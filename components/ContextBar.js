@@ -10,13 +10,12 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Divider,
   Paper,
   Tooltip,
   alpha
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useSetAtom, useAtomValue } from 'jotai';
 import { modelConfigListAtom, selectedModelInfoAtom } from '@/lib/store';
 import { toast } from 'sonner';
@@ -32,7 +31,6 @@ export default function ContextBar({ projects = [], currentProjectId }) {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
-  const pathname = usePathname();
   
   // State
   const [projectMenuAnchor, setProjectMenuAnchor] = useState(null);
@@ -185,6 +183,10 @@ export default function ContextBar({ projects = [], currentProjectId }) {
               '&:active': {
                 transform: 'translateY(0)'
               },
+              '&:focus-visible': {
+                outline: `2px solid ${theme.palette.primary.main}`,
+                outlineOffset: 2
+              },
               '& .MuiChip-icon': {
                 color: 'text.primary',
                 fontSize: '1.1rem',
@@ -263,6 +265,10 @@ export default function ContextBar({ projects = [], currentProjectId }) {
               },
               '&:active': {
                 transform: 'translateY(0)'
+              },
+              '&:focus-visible': {
+                outline: `2px solid ${theme.palette.primary.main}`,
+                outlineOffset: 2
               },
               '& .MuiChip-icon': {
                 color: 'primary.main',

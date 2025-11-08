@@ -570,10 +570,8 @@ export default function Navbar({ projects = [], currentProject }) {
                   borderRadius: '8px',
                   minHeight: 44,
                   py: 1.5,
-                  minHeight: 44,
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': { 
-
+                  '&:hover': {
                     bgcolor: theme.palette.mode === 'dark' ? 'rgba(103, 126, 234, 0.08)' : 'rgba(103, 126, 234, 0.05)'
                   },
                   '&:focus-visible': {
@@ -598,10 +596,8 @@ export default function Navbar({ projects = [], currentProject }) {
                   borderRadius: '8px',
                   minHeight: 44,
                   py: 1.5,
-
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': { 
-                    
+                  '&:hover': {
                     bgcolor: theme.palette.mode === 'dark' ? 'rgba(103, 126, 234, 0.08)' : 'rgba(103, 126, 234, 0.05)'
                   },
                   '&:focus-visible': {
@@ -744,9 +740,12 @@ export default function Navbar({ projects = [], currentProject }) {
                   minHeight: 44,
                   py: 1.25,
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': { 
-                    
+                  '&:hover': {
                     bgcolor: theme.palette.mode === 'dark' ? 'rgba(103, 126, 234, 0.08)' : 'rgba(103, 126, 234, 0.05)'
+                  },
+                  '&:focus-visible': {
+                    outline: `2px solid ${theme.palette.primary.main}`,
+                    outlineOffset: -2
                   }
                 }}
                 component={Link}
@@ -766,9 +765,12 @@ export default function Navbar({ projects = [], currentProject }) {
                   minHeight: 44,
                   py: 1.25,
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': { 
-                    
+                  '&:hover': {
                     bgcolor: theme.palette.mode === 'dark' ? 'rgba(103, 126, 234, 0.08)' : 'rgba(103, 126, 234, 0.05)'
+                  },
+                  '&:focus-visible': {
+                    outline: `2px solid ${theme.palette.primary.main}`,
+                    outlineOffset: -2
                   }
                 }}
                 component={Link}
@@ -844,9 +846,12 @@ export default function Navbar({ projects = [], currentProject }) {
                   minHeight: 44,
                   py: 1.25,
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': { 
-                    
+                  '&:hover': {
                     bgcolor: theme.palette.mode === 'dark' ? 'rgba(103, 126, 234, 0.08)' : 'rgba(103, 126, 234, 0.05)'
+                  },
+                  '&:focus-visible': {
+                    outline: `2px solid ${theme.palette.primary.main}`,
+                    outlineOffset: -2
                   }
                 }}
                 component={Link}
@@ -866,9 +871,12 @@ export default function Navbar({ projects = [], currentProject }) {
                   minHeight: 44,
                   py: 1.25,
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': { 
-                    
+                  '&:hover': {
                     bgcolor: theme.palette.mode === 'dark' ? 'rgba(103, 126, 234, 0.08)' : 'rgba(103, 126, 234, 0.05)'
+                  },
+                  '&:focus-visible': {
+                    outline: `2px solid ${theme.palette.primary.main}`,
+                    outlineOffset: -2
                   }
                 }}
                 component={Link}
