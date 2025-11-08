@@ -1,6 +1,7 @@
 'use client';
 
 import Navbar from '@/components/Navbar';
+import ContextBar from '@/components/ContextBar';
 import { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
@@ -100,7 +101,10 @@ export default function ProjectLayout({ children, params }) {
   return (
     <>
       <Navbar projects={projects} currentProject={projectId} />
-      <main>{children}</main>
+      <ContextBar projects={projects} currentProjectId={projectId} />
+      <Box component="main" sx={{ pt: 2 }}>
+        {children}
+      </Box>
     </>
   );
 }
