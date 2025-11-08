@@ -271,8 +271,14 @@ docker run -d \
 
 - [Easy Dataset × LLaMA Factory: 让大模型高效学习领域知识](https://buaa-act.feishu.cn/wiki/KY9xwTGs1iqHrRkjXBwcZP9WnL9)
 - [Easy Dataset 使用实战: 如何构建高质量数据集？](https://www.bilibili.com/video/BV1MRMnz1EGW)
-- [Easy Dataset 重点功能更新解读](https://www.bilibili.com/video/BV1fyJhzHEb7/)
+- [Easy Dataset 1.4 重点功能更新解读](https://www.bilibili.com/video/BV1fyJhzHEb7/)
+- [Easy Dataset 1.6 重点功能更新解读](https://www.bilibili.com/video/BV1Rq1hBtEJa/)
 - [大模型微调数据集: 基础知识科普](https://docs.easy-dataset.com/zhi-shi-ke-pu)
+- [实战案例1：生成汽车图片识别数据集](https://docs.easy-dataset.com/bo-ke/shi-zhan-an-li/an-li-1-sheng-cheng-qi-che-tu-pian-shi-bie-shu-ju-ji)
+- [实战案例2：评论情感分类数据集](https://docs.easy-dataset.com/bo-ke/shi-zhan-an-li/an-li-2-ping-lun-qing-gan-fen-lei-shu-ju-ji)
+- [实战案例3：物理学多轮对话数据集](https://docs.easy-dataset.com/bo-ke/shi-zhan-an-li/an-li-3-wu-li-xue-duo-lun-dui-hua-shu-ju-ji)
+- [实战案例4：AI 智能体安全数据集](https://docs.easy-dataset.com/bo-ke/shi-zhan-an-li/an-li-4ai-zhi-neng-ti-an-quan-shu-ju-ji)
+- [实战案例5：从图文 PPT 中提取数据集](https://docs.easy-dataset.com/bo-ke/shi-zhan-an-li/an-li-5-cong-tu-wen-ppt-zhong-ti-qu-shu-ju-ji)
 
 ## 贡献
 
