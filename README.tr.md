@@ -42,6 +42,7 @@ Easy Dataset ile alan bilgisini yapılandırılmış veri setlerine dönüştür
 - **Esnek Düzenleme**: Sürecin herhangi bir aşamasında soruları, cevapları ve veri setlerini düzenleyin
 - **Çoklu Dışa Aktarma Formatları**: Veri setlerini çeşitli formatlarda (Alpaca, ShareGPT, çok dilli düşünme) ve dosya türlerinde (JSON, JSONL) dışa aktarın
 - **Geniş Model Desteği**: OpenAI formatını takip eden tüm LLM API'leriyle uyumlu
+- **Tam Türkçe Dil Desteği**: Tüm arayüz ve AI işlemleri için eksiksiz Türkçe çeviriler 🇹🇷
 - **Kullanıcı Dostu Arayüz**: Hem teknik hem de teknik olmayan kullanıcılar için tasarlanmış sezgisel kullanıcı arayüzü
 - **Özel Sistem İstemleri**: Model yanıtlarını yönlendirmek için özel sistem istemleri ekleyin
 
