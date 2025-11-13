@@ -42,6 +42,7 @@ With Easy Dataset, you can transform domain knowledge into structured datasets, 
 - **Flexible Editing**: Edit questions, answers, and datasets at any stage of the process
 - **Multiple Export Formats**: Export datasets in various formats (Alpaca, ShareGPT, multilingual-thinking) and file types (JSON, JSONL)
 - **Wide Model Support**: Compatible with all LLM APIs that follow the OpenAI format
+- **Multi-Language Support**: Complete Turkish language support for UI and all AI operations 🇹🇷
 - **User-Friendly Interface**: Intuitive UI designed for both technical and non-technical users
 - **Custom System Prompts**: Add custom system prompts to guide model responses
 
