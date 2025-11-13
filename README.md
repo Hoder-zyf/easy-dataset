@@ -16,7 +16,7 @@
 
 **A powerful tool for creating fine-tuning datasets for Large Language Models**
 
-[简体中文](./README.zh-CN.md) | [English](./README.md)
+[简体中文](./README.zh-CN.md) | [English](./README.md) | [Türkçe](./README.tr.md)
 
 [Features](#features) • [Quick Start](#local-run) • [Documentation](https://docs.easy-dataset.com/ed/en) • [Contributing](#contributing) • [License](#license)
 
