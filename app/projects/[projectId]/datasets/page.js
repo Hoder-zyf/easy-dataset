@@ -34,8 +34,6 @@ export default function DatasetsPage({ params }) {
     batch: false,
     deleting: false
   });
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [exportDialog, setExportDialog] = useState({ open: false });
   const [importDialog, setImportDialog] = useState({ open: false });
   const [selectedIds, setselectedIds] = useState([]);
@@ -63,6 +61,10 @@ export default function DatasetsPage({ params }) {
     setSearchQuery,
     searchField,
     setSearchField,
+    page,
+    setPage,
+    rowsPerPage,
+    setRowsPerPage,
     isInitialized,
     getActiveFilterCount
   } = useDatasetFilters(projectId);
@@ -176,7 +178,7 @@ export default function DatasetsPage({ params }) {
   }, [projectId, page, rowsPerPage, debouncedSearchQuery, searchField, isInitialized]);
 
   // 处理页码变化
-  const handlePageChange = (event, newPage) => {
+  const handlePageChange = (_event, newPage) => {
     // MUI TablePagination 的页码从 0 开始，而我们的 API 从 1 开始
     setPage(newPage + 1);
   };
