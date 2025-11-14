@@ -18,6 +18,8 @@ export function useDatasetFilters(projectId) {
   const [filterChunkName, setFilterChunkName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchField, setSearchField] = useState('question');
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // 从 localStorage 恢复筛选条件
@@ -36,6 +38,8 @@ export function useDatasetFilters(projectId) {
           setFilterChunkName(filters.filterChunkName || '');
           setSearchQuery(filters.searchQuery || '');
           setSearchField(filters.searchField || 'question');
+          setPage(filters.page || 1);
+          setRowsPerPage(filters.rowsPerPage || 10);
         }
       } catch (error) {
         console.error('恢复筛选条件失败:', error);
@@ -57,7 +61,9 @@ export function useDatasetFilters(projectId) {
           filterNoteKeyword,
           filterChunkName,
           searchQuery,
-          searchField
+          searchField,
+          page,
+          rowsPerPage
         };
         localStorage.setItem(`datasets-filters-${projectId}`, JSON.stringify(filters));
       } catch (error) {
@@ -75,6 +81,8 @@ export function useDatasetFilters(projectId) {
     filterChunkName,
     searchQuery,
     searchField,
+    page,
+    rowsPerPage,
     isInitialized
   ]);
 
@@ -91,6 +99,8 @@ export function useDatasetFilters(projectId) {
     setFilterChunkName('');
     setSearchQuery('');
     setSearchField('question');
+    setPage(1);
+    setRowsPerPage(10);
   };
 
   /**
@@ -144,6 +154,11 @@ export function useDatasetFilters(projectId) {
     setSearchQuery,
     searchField,
     setSearchField,
+    // 分页状态
+    page,
+    setPage,
+    rowsPerPage,
+    setRowsPerPage,
     // 初始化状态
     isInitialized,
     // 工具方法
