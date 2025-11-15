@@ -90,6 +90,11 @@ export default function QuestionsPage({ params }) {
     }
   };
 
+  // 当筛选条件改变时，重置页码到第1页
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [answerFilter, debouncedSearchTerm, debouncedChunkNameFilter, sourceTypeFilter]);
+
   useEffect(() => {
     getQuestionList();
   }, [currentPage, answerFilter, debouncedSearchTerm, debouncedChunkNameFilter, sourceTypeFilter]);
