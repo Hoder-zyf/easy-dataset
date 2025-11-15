@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { imageStyles } from './styles/imageStyles';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -55,6 +56,9 @@ export default function ImagesPage() {
 
   // 视图模式
   const [viewMode, setViewMode] = useState('grid');
+
+  // 选中状态（仅列表视图使用）
+  const [selectedIds, setSelectedIds] = useState([]);
 
   // 对话框状态
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -134,6 +138,10 @@ export default function ImagesPage() {
     fetchImages();
   }, [projectId, page, imageName, hasQuestions, hasDatasets]);
 
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [viewMode]);
+
   // 处理导入成功
   const handleImportSuccess = () => {
     setImportDialogOpen(false);
@@ -153,21 +161,82 @@ export default function ImagesPage() {
     setDatasetDialogOpen(true);
   };
 
-  // 处理删除图片
+  // 删除图片
   const handleDeleteImage = async imageId => {
-    // 显示确认对话框
-    const confirmed = window.confirm(t('images.deleteConfirm') || '确定要删除这张图片吗？');
-    if (!confirmed) {
+    if (!confirm(t('images.deleteConfirm', { defaultValue: '确定要删除这张图片吗？' }))) {
       return;
     }
 
     try {
       await axios.delete(`/api/projects/${projectId}/images?imageId=${imageId}`);
-      toast.success(t('images.deleteSuccess'));
+      toast.success(t('images.deleteSuccess', { defaultValue: '删除成功' }));
       fetchImages();
     } catch (error) {
       console.error('Failed to delete image:', error);
-      toast.error(t('images.deleteFailed'));
+      toast.error(t('images.deleteFailed', { defaultValue: '删除失败' }));
+    }
+  };
+
+  // 批量删除图片
+  const handleBatchDelete = async () => {
+    if (selectedIds.length === 0) {
+      toast.error(t('images.selectImagesToDelete', { defaultValue: '请选择要删除的图片' }));
+      return;
+    }
+
+    if (
+      !confirm(
+        t('images.batchDeleteConfirm', {
+          defaultValue: `确定要删除选中的 ${selectedIds.length} 张图片吗？`,
+          count: selectedIds.length
+        })
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      let successCount = 0;
+      let failCount = 0;
+
+      // 逐个调用删除接口
+      for (const imageId of selectedIds) {
+        try {
+          await axios.delete(`/api/projects/${projectId}/images?imageId=${imageId}`);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to delete image ${imageId}:`, error);
+          failCount++;
+        }
+      }
+
+      // 显示结果
+      if (failCount === 0) {
+        toast.success(
+          t('images.batchDeleteSuccess', {
+            defaultValue: `成功删除 ${successCount} 张图片`,
+            count: successCount
+          })
+        );
+      } else {
+        toast.warning(
+          t('images.batchDeletePartialSuccess', {
+            defaultValue: `成功删除 ${successCount} 张，失败 ${failCount} 张`,
+            success: successCount,
+            fail: failCount
+          })
+        );
+      }
+
+      // 清空选中状态并刷新列表
+      setSelectedIds([]);
+      fetchImages();
+    } catch (error) {
+      console.error('Batch delete failed:', error);
+      toast.error(t('images.batchDeleteFailed', { defaultValue: '批量删除失败' }));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -250,6 +319,17 @@ export default function ImagesPage() {
           </Typography>
         </Box>
         <Box sx={imageStyles.headerActions}>
+          {viewMode === 'list' && selectedIds.length > 0 && (
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleBatchDelete}
+              sx={imageStyles.actionButton}
+            >
+              {t('images.batchDelete', { defaultValue: '批量删除' })} ({selectedIds.length})
+            </Button>
+          )}
           <Button
             variant="outlined"
             startIcon={<AutoAwesomeIcon />}
@@ -309,6 +389,8 @@ export default function ImagesPage() {
           onGenerateDataset={handleGenerateDataset}
           onDelete={handleDeleteImage}
           onAnnotate={openAnnotation}
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
         />
       )}
 

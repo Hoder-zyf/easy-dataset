@@ -18,7 +18,8 @@ import {
   Dialog,
   DialogContent,
   Typography,
-  Button
+  Button,
+  Checkbox
 } from '@mui/material';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import DatasetIcon from '@mui/icons-material/Dataset';
@@ -38,10 +39,35 @@ export default function ImageList({
   onGenerateQuestions,
   onGenerateDataset,
   onDelete,
-  onAnnotate
+  onAnnotate,
+  selectedIds = [],
+  onSelectionChange
 }) {
   const { t } = useTranslation();
   const [previewImage, setPreviewImage] = useState(null);
+
+  // 处理全选/取消全选
+  const handleSelectAll = event => {
+    if (event.target.checked) {
+      const allIds = images.map(img => img.id);
+      onSelectionChange?.(allIds);
+    } else {
+      onSelectionChange?.([]);
+    }
+  };
+
+  // 处理单个选择
+  const handleSelectOne = (imageId, checked) => {
+    if (checked) {
+      onSelectionChange?.([...selectedIds, imageId]);
+    } else {
+      onSelectionChange?.(selectedIds.filter(id => id !== imageId));
+    }
+  };
+
+  // 判断是否全选
+  const isAllSelected = images.length > 0 && selectedIds.length === images.length;
+  const isSomeSelected = selectedIds.length > 0 && selectedIds.length < images.length;
 
   // 格式化日期
   const formatDate = dateString => {
@@ -86,6 +112,9 @@ export default function ImageList({
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: 'grey.50' }}>
+              <TableCell padding="checkbox">
+                <Checkbox indeterminate={isSomeSelected} checked={isAllSelected} onChange={handleSelectAll} />
+              </TableCell>
               <TableCell width="60">{t('images.preview', { defaultValue: '预览' })}</TableCell>
               <TableCell>{t('images.fileName', { defaultValue: '文件名' })}</TableCell>
               <TableCell width="120">{t('images.size', { defaultValue: '大小' })}</TableCell>
@@ -103,12 +132,21 @@ export default function ImageList({
               <TableRow
                 key={image.id}
                 hover
+                selected={selectedIds.includes(image.id)}
                 sx={{
                   '&:hover': {
                     bgcolor: 'action.hover'
                   }
                 }}
               >
+                {/* 复选框 */}
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={selectedIds.includes(image.id)}
+                    onChange={e => handleSelectOne(image.id, e.target.checked)}
+                  />
+                </TableCell>
+
                 {/* 预览缩略图 */}
                 <TableCell>
                   <Avatar
