@@ -27,7 +27,7 @@ export default function ProjectPage({ params }) {
         if (response.data.defaultModelConfigId) {
           setSelectedModelInfo(response.data.data.find(item => item.id === response.data.defaultModelConfigId));
         } else {
-          setSelectedModelInfo('');
+          setSelectedModelInfo(null);
         }
       })
       .catch(error => {

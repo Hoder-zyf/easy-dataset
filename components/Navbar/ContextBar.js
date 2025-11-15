@@ -66,9 +66,10 @@ export default function ContextBar({ projects = [], currentProjectId, onMouseLea
       setConfigList(response.data.data);
 
       if (response.data.defaultModelConfigId) {
-        setSelectedModelInfo(response.data.data.find(item => item.id === response.data.defaultModelConfigId));
+        const defaultModel = response.data.data.find(item => item.id === response.data.defaultModelConfigId);
+        setSelectedModelInfo(defaultModel || null);
       } else {
-        setSelectedModelInfo('');
+        setSelectedModelInfo(null);
       }
 
       // Navigate to the new project's text-split page

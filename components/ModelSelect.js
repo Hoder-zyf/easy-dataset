@@ -115,6 +115,8 @@ export default function ModelSelect({
   useEffect(() => {
     if (selectedModelInfo && selectedModelInfo.id) {
       setSelectedModel(selectedModelInfo.id);
+    } else {
+      setSelectedModel('');
     }
   }, [selectedModelInfo]);
 
