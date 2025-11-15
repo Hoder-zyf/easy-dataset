@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { FormControl, Select, MenuItem, useTheme, ListSubheader, Box } from '@mui/material';
+import { FormControl, Select, MenuItem, useTheme, ListSubheader, Box, IconButton, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useAtomValue } from 'jotai/index';
 import { modelConfigListAtom, selectedModelInfoAtom } from '@/lib/store';
 import axios from 'axios';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 // 获取模型对应的图标路径
 const getModelIcon = modelName => {
@@ -62,6 +63,8 @@ export default function ModelSelect({
     return '';
   });
   const [error, setError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const handleModelChange = event => {
     if (!event || !event.target) return;
     const newModelId = event.target.value;
@@ -84,6 +87,12 @@ export default function ModelSelect({
         id: newModelId
       });
     }
+
+    // 选择模型后，延迟收回到图标状态
+    setTimeout(() => {
+      setIsHovered(false);
+      setIsOpen(false);
+    }, 200);
   };
 
   const updateDefaultModel = async id => {
@@ -145,125 +154,225 @@ export default function ModelSelect({
     );
   };
 
+  // 获取当前选中模型的图标
+  const currentModelIcon = useMemo(() => {
+    const selectedModelObj = models.find(model => model.id === selectedModel);
+    return selectedModelObj ? getModelIcon(selectedModelObj.modelName) : null;
+  }, [selectedModel, models]);
+
+  // 判断是否应该显示完整的 Select
+  const shouldShowFullSelect = isHovered || isOpen;
+
   return (
-    <FormControl size={size} sx={{ minWidth, minHeight }} error={error}>
-      <Select
-        value={selectedModel}
-        onChange={handleModelChange}
-        displayEmpty
-        variant="outlined"
-        onBlur={validateModel}
-        renderValue={renderSelectedValue}
+    <Box
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        // 确保菜单关闭后才能收回
+        if (!isOpen) {
+          setIsOpen(false);
+        }
+      }}
+      sx={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center'
+      }}
+    >
+      {/* 默认显示的图标按钮 */}
+      {!shouldShowFullSelect && (
+        <Tooltip
+          title={
+            selectedModel
+              ? models.find(m => m.id === selectedModel)?.modelName
+              : t('playground.selectModelFirst', '请先选择模型')
+          }
+          placement="bottom"
+        >
+          <IconButton
+            size="medium"
+            sx={{
+              bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.69)',
+              color: theme.palette.mode === 'dark' ? 'inherit' : 'white',
+              borderRadius: 1.5,
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.35)'
+              },
+              ...(error && {
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                '@keyframes pulse': {
+                  '0%, 100%': {
+                    opacity: 1
+                  },
+                  '50%': {
+                    opacity: 0.5
+                  }
+                }
+              })
+            }}
+          >
+            {currentModelIcon ? (
+              <Box
+                component="img"
+                src={currentModelIcon}
+                alt="model icon"
+                sx={{
+                  width: 20,
+                  height: 20,
+                  objectFit: 'contain'
+                }}
+                onError={e => {
+                  e.target.src = '/imgs/models/default.svg';
+                }}
+              />
+            ) : (
+              <SmartToyIcon
+                fontSize="small"
+                color="red"
+                sx={{
+                  color: error ? 'red' : 'red'
+                }}
+              />
+            )}
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {/* 悬浮时显示的完整 Select */}
+      <FormControl
+        size={size}
         sx={{
-          bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.15)',
-          color: theme.palette.mode === 'dark' ? 'inherit' : 'white',
-          borderRadius: '8px',
-          '& .MuiSelect-select': {
-            display: 'flex',
-            alignItems: 'center',
-            padding: '6px 32px 6px 12px'
-          },
-          '& .MuiSelect-icon': {
-            color: theme.palette.mode === 'dark' ? 'inherit' : 'white',
-            right: '8px'
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'transparent'
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'transparent'
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'primary.main'
-          },
-          marginRight: '-14px',
-          minHeight: '36px'
+          minWidth: shouldShowFullSelect ? 200 : 0,
+          minHeight,
+          opacity: shouldShowFullSelect ? 1 : 0,
+          width: shouldShowFullSelect ? 'auto' : 0,
+          overflow: 'hidden',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: shouldShowFullSelect ? 'relative' : 'absolute',
+          pointerEvents: shouldShowFullSelect ? 'auto' : 'none'
         }}
-        MenuProps={{
-          PaperProps: {
-            elevation: 2,
-            sx: {
-              mt: 1,
-              borderRadius: 2,
-              '& .MuiMenuItem-root': {
-                minHeight: '30px'
+        error={error}
+      >
+        <Select
+          value={selectedModel}
+          onChange={handleModelChange}
+          displayEmpty
+          variant="outlined"
+          onBlur={validateModel}
+          renderValue={renderSelectedValue}
+          onOpen={() => setIsOpen(true)}
+          onClose={() => setIsOpen(false)}
+          sx={{
+            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.2)',
+            color: theme.palette.mode === 'dark' ? 'inherit' : 'white',
+            borderRadius: 1.5,
+            '& .MuiSelect-select': {
+              display: 'flex',
+              alignItems: 'center',
+              padding: '6px 32px 6px 12px'
+            },
+            '& .MuiSelect-icon': {
+              color: theme.palette.mode === 'dark' ? 'inherit' : 'white',
+              right: '8px'
+            },
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'transparent'
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'transparent'
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: theme.palette.mode === 'dark' ? 'primary.main' : 'rgba(255, 255, 255, 0.5)'
+            },
+            minHeight: '36px'
+          }}
+          MenuProps={{
+            PaperProps: {
+              elevation: 2,
+              sx: {
+                mt: 1,
+                borderRadius: 2,
+                '& .MuiMenuItem-root': {
+                  minHeight: '30px'
+                }
               }
             }
-          }
-        }}
-      >
-        <MenuItem value="" disabled>
-          {error ? t('models.pleaseSelectModel') : t('playground.selectModelFirst')}
-        </MenuItem>
-        {(() => {
-          // 按 provider 分组
-          const filteredModels = models.filter(m => {
-            if (m.providerId?.toLowerCase() === 'ollama') {
-              return m.modelName && m.endpoint;
-            } else {
-              return m.modelName && m.endpoint && m.apiKey;
-            }
-          });
+          }}
+        >
+          <MenuItem value="" disabled>
+            {error ? t('models.pleaseSelectModel') : t('playground.selectModelFirst')}
+          </MenuItem>
+          {(() => {
+            // 按 provider 分组
+            const filteredModels = models.filter(m => {
+              if (m.providerId?.toLowerCase() === 'ollama') {
+                return m.modelName && m.endpoint;
+              } else {
+                return m.modelName && m.endpoint && m.apiKey;
+              }
+            });
 
-          // 获取所有 provider
-          const providers = [...new Set(filteredModels.map(m => m.providerName || 'Other'))];
+            // 获取所有 provider
+            const providers = [...new Set(filteredModels.map(m => m.providerName || 'Other'))];
 
-          return providers.map(provider => {
-            const providerModels = filteredModels.filter(m => (m.providerName || 'Other') === provider);
-            return [
-              <ListSubheader
-                key={`header-${provider}`}
-                sx={{
-                  pl: 2,
-                  color: theme.palette.text.secondary,
-                  fontWeight: 500,
-                  mt: 1,
-                  mb: 0.5
-                }}
-              >
-                {provider || 'Other'}
-              </ListSubheader>,
-              ...providerModels.map(model => (
-                <MenuItem
-                  key={model.id}
-                  value={model.id}
+            return providers.map(provider => {
+              const providerModels = filteredModels.filter(m => (m.providerName || 'Other') === provider);
+              return [
+                <ListSubheader
+                  key={`header-${provider}`}
                   sx={{
-                    pl: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    minHeight: '30px',
-                    '&.Mui-selected': {
-                      bgcolor: theme.palette.action.selected,
-                      '&:hover': {
-                        bgcolor: theme.palette.action.selected
-                      }
-                    }
+                    pl: 2,
+                    color: theme.palette.text.secondary,
+                    fontWeight: 500,
+                    mt: 1,
+                    mb: 0.5
                   }}
                 >
-                  <Box
-                    component="img"
-                    src={getModelIcon(model.modelName)}
-                    alt={model.modelName}
+                  {provider || 'Other'}
+                </ListSubheader>,
+                ...providerModels.map(model => (
+                  <MenuItem
+                    key={model.id}
+                    value={model.id}
                     sx={{
-                      width: 20,
-                      height: 20,
-                      objectFit: 'contain',
-                      flexShrink: 0
+                      pl: 3,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 2,
+                      minHeight: '30px',
+                      '&.Mui-selected': {
+                        bgcolor: theme.palette.action.selected,
+                        '&:hover': {
+                          bgcolor: theme.palette.action.selected
+                        }
+                      }
                     }}
-                    onError={e => {
-                      e.target.src = '/imgs/models/default.svg';
-                    }}
-                  />
-                  <Box component="span" sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {model.modelName}
-                  </Box>
-                </MenuItem>
-              ))
-            ];
-          });
-        })()}
-      </Select>
-    </FormControl>
+                  >
+                    <Box
+                      component="img"
+                      src={getModelIcon(model.modelName)}
+                      alt={model.modelName}
+                      sx={{
+                        width: 20,
+                        height: 20,
+                        objectFit: 'contain',
+                        flexShrink: 0
+                      }}
+                      onError={e => {
+                        e.target.src = '/imgs/models/default.svg';
+                      }}
+                    />
+                    <Box component="span" sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {model.modelName}
+                    </Box>
+                  </MenuItem>
+                ))
+              ];
+            });
+          })()}
+        </Select>
+      </FormControl>
+    </Box>
   );
 }

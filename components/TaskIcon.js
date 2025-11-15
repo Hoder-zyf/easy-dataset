@@ -109,8 +109,7 @@ export default function TaskIcon({ projectId, theme }) {
           borderRadius: 1.5,
           '&:hover': {
             bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.25)'
-          },
-          ml: 2
+          }
         }}
       >
         {renderTaskIcon()}

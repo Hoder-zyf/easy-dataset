@@ -1,7 +1,6 @@
 'use client';
 
-import Navbar from '@/components/Navbar';
-import ContextBar from '@/components/ContextBar';
+import Navbar from '@/components/Navbar/index';
 import { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
@@ -12,7 +11,6 @@ export default function ProjectLayout({ children, params }) {
   const { projectId } = params;
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
-  const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [t] = useTranslation();
@@ -101,7 +99,6 @@ export default function ProjectLayout({ children, params }) {
   return (
     <>
       <Navbar projects={projects} currentProject={projectId} />
-      <ContextBar projects={projects} currentProjectId={projectId} />
       <Box component="main" sx={{ pt: 2 }}>
         {children}
       </Box>

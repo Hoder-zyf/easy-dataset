@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Container, Typography, Paper, Divider, useTheme, alpha } from '@mui/material';
+import { Box, Container, Typography, Paper, useTheme, alpha } from '@mui/material';
 import StorageIcon from '@mui/icons-material/Storage';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/Navbar/index';
 import { DatasetSearchBar } from '@/components/dataset-square/DatasetSearchBar';
 import { DatasetSiteList } from '@/components/dataset-square/DatasetSiteList';
 import { useTranslation } from 'react-i18next';
