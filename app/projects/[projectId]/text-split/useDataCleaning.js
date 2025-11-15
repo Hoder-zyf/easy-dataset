@@ -89,10 +89,7 @@ export default function useDataCleaning(projectId, taskSettings) {
             t('textSplit.dataCleaningSuccess', {
               originalLength: data.originalLength,
               cleanedLength: data.cleanedLength
-            }),
-            {
-              duration: 3000
-            }
+            })
           );
         } else {
           // 如果是多个文本块，循环调用单个文本块的数据清洗接口

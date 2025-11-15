@@ -21,7 +21,6 @@ import {
   MenuItem,
   Stack,
   Paper,
-  Avatar,
   Tooltip,
   IconButton,
   Chip
@@ -29,7 +28,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import { DEFAULT_MODEL_SETTINGS, MODEL_PROVIDERS } from '@/constant/model';
+import { DEFAULT_MODEL_SETTINGS } from '@/constant/model';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { ProviderIcon } from '@lobehub/icons';
@@ -112,7 +111,7 @@ export default function ModelSettings({ projectId }) {
       })
       .catch(error => {
         setLoading(false);
-        toast.error('Fetch model list Error', { duration: 3000 });
+        toast.error('Fetch model list Error');
       });
   };
 
@@ -151,7 +150,7 @@ export default function ModelSettings({ projectId }) {
         setModels(response.data);
       })
       .catch(error => {
-        toast.error('Get Models Error', { duration: 3000 });
+        toast.error('Get Models Error');
       });
   };
 
@@ -161,16 +160,16 @@ export default function ModelSettings({ projectId }) {
     if (!data) return;
     if (data.length > 0) {
       setModels(data);
-      toast.success('Refresh Success', { duration: 3000 });
+      toast.success('Refresh Success');
       const newModelsData = await axios.post('/api/llm/model', {
         newModels: data,
         providerId: selectedProvider.id
       });
       if (newModelsData.status === 200) {
-        toast.success('Get Model Success', { duration: 3000 });
+        toast.success('Get Model Success');
       }
     } else {
-      toast.info('No Models Need Refresh', { duration: 3000 });
+      toast.info('No Models Need Refresh');
     }
   };
 
@@ -193,9 +192,9 @@ export default function ModelSettings({ projectId }) {
       return res.data;
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        toast.error('API Key Invalid', { duration: 3000 });
+        toast.error('API Key Invalid');
       } else {
-        toast.error('Get Model List Error', { duration: 3000 });
+        toast.error('Get Model List Error');
       }
       return null;
     }
@@ -247,7 +246,7 @@ export default function ModelSettings({ projectId }) {
         if (selectedModelInfo && selectedModelInfo.id === response.data.id) {
           setSelectedModelInfo(response.data);
         }
-        toast.success(t('settings.saveSuccess'), { duration: 3000 });
+        toast.success(t('settings.saveSuccess'));
         getModelConfigList();
         handleCloseModelDialog();
       })
@@ -262,11 +261,11 @@ export default function ModelSettings({ projectId }) {
     axios
       .delete(`/api/projects/${projectId}/model-config/${id}`)
       .then(response => {
-        toast.success(t('settings.deleteSuccess'), { duration: 3000 });
+        toast.success(t('settings.deleteSuccess'));
         getModelConfigList();
       })
       .catch(error => {
-        toast.error(t('settings.deleteFailed'), { duration: 3000 });
+        toast.error(t('settings.deleteFailed'));
       });
   };
 

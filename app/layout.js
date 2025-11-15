@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
           <ThemeRegistry>
             <I18nProvider>
               {children}
-              <Toaster richColors position="top-center" />
+              <Toaster richColors position="top-right" duration={1000} />
             </I18nProvider>
           </ThemeRegistry>
         </Provider>
