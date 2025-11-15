@@ -500,7 +500,7 @@ const QuestionItem = memo(
               </IconButton>
             </Tooltip>
             <Tooltip title={t('common.delete')}>
-              <IconButton size="small" onClick={() => onDelete(question.question, question.chunkId)}>
+              <IconButton size="small" onClick={() => onDelete(question.id)}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
