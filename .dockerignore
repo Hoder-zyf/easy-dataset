@@ -12,3 +12,5 @@ README.zh-CN.md
 /test
 /local-db
 /video
+/prisma/*.sqlite
+/prisma/*.sqlite-*
