@@ -11,6 +11,7 @@ NC='\033[0m' # No Color
 PRISMA_DIR="/app/prisma"
 PRISMA_TEMPLATE_DIR="/app/prisma-template"
 DB_FILE="$PRISMA_DIR/db.sqlite"
+LOCAL_DB_DIR="/app/local-db"
 
 echo "${GREEN}=== Easy Dataset Database Initialization ===${NC}"
 
@@ -23,6 +24,12 @@ fi
 # Check if database file exists
 if [ ! -f "$DB_FILE" ]; then
     echo "${YELLOW}Database file not found at: $DB_FILE${NC}"
+
+    # Check if local-db has files (possible configuration issue)
+    if [ -d "$LOCAL_DB_DIR" ] && [ -n "$(ls -A $LOCAL_DB_DIR 2>/dev/null | grep -v 'empty.txt')" ]; then
+        echo "${YELLOW}Note: local-db contains files but database is missing.${NC}"
+        echo "${YELLOW}If you have existing data, ensure prisma volume is mounted.${NC}"
+    fi
 
     # Safety check: only initialize if directory is completely empty
     if [ -z "$(ls -A $PRISMA_DIR 2>/dev/null)" ]; then
