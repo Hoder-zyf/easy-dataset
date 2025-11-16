@@ -142,13 +142,13 @@ services:
       - '1717:1717'
     volumes:
       - ./local-db:/app/local-db
-      # - ./prisma:/app/prisma 如果需要挂载请先手动初始化数据库文件
+      - ./prisma:/app/prisma
     restart: unless-stopped
 ```
 
-> **注意：** 请将 `{YOUR_LOCAL_DB_PATH}`、`{LOCAL_PRISMA_PATH}` 替换为你希望存储本地数据库的实际路径，建议直接使用当前代码仓库目录下的 `local-db` 和 `prisma` 文件夹，这样可以和 NPM 启动时的数据库路径保持一致。
+> **注意：** 建议直接使用当前代码仓库目录下的 `local-db` 和 `prisma` 文件夹作为挂载路径，这样可以和 NPM 启动时的数据库路径保持一致。
 
-> **注意：** 如果需要挂载数据库文件（PRISMA），需要提前执行 `npm run db:push` 初始化数据库文件。
+> **注意：** 数据库文件会在首次启动时自动初始化，无需手动执行 `npm run db:push`。
 
 3. 使用 docker-compose 启动
 
@@ -180,15 +180,15 @@ docker build -t easy-dataset .
 ```bash
 docker run -d \
   -p 1717:1717 \
-  -v {YOUR_LOCAL_DB_PATH}:/app/local-db \
-  -v {LOCAL_PRISMA_PATH}:/app/prisma \
+  -v ./local-db:/app/local-db \
+  -v ./prisma:/app/prisma \
   --name easy-dataset \
   easy-dataset
 ```
 
-> **注意：** 请将 `{YOUR_LOCAL_DB_PATH}`、`{LOCAL_PRISMA_PATH}` 替换为你希望存储本地数据库的实际路径，建议直接使用当前代码仓库目录下的 `local-db` 和 `prisma` 文件夹，这样可以和 NPM 启动时的数据库路径保持一致。
+> **注意：** 建议直接使用当前代码仓库目录下的 `local-db` 和 `prisma` 文件夹作为挂载路径，这样可以和 NPM 启动时的数据库路径保持一致。
 
-> **注意：** 如果需要挂载数据库文件（PRISMA），需要提前执行 `npm run db:push` 初始化数据库文件。
+> **注意：** 数据库文件会在首次启动时自动初始化，无需手动执行 `npm run db:push`。
 
 4. 打开浏览器，访问 `http://localhost:1717`
 
