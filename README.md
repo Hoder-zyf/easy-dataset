@@ -143,13 +143,13 @@ services:
       - '1717:1717'
     volumes:
       - ./local-db:/app/local-db
-      # - ./prisma:/app/prisma  If mounting is required, please manually initialize the database file first.
+      - ./prisma:/app/prisma
     restart: unless-stopped
 ```
 
-> **Note:** Replace `{YOUR_LOCAL_DB_PATH}` and `{LOCAL_PRISMA_PATH}` with the actual paths where you want to store the local database. It is recommended to use the `local-db` and `prisma` folders in the current code repository directory to maintain consistency with the database paths when starting via NPM.
+> **Note:** It is recommended to use the `local-db` and `prisma` folders in the current code repository directory as mount paths to maintain consistency with the database paths when starting via NPM.
 
-> **Note:** If you need to mount the database file (PRISMA), you need to run `npm run db:push` in advance to initialize the database file.
+> **Note:** The database file will be automatically initialized on first startup, no need to manually run `npm run db:push`.
 
 3. Start with docker-compose:
 
@@ -181,13 +181,15 @@ docker build -t easy-dataset .
 ```bash
 docker run -d \
   -p 1717:1717 \
-  -v {YOUR_LOCAL_DB_PATH}:/app/local-db \
-  -v {LOCAL_PRISMA_PATH}:/app/prisma \
+  -v ./local-db:/app/local-db \
+  -v ./prisma:/app/prisma \
   --name easy-dataset \
   easy-dataset
 ```
 
-> **Note:** Replace `{YOUR_LOCAL_DB_PATH}` and `{LOCAL_PRISMA_PATH}` with the actual paths where you want to store the local database. It is recommended to use the `local-db` and `prisma` folders in the current code repository directory to maintain consistency with the database paths when starting via NPM.
+> **Note:** It is recommended to use the `local-db` and `prisma` folders in the current code repository directory as mount paths to maintain consistency with the database paths when starting via NPM.
+
+> **Note:** The database file will be automatically initialized on first startup, no need to manually run `npm run db:push`.
 
 4. Open a browser and visit `http://localhost:1717`
 
