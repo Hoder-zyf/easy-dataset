@@ -23,20 +23,21 @@ import {
   Card
 } from '@mui/material';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import DeleteIcon from '@mui/icons-material/Delete';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import FolderZipIcon from '@mui/icons-material/FolderZip';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 export default function ImportDialog({ open, projectId, onClose, onSuccess }) {
   const { t } = useTranslation();
-  const [mode, setMode] = useState(0); // 0: 目录导入, 1: PDF 导入
+  const [mode, setMode] = useState(0); // 0: 目录导入, 1: PDF 导入, 2: 压缩包导入
   const [directories, setDirectories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [inputPath, setInputPath] = useState('');
   const [selectedPdf, setSelectedPdf] = useState(null);
+  const [selectedZip, setSelectedZip] = useState(null);
 
   const handleAddDirectory = () => {
     if (inputPath.trim() && !directories.includes(inputPath.trim())) {
@@ -116,10 +117,55 @@ export default function ImportDialog({ open, projectId, onClose, onSuccess }) {
     }
   };
 
+  const handleZipSelect = event => {
+    const file = event.target.files?.[0];
+    if (file && file.name.toLowerCase().endsWith('.zip')) {
+      setSelectedZip(file);
+    } else {
+      toast.error(t('images.invalidZipFile', { defaultValue: '请选择有效的 ZIP 文件' }));
+    }
+  };
+
+  const handleZipImport = async () => {
+    if (!selectedZip) {
+      toast.error(t('images.selectZipFile', { defaultValue: '请选择 ZIP 文件' }));
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('file', selectedZip);
+
+      // 调用压缩包导入 API
+      const response = await axios.post(`/api/projects/${projectId}/images/zip-import`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      toast.success(
+        t('images.zipImportSuccess', {
+          defaultValue: `成功从压缩包 "${response.data.zipName}" 导入 ${response.data.count} 张图片`,
+          count: response.data.count,
+          name: response.data.zipName
+        })
+      );
+      setSelectedZip(null);
+      onSuccess?.();
+    } catch (error) {
+      console.error('Failed to import ZIP:', error);
+      toast.error(error.response?.data?.error || t('images.zipImportFailed', { defaultValue: '压缩包导入失败' }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleClose = () => {
     if (!loading) {
       setDirectories([]);
       setSelectedPdf(null);
+      setSelectedZip(null);
       setMode(0);
       onClose();
     }
@@ -142,6 +188,11 @@ export default function ImportDialog({ open, projectId, onClose, onSuccess }) {
           <Tab
             label={t('images.importFromPdf', { defaultValue: '从 PDF 导入' })}
             icon={<PictureAsPdfIcon />}
+            iconPosition="start"
+          />
+          <Tab
+            label={t('images.importFromZip', { defaultValue: '从压缩包导入' })}
+            icon={<FolderZipIcon />}
             iconPosition="start"
           />
         </Tabs>
@@ -235,7 +286,7 @@ export default function ImportDialog({ open, projectId, onClose, onSuccess }) {
               </Card>
             )}
           </>
-        ) : (
+        ) : mode === 1 ? (
           <>
             <Alert severity="info" sx={{ mb: 2 }}>
               {t('images.pdfImportTip', { defaultValue: '选择 PDF 文件，系统会自动将其转换为图片并导入' })}
@@ -280,6 +331,51 @@ export default function ImportDialog({ open, projectId, onClose, onSuccess }) {
               )}
             </Paper>
           </>
+        ) : (
+          <>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              {t('images.zipImportTip', { defaultValue: '选择 ZIP 压缩包文件，系统会自动解压并导入其中的图片' })}
+            </Alert>
+
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 4,
+                textAlign: 'center',
+                cursor: 'pointer',
+                bgcolor: 'background.default',
+                border: '2px dashed',
+                borderColor: selectedZip ? 'primary.main' : 'divider',
+                transition: 'all 0.3s',
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                  borderColor: 'primary.main'
+                }
+              }}
+              onClick={() => document.getElementById('zip-file-input').click()}
+            >
+              <input
+                id="zip-file-input"
+                type="file"
+                accept=".zip,application/zip,application/x-zip-compressed"
+                style={{ display: 'none' }}
+                onChange={handleZipSelect}
+                disabled={loading}
+              />
+              <FolderZipIcon sx={{ fontSize: 64, color: selectedZip ? 'primary.main' : 'text.secondary', mb: 2 }} />
+              <Typography variant="h6" gutterBottom>
+                {selectedZip ? selectedZip.name : t('images.clickToSelectZip', { defaultValue: '点击选择 ZIP 文件' })}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {t('images.supportedZipFormat', { defaultValue: '支持格式：ZIP' })}
+              </Typography>
+              {selectedZip && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                  {t('images.fileSize', { defaultValue: '文件大小' })}: {(selectedZip.size / 1024 / 1024).toFixed(2)} MB
+                </Typography>
+              )}
+            </Paper>
+          </>
         )}
       </DialogContent>
       <DialogActions>
@@ -295,7 +391,7 @@ export default function ImportDialog({ open, projectId, onClose, onSuccess }) {
           >
             {t('images.startImport')}
           </Button>
-        ) : (
+        ) : mode === 1 ? (
           <Button
             onClick={handlePdfImport}
             variant="contained"
@@ -303,6 +399,15 @@ export default function ImportDialog({ open, projectId, onClose, onSuccess }) {
             startIcon={loading ? <CircularProgress size={20} /> : null}
           >
             {t('images.convertAndImport', { defaultValue: '转换并导入' })}
+          </Button>
+        ) : (
+          <Button
+            onClick={handleZipImport}
+            variant="contained"
+            disabled={loading || !selectedZip}
+            startIcon={loading ? <CircularProgress size={20} /> : null}
+          >
+            {t('images.extractAndImport', { defaultValue: '解压并导入' })}
           </Button>
         )}
       </DialogActions>

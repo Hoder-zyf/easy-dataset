@@ -184,7 +184,7 @@ export default function ChunkListHeader({
         }}
       >
         {/* 更多筛选按钮 */}
-        <Tooltip title={t('textSplit.moreFilters', { defaultValue: '更多筛选' })}>
+        <Tooltip title={t('datasets.moreFilters', { defaultValue: '更多筛选' })}>
           <Badge badgeContent={activeFilterCount} color="error" overlap="circular">
             <Button
               variant="outlined"
@@ -193,7 +193,7 @@ export default function ChunkListHeader({
               size="small"
               sx={{ borderRadius: 1 }}
             >
-              {t('textSplit.moreFilters', { defaultValue: '更多筛选' })}
+              {t('datasets.moreFilters', { defaultValue: '更多筛选' })}
             </Button>
           </Badge>
         </Tooltip>

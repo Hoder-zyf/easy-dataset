@@ -16,7 +16,7 @@
 
 **A powerful tool for creating fine-tuning datasets for Large Language Models**
 
-[简体中文](./README.zh-CN.md) | [English](./README.md)
+[简体中文](./README.zh-CN.md) | [English](./README.md) | [Türkçe](./README.tr.md)
 
 [Features](#features) • [Quick Start](#local-run) • [Documentation](https://docs.easy-dataset.com/ed/en) • [Contributing](#contributing) • [License](#license)
 
@@ -42,6 +42,7 @@ With Easy Dataset, you can transform domain knowledge into structured datasets, 
 - **Flexible Editing**: Edit questions, answers, and datasets at any stage of the process
 - **Multiple Export Formats**: Export datasets in various formats (Alpaca, ShareGPT, multilingual-thinking) and file types (JSON, JSONL)
 - **Wide Model Support**: Compatible with all LLM APIs that follow the OpenAI format
+- **Multi-Language Support**: Complete Turkish language support for UI and all AI operations 🇹🇷
 - **User-Friendly Interface**: Intuitive UI designed for both technical and non-technical users
 - **Custom System Prompts**: Add custom system prompts to guide model responses
 
@@ -142,13 +143,13 @@ services:
       - '1717:1717'
     volumes:
       - ./local-db:/app/local-db
-      # - ./prisma:/app/prisma  If mounting is required, please manually initialize the database file first.
+      - ./prisma:/app/prisma
     restart: unless-stopped
 ```
 
-> **Note:** Replace `{YOUR_LOCAL_DB_PATH}` and `{LOCAL_PRISMA_PATH}` with the actual paths where you want to store the local database. It is recommended to use the `local-db` and `prisma` folders in the current code repository directory to maintain consistency with the database paths when starting via NPM.
+> **Note:** It is recommended to use the `local-db` and `prisma` folders in the current code repository directory as mount paths to maintain consistency with the database paths when starting via NPM.
 
-> **Note:** If you need to mount the database file (PRISMA), you need to run `npm run db:push` in advance to initialize the database file.
+> **Note:** The database file will be automatically initialized on first startup, no need to manually run `npm run db:push`.
 
 3. Start with docker-compose:
 
@@ -180,13 +181,15 @@ docker build -t easy-dataset .
 ```bash
 docker run -d \
   -p 1717:1717 \
-  -v {YOUR_LOCAL_DB_PATH}:/app/local-db \
-  -v {LOCAL_PRISMA_PATH}:/app/prisma \
+  -v ./local-db:/app/local-db \
+  -v ./prisma:/app/prisma \
   --name easy-dataset \
   easy-dataset
 ```
 
-> **Note:** Replace `{YOUR_LOCAL_DB_PATH}` and `{LOCAL_PRISMA_PATH}` with the actual paths where you want to store the local database. It is recommended to use the `local-db` and `prisma` folders in the current code repository directory to maintain consistency with the database paths when starting via NPM.
+> **Note:** It is recommended to use the `local-db` and `prisma` folders in the current code repository directory as mount paths to maintain consistency with the database paths when starting via NPM.
+
+> **Note:** The database file will be automatically initialized on first startup, no need to manually run `npm run db:push`.
 
 4. Open a browser and visit `http://localhost:1717`
 

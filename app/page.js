@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Container, Box, Typography, CircularProgress, Stack, useTheme } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/Navbar/index';
 import HeroSection from '@/components/home/HeroSection';
-import StatsCard from '@/components/home/StatsCard';
 import ProjectList from '@/components/home/ProjectList';
 import CreateProjectDialog from '@/components/home/CreateProjectDialog';
 import MigrationDialog from '@/components/home/MigrationDialog';

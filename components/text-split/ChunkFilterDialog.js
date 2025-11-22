@@ -46,7 +46,7 @@ export default function ChunkFilterDialog({ open, onClose, onApply, initialFilte
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t('textSplit.moreFilters', { defaultValue: '更多筛选' })}</DialogTitle>
+      <DialogTitle>{t('datasets.moreFilters', { defaultValue: '更多筛选' })}</DialogTitle>
       <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 3 }}>
         {/* 文本块内容筛选 */}
         <Box>
