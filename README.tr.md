@@ -155,6 +155,7 @@ easy-dataset/
 ### 2. Dosya Yükleme
 
 Alana özgü belgelerinizi yükleyin. Desteklenen formatlar:
+
 - PDF
 - Markdown (.md)
 - Microsoft Word (.docx)
@@ -164,6 +165,7 @@ Alana özgü belgelerinizi yükleyin. Desteklenen formatlar:
 ### 3. Metin Bölme
 
 Dosyalar aşağıdaki yöntemlerle akıllıca bölünebilir:
+
 - Doğal dil işleme tabanlı semantik bölme
 - Özel ayırıcılara dayalı bölme
 - Karakter sayısına dayalı sabit boyutlu bölme
@@ -176,6 +178,7 @@ Sistem, belge içeriğine dayalı olarak otomatik olarak hiyerarşik alan etiket
 ### 5. Soru Üretimi
 
 Her metin bloğu için sistem:
+
 - İçeriğe dayalı alakalı sorular oluşturur
 - Tür ve hedef kitle perspektifi sorgulamayı destekler
 - Soru sayısını özelleştirme seçeneği sunar
@@ -183,6 +186,7 @@ Her metin bloğu için sistem:
 ### 6. Cevap Üretimi
 
 Yapılandırılmış LLM API'si kullanarak:
+
 - Her soru için kapsamlı cevaplar oluşturur
 - Düşünce Zinciri (COT) üretimini destekler
 - Farklı cevap şablonları destekler
@@ -190,12 +194,14 @@ Yapılandırılmış LLM API'si kullanarak:
 ### 7. Veri Seti Dışa Aktarma
 
 Veri setinizi çeşitli formatlarda dışa aktarın:
+
 - **Alpaca Format**: Basit talimat-takip formatı
 - **ShareGPT Format**: Çok turlu konuşma formatı
 - **Çok Dilli Düşünme**: COT ile genişletilmiş format
 - **Özel Format**: Kendi JSON yapınızı tanımlayın
 
 Dışa aktarma hedefleri:
+
 - Yerel dosya sistemi
 - Hugging Face Hub
 - LLaMA Factory uyumluluğu
@@ -205,18 +211,21 @@ Dışa aktarma hedefleri:
 ### Veri Damıtma
 
 Mevcut veri setlerinden yeni eğitim örnekleri oluşturun:
+
 - Soru damıtma: Mevcut soru-cevap çiftlerinden yeni sorular oluşturun
 - Etiket damıtma: Otomatik etiket ve kategorizasyon oluşturma
 
 ### Tür-Hedef Kitle (GA) Çiftleri
 
 Spesifik içerik stilleri ve hedef kitleler için veri setlerini uyarlayın:
+
 - Tür: Akademik, teknik, yaratıcı yazma, vb.
 - Hedef Kitle: Yeni başlayanlar, uzmanlar, öğrenciler, vb.
 
 ### Toplu İşlemler
 
 Birden fazla öğeye verimli bir şekilde işlem:
+
 - Toplu soru üretimi
 - Toplu cevap üretimi
 - Toplu veri seti dışa aktarma
@@ -224,6 +233,7 @@ Birden fazla öğeye verimli bir şekilde işlem:
 ### Görev Yönetimi
 
 Tüm arka plan görevlerini izleyin ve yönetin:
+
 - Dosya işleme görevleri
 - Soru üretim görevleri
 - Cevap üretim görevleri
@@ -234,6 +244,7 @@ Tüm arka plan görevlerini izleyin ve yönetin:
 ### LLM API Yapılandırması
 
 Ayarlar sayfasında LLM API'nizi yapılandırın:
+
 1. **Sağlayıcı**: OpenAI, Ollama, 智谱AI veya özel seçin
 2. **API Anahtarı**: API anahtarınızı girin (gerekirse)
 3. **Model**: Kullanılacak modeli seçin
@@ -242,6 +253,7 @@ Ayarlar sayfasında LLM API'nizi yapılandırın:
 ### Görev Ayarları
 
 Görev yürütme parametrelerini özelleştirin:
+
 - Soru üretimi için eşzamanlılık
 - Cevap üretimi için eşzamanlılık
 - Varsayılan soru sayısı
@@ -250,6 +262,7 @@ Görev yürütme parametrelerini özelleştirin:
 ### Özel İstemler
 
 Her görev türü için özel sistem istemleri ekleyin:
+
 - Soru üretim istemi
 - Cevap üretim istemi
 - Etiket üretim istemi
@@ -292,6 +305,7 @@ Bu aracı araştırmanızda kullanırsanız, lütfen şu şekilde alıntı yapı
 ## Teşekkürler
 
 Bu proje aşağıdaki harika açık kaynak projelerini kullanır:
+
 - [Next.js](https://nextjs.org/)
 - [React](https://reactjs.org/)
 - [Material-UI](https://mui.com/)

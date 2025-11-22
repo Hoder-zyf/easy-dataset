@@ -81,5 +81,5 @@ ENV NODE_ENV=production
 EXPOSE 1717
 
 # 使用 entrypoint 脚本
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["pnpm", "start"]

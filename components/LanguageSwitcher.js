@@ -19,7 +19,7 @@ export default function LanguageSwitcher() {
 
   const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 
-  const handleClick = (event) => {
+  const handleClick = event => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -27,7 +27,7 @@ export default function LanguageSwitcher() {
     setAnchorEl(null);
   };
 
-  const handleLanguageChange = (langCode) => {
+  const handleLanguageChange = langCode => {
     i18n.changeLanguage(langCode);
     handleClose();
   };
@@ -60,14 +60,14 @@ export default function LanguageSwitcher() {
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'right',
+          horizontal: 'right'
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'right',
+          horizontal: 'right'
         }}
       >
-        {languages.map((lang) => (
+        {languages.map(lang => (
           <MenuItem
             key={lang.code}
             onClick={() => handleLanguageChange(lang.code)}
