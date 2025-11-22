@@ -273,7 +273,9 @@
     "copied": "Copied",
     "generating": "Generating...",
     "items": "items",
-    "detailInfo": "Detail Info"
+    "detailInfo": "Detail Info",
+    "reset": "Reset",
+    "apply": "Apply"
   },
   "home": {
     "title": "Easy Dataset",
@@ -318,6 +320,10 @@
     "allChunks": "All Text Chunks",
     "generatedQuestions2": "With Questions",
     "ungeneratedQuestions": "Without Questions",
+    "contentKeyword": "Text Chunk Content",
+    "contentKeywordPlaceholder": "Enter keywords to search chunk content",
+    "characterRange": "Character Range",
+    "questionStatus": "Question Status",
     "noFilesUploaded": "No files uploaded yet",
     "unknownFile": "Unknown File",
     "fetchFilesFailed": "Failed to fetch files",

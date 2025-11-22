@@ -274,7 +274,9 @@
     "disabled": "已禁用",
     "generating": "正在生成...",
     "items": "项",
-    "detailInfo": "详细信息"
+    "detailInfo": "详细信息",
+    "reset": "重置",
+    "apply": "应用"
   },
   "home": {
     "title": "Easy Dataset",
@@ -321,6 +323,10 @@
     "allChunks": "全部文本块",
     "generatedQuestions2": "已生成问题",
     "ungeneratedQuestions": "未生成问题",
+    "contentKeyword": "文本块内容",
+    "contentKeywordPlaceholder": "输入关键词搜索文本块内容",
+    "characterRange": "字数范围",
+    "questionStatus": "问题状态",
     "noFilesUploaded": "暂未上传文件",
     "unknownFile": "未知文件",
     "fetchFilesFailed": "获取文件列表出错",
