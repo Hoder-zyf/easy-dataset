@@ -78,6 +78,7 @@ model Tags {
   children  Tags[]   @relation("Tags")
 
   @@index([projectId, label])
+  @@index([projectId, parentId])
 }
 
 model Questions {
