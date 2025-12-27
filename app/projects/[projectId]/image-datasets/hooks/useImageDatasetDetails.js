@@ -21,7 +21,8 @@ export default function useImageDatasetDetails(projectId, datasetId) {
   // 获取数据集列表信息
   const fetchDatasetsList = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/projects/${projectId}/image-datasets`);
+      // 获取所有数据集以正确统计已确认数量
+      const response = await axios.get(`/api/projects/${projectId}/image-datasets?page=1&pageSize=10000`);
       const data = response.data;
       setDatasetsAllCount(data.total || 0);
       setDatasetsConfirmCount(data.data?.filter(d => d.confirmed).length || 0);
@@ -75,7 +76,8 @@ export default function useImageDatasetDetails(projectId, datasetId) {
   const handleNavigate = useCallback(
     async (direction, skipCurrentId = null) => {
       try {
-        const response = await axios.get(`/api/projects/${projectId}/image-datasets`);
+        // 获取所有数据集（不分页），使用一个足够大的 pageSize
+        const response = await axios.get(`/api/projects/${projectId}/image-datasets?page=1&pageSize=10000`);
         const datasets = response.data.data || [];
 
         if (datasets.length === 0) {
