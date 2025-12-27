@@ -1118,7 +1118,15 @@
     "batchGenerationFailed": "批量生成GA对失败",
     "batchGenerationSuccess": "成功为 {{count}} 个文件生成GA对",
     "selectAllFiles": "全选",
-    "deselectAllFiles": "取消全选"
+    "deselectAllFiles": "取消全选",
+    "batchGenerateTitle": "批量生成GA对",
+    "generationMode": "生成方式",
+    "aiGenerateMode": "AI 生成",
+    "manualAddMode": "手动添加",
+    "genreDesc": "文体描述",
+    "audienceDesc": "受众描述",
+    "manualGaPairRequired": "请填写文体标题和受众标题",
+    "batchAddManual": "批量添加"
   },
   "batchEdit": {
     "title": "批量编辑文本块",

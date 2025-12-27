@@ -1131,7 +1131,15 @@
     "batchGenerationFailed": "Batch GA pair generation failed",
     "batchGenerationSuccess": "Successfully generated GA pairs for {{count}} files",
     "selectAllFiles": "Select All",
-    "deselectAllFiles": "Deselect All"
+    "deselectAllFiles": "Deselect All",
+    "batchGenerateTitle": "Batch Generate GA Pairs",
+    "generationMode": "Generation Mode",
+    "aiGenerateMode": "AI Generate",
+    "manualAddMode": "Manual Add",
+    "genreDesc": "Genre Description",
+    "audienceDesc": "Audience Description",
+    "manualGaPairRequired": "Please fill in Genre Title and Audience Title",
+    "batchAddManual": "Batch Add"
   },
   "batchEdit": {
     "title": "Batch Edit Text Chunks",

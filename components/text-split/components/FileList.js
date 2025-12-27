@@ -21,7 +21,8 @@ import {
   Switch,
   Pagination,
   TextField,
-  InputAdornment
+  InputAdornment,
+  Grid
 } from '@mui/material';
 import {
   Visibility as VisibilityIcon,
@@ -69,6 +70,13 @@ export default function FileList({
   const [projectModel, setProjectModel] = useState(null);
   const [loadingModel, setLoadingModel] = useState(false);
   const [appendMode, setAppendMode] = useState(false);
+  const [generationMode, setGenerationMode] = useState('ai'); // 'ai' 或 'manual'
+  const [manualGaPair, setManualGaPair] = useState({
+    genreTitle: '',
+    genreDesc: '',
+    audienceTitle: '',
+    audienceDesc: ''
+  });
 
   // 搜索相关状态
   const [searchTerm, setSearchTerm] = useState('');
@@ -289,6 +297,87 @@ export default function FileList({
       return;
     }
 
+    // 如果是手动添加模式，验证手动输入的 GA 对
+    if (generationMode === 'manual') {
+      if (!manualGaPair.genreTitle || !manualGaPair.audienceTitle) {
+        setGenError(t('gaPairs.manualGaPairRequired'));
+        return;
+      }
+
+      try {
+        setGenerating(true);
+        setGenError(null);
+        setGenResult(null);
+
+        const stringFileIds = array.map(id => String(id));
+
+        const requestData = {
+          fileIds: stringFileIds,
+          gaPair: manualGaPair,
+          appendMode: appendMode
+        };
+
+        const response = await fetch(`/api/projects/${projectId}/batch-add-manual-ga`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestData)
+        });
+
+        const responseText = await response.text();
+
+        if (!response.ok) {
+          const errorData = await response
+            .json()
+            .catch(() => ({ error: t('gaPairs.requestFailed', { status: response.status }) }));
+          throw new Error(errorData.error || t('gaPairs.requestFailed', { status: response.status }));
+        }
+
+        const result = JSON.parse(responseText);
+
+        if (result.success) {
+          setGenResult({
+            total: result.data?.length || 0,
+            success: result.data?.filter(r => r.success).length || 0
+          });
+
+          // 成功后清空选择状态和表单
+          setArray([]);
+          if (typeof sendToFileUploader === 'function') {
+            sendToFileUploader([]);
+          }
+          setManualGaPair({
+            genreTitle: '',
+            genreDesc: '',
+            audienceTitle: '',
+            audienceDesc: ''
+          });
+
+          // 发送全局刷新事件
+          const successfulFileIds = result.data?.filter(item => item.success)?.map(item => String(item.fileId)) || [];
+
+          if (successfulFileIds.length > 0) {
+            window.dispatchEvent(
+              new CustomEvent('refreshGaPairsIndicators', {
+                detail: {
+                  projectId,
+                  fileIds: successfulFileIds
+                }
+              })
+            );
+          }
+        } else {
+          setGenError(result.error || t('gaPairs.generationFailed'));
+        }
+      } catch (error) {
+        console.error(t('gaPairs.batchGenerationFailed'), error);
+        setGenError(t('gaPairs.generationError', { error: error.message || t('common.unknownError') }));
+      } finally {
+        setGenerating(false);
+      }
+      return;
+    }
+
+    // AI 生成模式
     const modelToUse = projectModel || selectedModelInfo;
 
     if (!modelToUse || !modelToUse.id) {
@@ -662,11 +751,101 @@ export default function FileList({
 
       {/* 新增：批量生成GA对对话框 */}
       <Dialog open={batchGenDialogOpen} onClose={closeBatchGenDialog} maxWidth="md" fullWidth>
-        <DialogTitle>批量生成GA对</DialogTitle>
+        <DialogTitle>{t('gaPairs.batchGenerateTitle')}</DialogTitle>
         <DialogContent>
           {!genResult && (
             <DialogContentText>
               {t('gaPairs.batchGenerateDescription', { count: array.length })}
+
+              {/* 生成方式选择 */}
+              <Box sx={{ mt: 2, mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  {t('gaPairs.generationMode')}
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={generationMode === 'manual'}
+                      onChange={e => setGenerationMode(e.target.checked ? 'manual' : 'ai')}
+                      color="primary"
+                    />
+                  }
+                  label={generationMode === 'manual' ? t('gaPairs.manualAddMode') : t('gaPairs.aiGenerateMode')}
+                />
+              </Box>
+
+              {/* AI 生成模式：显示模型信息 */}
+              {generationMode === 'ai' && (
+                <>
+                  {loadingModel ? (
+                    <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
+                      <CircularProgress size={16} sx={{ mr: 1 }} />
+                      <Typography variant="body2">{t('gaPairs.loadingProjectModel')}</Typography>
+                    </Box>
+                  ) : projectModel ? (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="body2" color="textSecondary">
+                        {t('gaPairs.usingModel')}:{' '}
+                        <strong>
+                          {projectModel.providerName}: {projectModel.modelName}
+                        </strong>
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="body2" color="error">
+                        {t('gaPairs.noDefaultModel')}
+                      </Typography>
+                    </Box>
+                  )}
+                </>
+              )}
+
+              {/* 手动添加模式：显示输入表单 */}
+              {generationMode === 'manual' && (
+                <Box sx={{ mt: 2 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label={t('gaPairs.genreTitle')}
+                        value={manualGaPair.genreTitle}
+                        onChange={e => setManualGaPair({ ...manualGaPair, genreTitle: e.target.value })}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label={t('gaPairs.genreDesc')}
+                        value={manualGaPair.genreDesc}
+                        onChange={e => setManualGaPair({ ...manualGaPair, genreDesc: e.target.value })}
+                        multiline
+                        rows={2}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label={t('gaPairs.audienceTitle')}
+                        value={manualGaPair.audienceTitle}
+                        onChange={e => setManualGaPair({ ...manualGaPair, audienceTitle: e.target.value })}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label={t('gaPairs.audienceDesc')}
+                        value={manualGaPair.audienceDesc}
+                        onChange={e => setManualGaPair({ ...manualGaPair, audienceDesc: e.target.value })}
+                        multiline
+                        rows={2}
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
 
               {/* 追加模式选择 */}
               <Box sx={{ mt: 2, mb: 2 }}>
@@ -677,28 +856,6 @@ export default function FileList({
                   label={`${t('gaPairs.appendMode')}（${t('gaPairs.appendModeDescription')}）`}
                 />
               </Box>
-
-              {loadingModel ? (
-                <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
-                  <CircularProgress size={16} sx={{ mr: 1 }} />
-                  <Typography variant="body2">{t('gaPairs.loadingProjectModel')}</Typography>
-                </Box>
-              ) : projectModel ? (
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2" color="textSecondary">
-                    {t('gaPairs.usingModel')}:{' '}
-                    <strong>
-                      {projectModel.providerName}: {projectModel.modelName}
-                    </strong>
-                  </Typography>
-                </Box>
-              ) : (
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2" color="error">
-                    {t('gaPairs.noDefaultModel')}
-                  </Typography>
-                </Box>
-              )}
             </DialogContentText>
           )}
 
@@ -724,10 +881,19 @@ export default function FileList({
             <Button
               onClick={handleBatchGenerateGAPairs}
               variant="contained"
-              disabled={generating || array.length === 0 || !projectModel}
+              disabled={
+                generating ||
+                array.length === 0 ||
+                (generationMode === 'ai' && !projectModel) ||
+                (generationMode === 'manual' && (!manualGaPair.genreTitle || !manualGaPair.audienceTitle))
+              }
               startIcon={generating ? <CircularProgress size={20} /> : <PsychologyIcon />}
             >
-              {generating ? t('gaPairs.generating') : t('gaPairs.startGeneration')}
+              {generating
+                ? t('gaPairs.generating')
+                : generationMode === 'manual'
+                  ? t('gaPairs.batchAddManual')
+                  : t('gaPairs.startGeneration')}
             </Button>
           )}
         </DialogActions>
