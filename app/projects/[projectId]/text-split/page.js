@@ -340,6 +340,7 @@ export default function TextSplitPage({ params }) {
                   setCurrentPage(page);
                 }
               }}
+              onRefresh={fetchUploadedFiles} // 传递刷新函数
               isFullscreen={true} // 在对话框中移除高度限制
             />
           </Box>

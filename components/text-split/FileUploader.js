@@ -321,6 +321,7 @@ export default function FileUploader({
                     setCurrentPage(page);
                   }
                 }}
+                onRefresh={fetchUploadedFiles} // 传递刷新函数
               />
             </Grid>
           </Grid>

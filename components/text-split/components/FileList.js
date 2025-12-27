@@ -22,7 +22,8 @@ import {
   Pagination,
   TextField,
   InputAdornment,
-  Grid
+  Grid,
+  Alert
 } from '@mui/material';
 import {
   Visibility as VisibilityIcon,
@@ -41,7 +42,9 @@ import { useAtomValue } from 'jotai';
 import { selectedModelInfoAtom } from '@/lib/store';
 import MarkdownViewDialog from '../MarkdownViewDialog';
 import GaPairsIndicator from '../../mga/GaPairsIndicator';
+import DomainTreeActionDialog from './DomainTreeActionDialog';
 import i18n from '@/lib/i18n';
+import { toast } from 'sonner';
 
 export default function FileList({
   theme,
@@ -53,6 +56,7 @@ export default function FileList({
   setPageLoading,
   currentPage = 1,
   onPageChange,
+  onRefresh, // 新增：刷新文件列表的回调函数
   isFullscreen = false // 新增参数，用于控制是否处于全屏状态
 }) {
   const { t } = useTranslation();
@@ -77,6 +81,11 @@ export default function FileList({
     audienceTitle: '',
     audienceDesc: ''
   });
+
+  // 批量删除相关状态
+  const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = useState(false);
+  const [domainTreeActionOpen, setDomainTreeActionOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // 搜索相关状态
   const [searchTerm, setSearchTerm] = useState('');
@@ -493,6 +502,104 @@ export default function FileList({
     setAppendMode(false); // 重置追加模式
   };
 
+  // 批量删除处理函数 - 第一步：打开确认对话框
+  const handleBatchDelete = () => {
+    if (array.length === 0) {
+      return;
+    }
+    setBatchDeleteDialogOpen(true);
+  };
+
+  // 确认批量删除 - 第二步：打开领域树选择对话框
+  const confirmBatchDelete = () => {
+    setBatchDeleteDialogOpen(false);
+
+    // 检查是否还有其他文件
+    const remainingFilesCount = files.total - array.length;
+
+    // 如果删除后没有文件了，直接执行删除（keep 模式）
+    if (remainingFilesCount === 0) {
+      executeBatchDelete('keep');
+      return;
+    }
+
+    // 否则打开领域树操作选择对话框
+    setDomainTreeActionOpen(true);
+  };
+
+  // 处理领域树操作选择
+  const handleDomainTreeAction = action => {
+    setDomainTreeActionOpen(false);
+    executeBatchDelete(action);
+  };
+
+  // 执行批量删除 - 第三步：实际删除操作
+  const executeBatchDelete = async domainTreeAction => {
+    if (array.length === 0) {
+      return;
+    }
+
+    setDeleting(true);
+    // 设置页面 loading 状态
+    if (typeof setPageLoading === 'function') {
+      setPageLoading(true);
+    }
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}/batch-delete-files`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileIds: array,
+          domainTreeAction,
+          model: selectedModelInfo || {},
+          language: i18n.language === 'en' ? 'English' : '中文'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('批量删除失败');
+      }
+
+      const result = await response.json();
+
+      // 清空选择
+      setArray([]);
+      if (typeof sendToFileUploader === 'function') {
+        sendToFileUploader([]);
+      }
+
+      // 刷新文件列表
+      if (typeof onRefresh === 'function') {
+        await onRefresh();
+      } else if (typeof onPageChange === 'function') {
+        // 回退方案：如果没有 onRefresh，使用 onPageChange
+        await onPageChange(1);
+      }
+
+      toast.success(
+        t('textSplit.batchDeleteSuccess', {
+          count: result.deletedCount || array.length,
+          defaultValue: `成功删除 ${result.deletedCount || array.length} 个文件`
+        })
+      );
+    } catch (error) {
+      console.error('批量删除文件失败:', error);
+      toast.error(t('textSplit.batchDeleteFailed', { defaultValue: '批量删除失败' }));
+    } finally {
+      setDeleting(false);
+      // 清除页面 loading 状态
+      if (typeof setPageLoading === 'function') {
+        setPageLoading(false);
+      }
+    }
+  };
+
+  // 取消批量删除
+  const cancelBatchDelete = () => {
+    setBatchDeleteDialogOpen(false);
+  };
+
   return (
     <Box
       sx={{
@@ -519,7 +626,7 @@ export default function FileList({
         >
           <Typography variant="subtitle1">{t('textSplit.uploadedDocuments', { count: files.total })}</Typography>
 
-          {/* 批量生成GA对按钮 */}
+          {/* 批量操作按钮 */}
           {files.total > 0 && (
             <Box sx={{ display: 'flex', gap: 1 }}>
               {/* 全选/取消全选按钮 */}
@@ -542,6 +649,20 @@ export default function FileList({
                   disabled={loading}
                 >
                   {t('gaPairs.selectAllFiles')}
+                </Button>
+              )}
+
+              {/* 批量删除按钮 */}
+              {array.length > 0 && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleBatchDelete}
+                  disabled={loading}
+                >
+                  {t('textSplit.batchDelete', { count: array.length })}
                 </Button>
               )}
 
@@ -898,6 +1019,50 @@ export default function FileList({
           )}
         </DialogActions>
       </Dialog>
+
+      {/* 批量删除确认对话框 */}
+      <Dialog open={batchDeleteDialogOpen} onClose={cancelBatchDelete} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('textSplit.batchDeleteTitle')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {t('textSplit.batchDeleteConfirm', {
+              count: array.length,
+              defaultValue: `确定要删除选中的 ${array.length} 个文件吗？此操作不可恢复。`
+            })}
+          </DialogContentText>
+          <Alert severity="warning" sx={{ my: 2 }}>
+            <Typography variant="body2" component="div" fontWeight="medium">
+              {t('textSplit.deleteFileWarning')}
+            </Typography>
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="body2" component="div">
+                • {t('textSplit.deleteFileWarningChunks')}
+              </Typography>
+              <Typography variant="body2" component="div">
+                • {t('textSplit.deleteFileWarningQuestions')}
+              </Typography>
+              <Typography variant="body2" component="div">
+                • {t('textSplit.deleteFileWarningDatasets')}
+              </Typography>
+            </Box>
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelBatchDelete}>{t('common.cancel')}</Button>
+          <Button onClick={confirmBatchDelete} variant="contained" color="error">
+            {t('common.confirmDelete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 领域树操作选择对话框 */}
+      <DomainTreeActionDialog
+        open={domainTreeActionOpen}
+        onClose={() => setDomainTreeActionOpen(false)}
+        onConfirm={handleDomainTreeAction}
+        isFirstUpload={false}
+        action="delete"
+      />
     </Box>
   );
 }
