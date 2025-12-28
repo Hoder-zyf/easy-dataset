@@ -8,6 +8,7 @@ export function useQuestionsFilter(projectId) {
   // 过滤和搜索状态
   const [answerFilter, setAnswerFilter] = useState('all'); // 'all', 'answered', 'unanswered'
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchMatchMode, setSearchMatchMode] = useState('match'); // 'match', 'notMatch'
   const [chunkNameFilter, setChunkNameFilter] = useState('');
   const [sourceTypeFilter, setSourceTypeFilter] = useState('all'); // 'all', 'text', 'image'
   const debouncedSearchTerm = useDebounce(searchTerm);
@@ -39,7 +40,7 @@ export function useQuestionsFilter(projectId) {
       setSelectedQuestions([]);
     } else {
       const response = await axios.get(
-        `/api/projects/${projectId}/questions?status=${answerFilter}&input=${searchTerm}&chunkName=${encodeURIComponent(chunkNameFilter)}&sourceType=${sourceTypeFilter}&selectedAll=1`
+        `/api/projects/${projectId}/questions?status=${answerFilter}&input=${searchTerm}&searchMatchMode=${searchMatchMode}&chunkName=${encodeURIComponent(chunkNameFilter)}&sourceType=${sourceTypeFilter}&selectedAll=1`
       );
       setSelectedQuestions(response.data.map(dataset => dataset.id));
     }
@@ -65,6 +66,11 @@ export function useQuestionsFilter(projectId) {
     setSourceTypeFilter(event.target.value);
   };
 
+  // 处理搜索匹配模式变化
+  const handleSearchMatchModeChange = event => {
+    setSearchMatchMode(event.target.value);
+  };
+
   // 清空选择
   const clearSelection = () => {
     setSelectedQuestions([]);
@@ -73,6 +79,7 @@ export function useQuestionsFilter(projectId) {
   // 重置所有过滤条件
   const resetFilters = () => {
     setSearchTerm('');
+    setSearchMatchMode('match');
     setAnswerFilter('all');
     setChunkNameFilter('');
     setSourceTypeFilter('all');
@@ -84,6 +91,7 @@ export function useQuestionsFilter(projectId) {
     answerFilter,
     searchTerm,
     debouncedSearchTerm,
+    searchMatchMode,
     chunkNameFilter,
     debouncedChunkNameFilter,
     sourceTypeFilter,
@@ -92,6 +100,7 @@ export function useQuestionsFilter(projectId) {
     // 方法
     setAnswerFilter,
     setSearchTerm,
+    setSearchMatchMode,
     setChunkNameFilter,
     setSourceTypeFilter,
     setSelectedQuestions,
@@ -101,6 +110,7 @@ export function useQuestionsFilter(projectId) {
     handleFilterChange,
     handleChunkNameFilterChange,
     handleSourceTypeFilterChange,
+    handleSearchMatchModeChange,
     clearSelection,
     resetFilters
   };

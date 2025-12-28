@@ -150,6 +150,8 @@
     "selectedCount": "已选择 {{count}} 个问题",
     "totalCount": "共 {{count}} 个问题",
     "searchPlaceholder": "搜索问题或标签...",
+    "searchMatch": "匹配",
+    "searchNotMatch": "不匹配",
     "deleteSelected": "删除所选",
     "batchGenerate": "批量构造数据集",
     "generating": "正在生成数据集",

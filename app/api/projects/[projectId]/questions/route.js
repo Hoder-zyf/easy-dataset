@@ -23,9 +23,17 @@ export async function GET(request, { params }) {
     if (status === 'unanswered') answered = false;
     const chunkName = searchParams.get('chunkName');
     const sourceType = searchParams.get('sourceType') || 'all'; // 'all', 'text', 'image'
+    const searchMatchMode = searchParams.get('searchMatchMode') || 'match'; // 'match', 'notMatch'
     let selectedAll = searchParams.get('selectedAll');
     if (selectedAll) {
-      let data = await getQuestionsIds(projectId, answered, searchParams.get('input'), chunkName, sourceType);
+      let data = await getQuestionsIds(
+        projectId,
+        answered,
+        searchParams.get('input'),
+        chunkName,
+        sourceType,
+        searchMatchMode
+      );
       return NextResponse.json(data);
     }
     let all = searchParams.get('all');
@@ -41,7 +49,8 @@ export async function GET(request, { params }) {
       answered,
       searchParams.get('input'),
       chunkName,
-      sourceType
+      sourceType,
+      searchMatchMode
     );
 
     return NextResponse.json(questions);

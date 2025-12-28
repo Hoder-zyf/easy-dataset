@@ -15,6 +15,8 @@ export default function QuestionsFilter({
   // 搜索相关
   searchTerm,
   onSearchChange,
+  searchMatchMode,
+  onSearchMatchModeChange,
 
   // 过滤相关
   answerFilter,
@@ -61,22 +63,55 @@ export default function QuestionsFilter({
 
         {/* 搜索和过滤区域 */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-          <TextField
-            placeholder={t('questions.searchPlaceholder')}
-            variant="outlined"
-            size="small"
-            fullWidth
-            sx={{ width: { xs: '100%', sm: 300 } }}
-            value={searchTerm}
-            onChange={onSearchChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" color="action" />
-                </InputAdornment>
-              )
-            }}
-          />
+          {/* 组合搜索框：下拉选择（匹配/不匹配）+ 输入框 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', width: { xs: '100%', sm: 300 } }}>
+            <Select
+              value={searchMatchMode}
+              onChange={onSearchMatchModeChange}
+              size="small"
+              sx={{
+                width: 110,
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'white',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderRight: 'none',
+                  borderColor: theme.palette.mode === 'dark' ? 'transparent' : 'rgba(0, 0, 0, 0.23)'
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: theme.palette.mode === 'dark' ? 'transparent' : 'rgba(0, 0, 0, 0.87)'
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'primary.main'
+                }
+              }}
+            >
+              <MenuItem value="match">{t('questions.searchMatch')}</MenuItem>
+              <MenuItem value="notMatch">{t('questions.searchNotMatch')}</MenuItem>
+            </Select>
+            <TextField
+              placeholder={t('questions.searchPlaceholder')}
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={searchTerm}
+              onChange={onSearchChange}
+              sx={{
+                flex: 1,
+                '& .MuiOutlinedInput-root': {
+                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: 0
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" color="action" />
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Box>
           <TextField
             placeholder={t('questions.filterChunkNamePlaceholder')}
             variant="outlined"

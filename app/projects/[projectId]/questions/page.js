@@ -55,6 +55,7 @@ export default function QuestionsPage({ params }) {
     answerFilter,
     searchTerm,
     debouncedSearchTerm,
+    searchMatchMode,
     chunkNameFilter,
     debouncedChunkNameFilter,
     sourceTypeFilter,
@@ -65,14 +66,15 @@ export default function QuestionsPage({ params }) {
     handleSearchChange,
     handleFilterChange,
     handleChunkNameFilterChange,
-    handleSourceTypeFilterChange
+    handleSourceTypeFilterChange,
+    handleSearchMatchModeChange
   } = useQuestionsFilter(projectId);
 
   const getQuestionList = async () => {
     try {
       // 获取问题列表
       const questionsResponse = await axios.get(
-        `/api/projects/${projectId}/questions?page=${currentPage}&size=10&status=${answerFilter}&input=${searchTerm}&chunkName=${encodeURIComponent(debouncedChunkNameFilter)}&sourceType=${sourceTypeFilter}`
+        `/api/projects/${projectId}/questions?page=${currentPage}&size=10&status=${answerFilter}&input=${searchTerm}&searchMatchMode=${searchMatchMode}&chunkName=${encodeURIComponent(debouncedChunkNameFilter)}&sourceType=${sourceTypeFilter}`
       );
       if (questionsResponse.status !== 200) {
         throw new Error(t('common.fetchError'));
@@ -96,11 +98,11 @@ export default function QuestionsPage({ params }) {
   // 当筛选条件改变时，重置页码到第1页
   useEffect(() => {
     setCurrentPage(1);
-  }, [answerFilter, debouncedSearchTerm, debouncedChunkNameFilter, sourceTypeFilter]);
+  }, [answerFilter, debouncedSearchTerm, debouncedChunkNameFilter, sourceTypeFilter, searchMatchMode]);
 
   useEffect(() => {
     getQuestionList();
-  }, [currentPage, answerFilter, debouncedSearchTerm, debouncedChunkNameFilter, sourceTypeFilter]);
+  }, [currentPage, answerFilter, debouncedSearchTerm, debouncedChunkNameFilter, sourceTypeFilter, searchMatchMode]);
 
   const { taskSettings } = useTaskSettings(projectId);
 
@@ -325,6 +327,8 @@ export default function QuestionsPage({ params }) {
           onSelectAll={handleSelectAll}
           searchTerm={searchTerm}
           onSearchChange={handleSearchChange}
+          searchMatchMode={searchMatchMode}
+          onSearchMatchModeChange={handleSearchMatchModeChange}
           answerFilter={answerFilter}
           onFilterChange={handleFilterChange}
           chunkNameFilter={chunkNameFilter}

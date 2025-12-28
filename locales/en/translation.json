@@ -146,6 +146,8 @@
     "selectedCount": "Selected {{count}} questions",
     "totalCount": "Total {{count}} questions",
     "searchPlaceholder": "Search questions or tags...",
+    "searchMatch": "Match",
+    "searchNotMatch": "Not Match",
     "deleteSelected": "Delete Selected",
     "batchGenerate": "Batch Generate Datasets",
     "generating": "Generating Dataset",
