@@ -86,7 +86,7 @@ export default function ProjectCard({ project, onDeleteClick }) {
               <Typography variant="h5" component="div" fontWeight="600" sx={{ mt: 1 }}>
                 {project.name}
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 <Chip
                   size="small"
                   label={`${project._count.Questions || 0} ${t('projects.questions')}`}
@@ -95,7 +95,7 @@ export default function ProjectCard({ project, onDeleteClick }) {
                 />
                 <Chip
                   size="small"
-                  label={`${project._count.Datasets || 0} ${t('projects.datasets')}`}
+                  label={`${(project._count.ImageDatasets || 0) + (project._count.Datasets || 0)} ${t('projects.datasets')}`}
                   color="secondary"
                   variant="outlined"
                 />
