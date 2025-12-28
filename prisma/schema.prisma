@@ -306,3 +306,29 @@ model QuestionTemplates {
   @@index([projectId])
   @@index([projectId, sourceType])
 }
+
+model LlmUsageLogs {
+  id        String @id @default(nanoid())
+  projectId String
+  provider  String // 提供商: openai, anthropic, google 等
+  model     String // 模型名称
+
+  // 核心指标
+  inputTokens  Int @default(0)
+  outputTokens Int @default(0)
+  totalTokens  Int @default(0)
+  latency      Int @default(0) // 响应耗时（毫秒）
+
+  // 状态与追踪
+  status       String  @default("SUCCESS") // 状态: "SUCCESS", "FAILED"
+  errorMessage String? // 失败原因，status="FAILED" 时填写
+
+  // 时间维度
+  createAt   DateTime @default(now())
+  dateString String // 格式 "YYYY-MM-DD"，用于快速按天聚合
+
+  @@index([projectId, dateString])
+  @@index([dateString])
+  @@index([provider])
+  @@index([model])
+}

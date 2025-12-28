@@ -1440,5 +1440,67 @@
         "invalidJson": "Invalid JSON format"
       }
     }
+  },
+  "monitoring": {
+    "title": "Resource Monitoring Dashboard",
+    "timeRange": {
+      "24h": "Last 24 hours",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days"
+    },
+    "filters": {
+      "allProjects": "All Projects",
+      "allProviders": "All Providers",
+      "allStatus": "All Status"
+    },
+    "status": {
+      "success": "Success",
+      "failed": "Failed"
+    },
+    "actions": {
+      "export": "Export Report"
+    },
+    "stats": {
+      "totalTokens": "Total Token Usage",
+      "avgTokensPerCall": "Avg Tokens per Call",
+      "totalCalls": "Total Calls",
+      "avgLatency": "Avg Latency",
+      "inputOutput": "Input: {{input}} · Output: {{output}}",
+      "successCalls": "{{count}} Success",
+      "failedCalls": "{{count}} Failed",
+      "failureRate": "{{rate}}% Failure Rate",
+      "basedOnSuccessCalls": "Based on {{count}} successful calls",
+      "noSuccessCalls": "No successful calls"
+    },
+    "charts": {
+      "tokenTrend": "Token Usage Trend",
+      "inputLegend": "Input",
+      "outputLegend": "Output",
+      "distributionTitle": "Token Usage Distribution (by Model)",
+      "distributionSubtitle": "Resource usage share by model",
+      "tokensTooltip": "{{value}}K Tokens"
+    },
+    "table": {
+      "title": "Usage Details",
+      "searchPlaceholder": "Search project, model, or failure reason...",
+      "empty": "No data",
+      "rowsPerPage": "Rows per page:",
+      "columns": {
+        "projectName": "Project",
+        "provider": "Provider",
+        "model": "Model",
+        "status": "Status",
+        "failureReason": "Failure Reason",
+        "inputTokens": "Input Tokens",
+        "outputTokens": "Output Tokens",
+        "totalTokens": "Total",
+        "calls": "Calls",
+        "avgLatency": "Avg Latency"
+      }
+    },
+    "errors": {
+      "fetchSummaryFailed": "Failed to fetch monitoring summary",
+      "fetchLogsFailed": "Failed to fetch monitoring logs"
+    }
   }
 }

@@ -64,5 +64,10 @@
     "version": "1.6.0",
     "description": "创建 QuestionTemplates 表",
     "sql": "CREATE TABLE IF NOT EXISTS QuestionTemplates (\n  id VARCHAR(255) NOT NULL,\n  projectId VARCHAR(255) NOT NULL,\n  question TEXT NOT NULL,\n  sourceType VARCHAR(50) NOT NULL,\n  answerType VARCHAR(50) NOT NULL,\n  description TEXT DEFAULT '' NOT NULL,\n  labels TEXT DEFAULT '' NOT NULL,\n  customFormat TEXT DEFAULT '' NOT NULL,\n  \"order\" INT DEFAULT 0 NOT NULL,\n  createAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updateAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (id),\n  FOREIGN KEY (projectId) REFERENCES Projects(id) ON DELETE CASCADE\n);\n\nCREATE INDEX idx_questiontemplates_projectId ON QuestionTemplates(projectId);\nCREATE INDEX idx_questiontemplates_project_source ON QuestionTemplates(projectId, sourceType);"
+  },
+  {
+    "version": "1.6.2",
+    "description": "创建 LlmUsageLogs 表 - LLM 调用统计日志",
+    "sql": "CREATE TABLE IF NOT EXISTS LlmUsageLogs (\n  id VARCHAR(255) NOT NULL,\n  projectId VARCHAR(255) NOT NULL,\n  provider VARCHAR(255) NOT NULL,\n  model VARCHAR(255) NOT NULL,\n  inputTokens INT DEFAULT 0 NOT NULL,\n  outputTokens INT DEFAULT 0 NOT NULL,\n  totalTokens INT DEFAULT 0 NOT NULL,\n  latency INT DEFAULT 0 NOT NULL,\n  status VARCHAR(50) DEFAULT 'SUCCESS' NOT NULL,\n  errorMessage TEXT NULL,\n  createAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  dateString VARCHAR(10) NOT NULL,\n  PRIMARY KEY (id)\n);\n\nCREATE INDEX idx_llmusagelogs_project_date ON LlmUsageLogs(projectId, dateString);\nCREATE INDEX idx_llmusagelogs_dateString ON LlmUsageLogs(dateString);\nCREATE INDEX idx_llmusagelogs_provider ON LlmUsageLogs(provider);\nCREATE INDEX idx_llmusagelogs_model ON LlmUsageLogs(model);"
   }
 ]

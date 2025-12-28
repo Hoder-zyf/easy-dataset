@@ -1427,5 +1427,67 @@
         "invalidJson": "JSON 格式不正确"
       }
     }
+  },
+  "monitoring": {
+    "title": "资源监控看板",
+    "timeRange": {
+      "24h": "24小时",
+      "7d": "近7天",
+      "30d": "近30天"
+    },
+    "filters": {
+      "allProjects": "所有项目",
+      "allProviders": "所有提供商",
+      "allStatus": "全部状态"
+    },
+    "status": {
+      "success": "成功",
+      "failed": "失败"
+    },
+    "actions": {
+      "export": "导出报表"
+    },
+    "stats": {
+      "totalTokens": "总 Token 消耗",
+      "avgTokensPerCall": "平均 Token 消耗/次",
+      "totalCalls": "总调用次数",
+      "avgLatency": "平均响应耗时",
+      "inputOutput": "输入: {{input}} · 输出: {{output}}",
+      "successCalls": "{{count}} 成功",
+      "failedCalls": "{{count}} 失败",
+      "failureRate": "{{rate}}% 失败率",
+      "basedOnSuccessCalls": "基于 {{count}} 次成功请求",
+      "noSuccessCalls": "暂无成功请求"
+    },
+    "charts": {
+      "tokenTrend": "Token 消耗趋势",
+      "inputLegend": "输入",
+      "outputLegend": "输出",
+      "distributionTitle": "Token 消耗分布 (按模型)",
+      "distributionSubtitle": "不同模型的资源消耗占比",
+      "tokensTooltip": "{{value}}K Tokens"
+    },
+    "table": {
+      "title": "详细使用明细",
+      "searchPlaceholder": "搜索项目、模型或失败原因...",
+      "empty": "暂无数据",
+      "rowsPerPage": "每页行数:",
+      "columns": {
+        "projectName": "项目名称",
+        "provider": "模型提供商",
+        "model": "模型名称",
+        "status": "状态",
+        "failureReason": "失败原因",
+        "inputTokens": "输入 TOKEN",
+        "outputTokens": "输出 TOKEN",
+        "totalTokens": "TOTAL",
+        "calls": "调用次数",
+        "avgLatency": "平均耗时"
+      }
+    },
+    "errors": {
+      "fetchSummaryFailed": "获取监控汇总数据失败",
+      "fetchLogsFailed": "获取监控日志失败"
+    }
   }
 }
