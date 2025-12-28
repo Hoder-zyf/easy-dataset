@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AppBar, Toolbar, Box, IconButton, useTheme as useMuiTheme, Tooltip, useMediaQuery } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { usePathname } from 'next/navigation';
@@ -37,6 +37,25 @@ export default function Navbar({ projects = [], currentProject }) {
 
   // ContextBar 悬浮状态
   const [contextBarHovered, setContextBarHovered] = useState(false);
+  const contextTriggerRef = useRef(null);
+  const contextBarRef = useRef(null);
+
+  useEffect(() => {
+    if (!contextBarHovered) return;
+
+    const handleOutsideClick = event => {
+      if (contextBarRef.current?.contains(event.target)) return;
+      if (contextTriggerRef.current?.contains(event.target)) return;
+      const projectMenuEl = document.getElementById('project-menu');
+      if (projectMenuEl?.contains(event.target)) return;
+      setContextBarHovered(false);
+    };
+
+    document.addEventListener('pointerdown', handleOutsideClick, true);
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideClick, true);
+    };
+  }, [contextBarHovered]);
 
   const handleMenuOpen = (event, menuType) => {
     setMenuState({ anchorEl: event.currentTarget, menuType });
@@ -75,7 +94,11 @@ export default function Navbar({ projects = [], currentProject }) {
       >
         <Toolbar sx={styles.toolbarStyles}>
           {/* 左侧: 汉堡菜单(移动端) + Logo */}
-          <Box sx={styles.logoContainerStyles} onMouseEnter={() => isProjectDetail && setContextBarHovered(true)}>
+          <Box
+            ref={contextTriggerRef}
+            sx={styles.logoContainerStyles}
+            onMouseEnter={() => isProjectDetail && setContextBarHovered(true)}
+          >
             {/* 汉堡菜单按钮 */}
             {isProjectDetail && isMobile && (
               <Tooltip title={t('common.menu', 'Menu')} placement="bottom">
@@ -120,7 +143,7 @@ export default function Navbar({ projects = [], currentProject }) {
 
       {/* ContextBar - 在 Logo 或 ContextBar 悬浮时展示 */}
       {isProjectDetail && contextBarHovered && (
-        <Box onMouseLeave={() => setContextBarHovered(false)}>
+        <Box ref={contextBarRef} onMouseLeave={() => setContextBarHovered(false)}>
           <ContextBar
             projects={projects}
             currentProjectId={currentProject}
