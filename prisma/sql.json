@@ -69,5 +69,10 @@
     "version": "1.6.2",
     "description": "创建 LlmUsageLogs 表 - LLM 调用统计日志",
     "sql": "CREATE TABLE IF NOT EXISTS LlmUsageLogs (\n  id VARCHAR(255) NOT NULL,\n  projectId VARCHAR(255) NOT NULL,\n  provider VARCHAR(255) NOT NULL,\n  model VARCHAR(255) NOT NULL,\n  inputTokens INT DEFAULT 0 NOT NULL,\n  outputTokens INT DEFAULT 0 NOT NULL,\n  totalTokens INT DEFAULT 0 NOT NULL,\n  latency INT DEFAULT 0 NOT NULL,\n  status VARCHAR(50) DEFAULT 'SUCCESS' NOT NULL,\n  errorMessage TEXT NULL,\n  createAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  dateString VARCHAR(10) NOT NULL,\n  PRIMARY KEY (id)\n);\n\nCREATE INDEX idx_llmusagelogs_project_date ON LlmUsageLogs(projectId, dateString);\nCREATE INDEX idx_llmusagelogs_dateString ON LlmUsageLogs(dateString);\nCREATE INDEX idx_llmusagelogs_provider ON LlmUsageLogs(provider);\nCREATE INDEX idx_llmusagelogs_model ON LlmUsageLogs(model);"
+  },
+  {
+    "version": "1.6.2",
+    "description": "为 Tags 和 Questions 表添加索引",
+    "sql": "CREATE INDEX idx_tags_project_label ON Tags(projectId, label);\nCREATE INDEX idx_tags_project_parentId ON Tags(projectId, parentId);\nCREATE INDEX idx_questions_project_label ON Questions(projectId, label);"
   }
 ]
