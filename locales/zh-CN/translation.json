@@ -150,6 +150,8 @@
     "selectedCount": "已选择 {{count}} 个问题",
     "totalCount": "共 {{count}} 个问题",
     "searchPlaceholder": "搜索问题或标签...",
+    "searchMatch": "匹配",
+    "searchNotMatch": "不匹配",
     "deleteSelected": "删除所选",
     "batchGenerate": "批量构造数据集",
     "generating": "正在生成数据集",
@@ -185,6 +187,14 @@
     "updateTemplateFailed": "更新问题模板失败",
     "deleteTemplateSuccess": "问题模板删除成功",
     "deleteTemplateFailed": "删除问题模板失败",
+    "exportQuestions": "导出问题集",
+    "exportScope": "导出范围",
+    "exportAll": "导出全部（{{count}} 个问题）",
+    "exportSelected": "导出已选（{{count}} 个问题）",
+    "exportFormat": "导出格式",
+    "txtFormat": "纯文本（仅问题内容）",
+    "exportSuccess": "问题集导出成功",
+    "exportFailed": "问题集导出失败",
     "template": {
       "management": "问题模板",
       "create": "创建问题模板",
@@ -440,6 +450,16 @@
     "defaultSelected": "已选择使用默认内置策略解析PDF",
     "download": "下载文献",
     "deleteFile": "删除文献",
+    "batchDelete": "批量删除 ({{count}})",
+    "batchDeleteTitle": "批量删除文件",
+    "batchDeleteConfirm": "确定要删除选中的 {{count}} 个文件吗？此操作不可恢复。",
+    "batchDeleteSuccess": "成功删除 {{count}} 个文件",
+    "batchDeleteFailed": "批量删除失败",
+    "searchFiles": "搜索文件名...",
+    "searchResults": "找到 {{count}} 个文件（共 {{total}} 个）",
+    "noSearchResults": "未找到包含 \"{{searchTerm}}\" 的文件",
+    "noResultsOnCurrentPage": "当前页面没有搜索结果，请返回第一页查看",
+    "noDataOnCurrentPage": "当前页面没有数据",
     "viewChunk": "查看文本块",
     "editChunk": "编辑文本块 {{chunkId}}",
     "editChunkSuccess": "文本块编辑成功",
@@ -1110,7 +1130,15 @@
     "batchGenerationFailed": "批量生成GA对失败",
     "batchGenerationSuccess": "成功为 {{count}} 个文件生成GA对",
     "selectAllFiles": "全选",
-    "deselectAllFiles": "取消全选"
+    "deselectAllFiles": "取消全选",
+    "batchGenerateTitle": "批量生成GA对",
+    "generationMode": "生成方式",
+    "aiGenerateMode": "AI 生成",
+    "manualAddMode": "手动添加",
+    "genreDesc": "文体描述",
+    "audienceDesc": "受众描述",
+    "manualGaPairRequired": "请填写文体标题和受众标题",
+    "batchAddManual": "批量添加"
   },
   "batchEdit": {
     "title": "批量编辑文本块",
@@ -1398,6 +1426,68 @@
         "customFormatRequired": "请输入自定义格式",
         "invalidJson": "JSON 格式不正确"
       }
+    }
+  },
+  "monitoring": {
+    "title": "资源监控看板",
+    "timeRange": {
+      "24h": "24小时",
+      "7d": "近7天",
+      "30d": "近30天"
+    },
+    "filters": {
+      "allProjects": "所有项目",
+      "allProviders": "所有提供商",
+      "allStatus": "全部状态"
+    },
+    "status": {
+      "success": "成功",
+      "failed": "失败"
+    },
+    "actions": {
+      "export": "导出报表"
+    },
+    "stats": {
+      "totalTokens": "总 Token 消耗",
+      "avgTokensPerCall": "平均 Token 消耗/次",
+      "totalCalls": "总调用次数",
+      "avgLatency": "平均响应耗时",
+      "inputOutput": "输入: {{input}} · 输出: {{output}}",
+      "successCalls": "{{count}} 成功",
+      "failedCalls": "{{count}} 失败",
+      "failureRate": "{{rate}}% 失败率",
+      "basedOnSuccessCalls": "基于 {{count}} 次成功请求",
+      "noSuccessCalls": "暂无成功请求"
+    },
+    "charts": {
+      "tokenTrend": "Token 消耗趋势",
+      "inputLegend": "输入",
+      "outputLegend": "输出",
+      "distributionTitle": "Token 消耗分布 (按模型)",
+      "distributionSubtitle": "不同模型的资源消耗占比",
+      "tokensTooltip": "{{value}}K Tokens"
+    },
+    "table": {
+      "title": "详细使用明细",
+      "searchPlaceholder": "搜索项目、模型或失败原因...",
+      "empty": "暂无数据",
+      "rowsPerPage": "每页行数:",
+      "columns": {
+        "projectName": "项目名称",
+        "provider": "模型提供商",
+        "model": "模型名称",
+        "status": "状态",
+        "failureReason": "失败原因",
+        "inputTokens": "输入 TOKEN",
+        "outputTokens": "输出 TOKEN",
+        "totalTokens": "TOTAL",
+        "calls": "调用次数",
+        "avgLatency": "平均耗时"
+      }
+    },
+    "errors": {
+      "fetchSummaryFailed": "获取监控汇总数据失败",
+      "fetchLogsFailed": "获取监控日志失败"
     }
   }
 }

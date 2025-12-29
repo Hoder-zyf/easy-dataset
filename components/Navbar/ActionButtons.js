@@ -7,6 +7,7 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import LanguageSwitcher from '../LanguageSwitcher';
 import UpdateChecker from '../UpdateChecker';
 import TaskIcon from '../TaskIcon';
@@ -24,6 +25,15 @@ export default function ActionButtons({ theme, resolvedTheme, toggleTheme, isPro
     <Box sx={styles.actionAreaStyles}>
       {isProjectDetail && <ModelSelect projectId={currentProject} />}
       {isProjectDetail && <TaskIcon theme={theme} projectId={currentProject} />}
+
+      {/* Monitoring Dashboard - Only visible on Home page */}
+      {!isProjectDetail && (
+        <Tooltip title={t('monitoring.title', 'Resource Monitoring')}>
+          <IconButton component="a" href="/monitoring" size="medium" sx={styles.getIconButtonStyles(theme)}>
+            <BarChartIcon />
+          </IconButton>
+        </Tooltip>
+      )}
 
       {/* Language Switcher - Always visible */}
       <LanguageSwitcher />

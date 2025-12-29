@@ -117,7 +117,7 @@ const ExportImageDatasetDialog = ({ open, onClose, onExport }) => {
           {t('common.cancel', '取消')}
         </Button>
         <Button onClick={handleExport} variant="contained">
-          {t('common.export', '导出')}
+          {t('export.title', '导出')}
         </Button>
       </DialogActions>
     </Dialog>

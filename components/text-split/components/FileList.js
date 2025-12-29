@@ -21,7 +21,9 @@ import {
   Switch,
   Pagination,
   TextField,
-  InputAdornment
+  InputAdornment,
+  Grid,
+  Alert
 } from '@mui/material';
 import {
   Visibility as VisibilityIcon,
@@ -40,7 +42,9 @@ import { useAtomValue } from 'jotai';
 import { selectedModelInfoAtom } from '@/lib/store';
 import MarkdownViewDialog from '../MarkdownViewDialog';
 import GaPairsIndicator from '../../mga/GaPairsIndicator';
+import DomainTreeActionDialog from './DomainTreeActionDialog';
 import i18n from '@/lib/i18n';
+import { toast } from 'sonner';
 
 export default function FileList({
   theme,
@@ -52,6 +56,7 @@ export default function FileList({
   setPageLoading,
   currentPage = 1,
   onPageChange,
+  onRefresh, // 新增：刷新文件列表的回调函数
   isFullscreen = false // 新增参数，用于控制是否处于全屏状态
 }) {
   const { t } = useTranslation();
@@ -69,6 +74,18 @@ export default function FileList({
   const [projectModel, setProjectModel] = useState(null);
   const [loadingModel, setLoadingModel] = useState(false);
   const [appendMode, setAppendMode] = useState(false);
+  const [generationMode, setGenerationMode] = useState('ai'); // 'ai' 或 'manual'
+  const [manualGaPair, setManualGaPair] = useState({
+    genreTitle: '',
+    genreDesc: '',
+    audienceTitle: '',
+    audienceDesc: ''
+  });
+
+  // 批量删除相关状态
+  const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = useState(false);
+  const [domainTreeActionOpen, setDomainTreeActionOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // 搜索相关状态
   const [searchTerm, setSearchTerm] = useState('');
@@ -289,6 +306,87 @@ export default function FileList({
       return;
     }
 
+    // 如果是手动添加模式，验证手动输入的 GA 对
+    if (generationMode === 'manual') {
+      if (!manualGaPair.genreTitle || !manualGaPair.audienceTitle) {
+        setGenError(t('gaPairs.manualGaPairRequired'));
+        return;
+      }
+
+      try {
+        setGenerating(true);
+        setGenError(null);
+        setGenResult(null);
+
+        const stringFileIds = array.map(id => String(id));
+
+        const requestData = {
+          fileIds: stringFileIds,
+          gaPair: manualGaPair,
+          appendMode: appendMode
+        };
+
+        const response = await fetch(`/api/projects/${projectId}/batch-add-manual-ga`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestData)
+        });
+
+        const responseText = await response.text();
+
+        if (!response.ok) {
+          const errorData = await response
+            .json()
+            .catch(() => ({ error: t('gaPairs.requestFailed', { status: response.status }) }));
+          throw new Error(errorData.error || t('gaPairs.requestFailed', { status: response.status }));
+        }
+
+        const result = JSON.parse(responseText);
+
+        if (result.success) {
+          setGenResult({
+            total: result.data?.length || 0,
+            success: result.data?.filter(r => r.success).length || 0
+          });
+
+          // 成功后清空选择状态和表单
+          setArray([]);
+          if (typeof sendToFileUploader === 'function') {
+            sendToFileUploader([]);
+          }
+          setManualGaPair({
+            genreTitle: '',
+            genreDesc: '',
+            audienceTitle: '',
+            audienceDesc: ''
+          });
+
+          // 发送全局刷新事件
+          const successfulFileIds = result.data?.filter(item => item.success)?.map(item => String(item.fileId)) || [];
+
+          if (successfulFileIds.length > 0) {
+            window.dispatchEvent(
+              new CustomEvent('refreshGaPairsIndicators', {
+                detail: {
+                  projectId,
+                  fileIds: successfulFileIds
+                }
+              })
+            );
+          }
+        } else {
+          setGenError(result.error || t('gaPairs.generationFailed'));
+        }
+      } catch (error) {
+        console.error(t('gaPairs.batchGenerationFailed'), error);
+        setGenError(t('gaPairs.generationError', { error: error.message || t('common.unknownError') }));
+      } finally {
+        setGenerating(false);
+      }
+      return;
+    }
+
+    // AI 生成模式
     const modelToUse = projectModel || selectedModelInfo;
 
     if (!modelToUse || !modelToUse.id) {
@@ -404,6 +502,104 @@ export default function FileList({
     setAppendMode(false); // 重置追加模式
   };
 
+  // 批量删除处理函数 - 第一步：打开确认对话框
+  const handleBatchDelete = () => {
+    if (array.length === 0) {
+      return;
+    }
+    setBatchDeleteDialogOpen(true);
+  };
+
+  // 确认批量删除 - 第二步：打开领域树选择对话框
+  const confirmBatchDelete = () => {
+    setBatchDeleteDialogOpen(false);
+
+    // 检查是否还有其他文件
+    const remainingFilesCount = files.total - array.length;
+
+    // 如果删除后没有文件了，直接执行删除（keep 模式）
+    if (remainingFilesCount === 0) {
+      executeBatchDelete('keep');
+      return;
+    }
+
+    // 否则打开领域树操作选择对话框
+    setDomainTreeActionOpen(true);
+  };
+
+  // 处理领域树操作选择
+  const handleDomainTreeAction = action => {
+    setDomainTreeActionOpen(false);
+    executeBatchDelete(action);
+  };
+
+  // 执行批量删除 - 第三步：实际删除操作
+  const executeBatchDelete = async domainTreeAction => {
+    if (array.length === 0) {
+      return;
+    }
+
+    setDeleting(true);
+    // 设置页面 loading 状态
+    if (typeof setPageLoading === 'function') {
+      setPageLoading(true);
+    }
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}/batch-delete-files`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileIds: array,
+          domainTreeAction,
+          model: selectedModelInfo || {},
+          language: i18n.language === 'en' ? 'English' : '中文'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('批量删除失败');
+      }
+
+      const result = await response.json();
+
+      // 清空选择
+      setArray([]);
+      if (typeof sendToFileUploader === 'function') {
+        sendToFileUploader([]);
+      }
+
+      // 刷新文件列表
+      if (typeof onRefresh === 'function') {
+        await onRefresh();
+      } else if (typeof onPageChange === 'function') {
+        // 回退方案：如果没有 onRefresh，使用 onPageChange
+        await onPageChange(1);
+      }
+
+      toast.success(
+        t('textSplit.batchDeleteSuccess', {
+          count: result.deletedCount || array.length,
+          defaultValue: `成功删除 ${result.deletedCount || array.length} 个文件`
+        })
+      );
+    } catch (error) {
+      console.error('批量删除文件失败:', error);
+      toast.error(t('textSplit.batchDeleteFailed', { defaultValue: '批量删除失败' }));
+    } finally {
+      setDeleting(false);
+      // 清除页面 loading 状态
+      if (typeof setPageLoading === 'function') {
+        setPageLoading(false);
+      }
+    }
+  };
+
+  // 取消批量删除
+  const cancelBatchDelete = () => {
+    setBatchDeleteDialogOpen(false);
+  };
+
   return (
     <Box
       sx={{
@@ -430,7 +626,7 @@ export default function FileList({
         >
           <Typography variant="subtitle1">{t('textSplit.uploadedDocuments', { count: files.total })}</Typography>
 
-          {/* 批量生成GA对按钮 */}
+          {/* 批量操作按钮 */}
           {files.total > 0 && (
             <Box sx={{ display: 'flex', gap: 1 }}>
               {/* 全选/取消全选按钮 */}
@@ -453,6 +649,20 @@ export default function FileList({
                   disabled={loading}
                 >
                   {t('gaPairs.selectAllFiles')}
+                </Button>
+              )}
+
+              {/* 批量删除按钮 */}
+              {array.length > 0 && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleBatchDelete}
+                  disabled={loading}
+                >
+                  {t('textSplit.batchDelete', { count: array.length })}
                 </Button>
               )}
 
@@ -662,11 +872,101 @@ export default function FileList({
 
       {/* 新增：批量生成GA对对话框 */}
       <Dialog open={batchGenDialogOpen} onClose={closeBatchGenDialog} maxWidth="md" fullWidth>
-        <DialogTitle>批量生成GA对</DialogTitle>
+        <DialogTitle>{t('gaPairs.batchGenerateTitle')}</DialogTitle>
         <DialogContent>
           {!genResult && (
             <DialogContentText>
               {t('gaPairs.batchGenerateDescription', { count: array.length })}
+
+              {/* 生成方式选择 */}
+              <Box sx={{ mt: 2, mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  {t('gaPairs.generationMode')}
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={generationMode === 'manual'}
+                      onChange={e => setGenerationMode(e.target.checked ? 'manual' : 'ai')}
+                      color="primary"
+                    />
+                  }
+                  label={generationMode === 'manual' ? t('gaPairs.manualAddMode') : t('gaPairs.aiGenerateMode')}
+                />
+              </Box>
+
+              {/* AI 生成模式：显示模型信息 */}
+              {generationMode === 'ai' && (
+                <>
+                  {loadingModel ? (
+                    <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
+                      <CircularProgress size={16} sx={{ mr: 1 }} />
+                      <Typography variant="body2">{t('gaPairs.loadingProjectModel')}</Typography>
+                    </Box>
+                  ) : projectModel ? (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="body2" color="textSecondary">
+                        {t('gaPairs.usingModel')}:{' '}
+                        <strong>
+                          {projectModel.providerName}: {projectModel.modelName}
+                        </strong>
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="body2" color="error">
+                        {t('gaPairs.noDefaultModel')}
+                      </Typography>
+                    </Box>
+                  )}
+                </>
+              )}
+
+              {/* 手动添加模式：显示输入表单 */}
+              {generationMode === 'manual' && (
+                <Box sx={{ mt: 2 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label={t('gaPairs.genreTitle')}
+                        value={manualGaPair.genreTitle}
+                        onChange={e => setManualGaPair({ ...manualGaPair, genreTitle: e.target.value })}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label={t('gaPairs.genreDesc')}
+                        value={manualGaPair.genreDesc}
+                        onChange={e => setManualGaPair({ ...manualGaPair, genreDesc: e.target.value })}
+                        multiline
+                        rows={2}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label={t('gaPairs.audienceTitle')}
+                        value={manualGaPair.audienceTitle}
+                        onChange={e => setManualGaPair({ ...manualGaPair, audienceTitle: e.target.value })}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label={t('gaPairs.audienceDesc')}
+                        value={manualGaPair.audienceDesc}
+                        onChange={e => setManualGaPair({ ...manualGaPair, audienceDesc: e.target.value })}
+                        multiline
+                        rows={2}
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
 
               {/* 追加模式选择 */}
               <Box sx={{ mt: 2, mb: 2 }}>
@@ -677,28 +977,6 @@ export default function FileList({
                   label={`${t('gaPairs.appendMode')}（${t('gaPairs.appendModeDescription')}）`}
                 />
               </Box>
-
-              {loadingModel ? (
-                <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
-                  <CircularProgress size={16} sx={{ mr: 1 }} />
-                  <Typography variant="body2">{t('gaPairs.loadingProjectModel')}</Typography>
-                </Box>
-              ) : projectModel ? (
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2" color="textSecondary">
-                    {t('gaPairs.usingModel')}:{' '}
-                    <strong>
-                      {projectModel.providerName}: {projectModel.modelName}
-                    </strong>
-                  </Typography>
-                </Box>
-              ) : (
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2" color="error">
-                    {t('gaPairs.noDefaultModel')}
-                  </Typography>
-                </Box>
-              )}
             </DialogContentText>
           )}
 
@@ -724,14 +1002,67 @@ export default function FileList({
             <Button
               onClick={handleBatchGenerateGAPairs}
               variant="contained"
-              disabled={generating || array.length === 0 || !projectModel}
+              disabled={
+                generating ||
+                array.length === 0 ||
+                (generationMode === 'ai' && !projectModel) ||
+                (generationMode === 'manual' && (!manualGaPair.genreTitle || !manualGaPair.audienceTitle))
+              }
               startIcon={generating ? <CircularProgress size={20} /> : <PsychologyIcon />}
             >
-              {generating ? t('gaPairs.generating') : t('gaPairs.startGeneration')}
+              {generating
+                ? t('gaPairs.generating')
+                : generationMode === 'manual'
+                  ? t('gaPairs.batchAddManual')
+                  : t('gaPairs.startGeneration')}
             </Button>
           )}
         </DialogActions>
       </Dialog>
+
+      {/* 批量删除确认对话框 */}
+      <Dialog open={batchDeleteDialogOpen} onClose={cancelBatchDelete} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('textSplit.batchDeleteTitle')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {t('textSplit.batchDeleteConfirm', {
+              count: array.length,
+              defaultValue: `确定要删除选中的 ${array.length} 个文件吗？此操作不可恢复。`
+            })}
+          </DialogContentText>
+          <Alert severity="warning" sx={{ my: 2 }}>
+            <Typography variant="body2" component="div" fontWeight="medium">
+              {t('textSplit.deleteFileWarning')}
+            </Typography>
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="body2" component="div">
+                • {t('textSplit.deleteFileWarningChunks')}
+              </Typography>
+              <Typography variant="body2" component="div">
+                • {t('textSplit.deleteFileWarningQuestions')}
+              </Typography>
+              <Typography variant="body2" component="div">
+                • {t('textSplit.deleteFileWarningDatasets')}
+              </Typography>
+            </Box>
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelBatchDelete}>{t('common.cancel')}</Button>
+          <Button onClick={confirmBatchDelete} variant="contained" color="error">
+            {t('common.confirmDelete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 领域树操作选择对话框 */}
+      <DomainTreeActionDialog
+        open={domainTreeActionOpen}
+        onClose={() => setDomainTreeActionOpen(false)}
+        onConfirm={handleDomainTreeAction}
+        isFirstUpload={false}
+        action="delete"
+      />
     </Box>
   );
 }

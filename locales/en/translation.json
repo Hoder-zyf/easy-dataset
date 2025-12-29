@@ -146,6 +146,8 @@
     "selectedCount": "Selected {{count}} questions",
     "totalCount": "Total {{count}} questions",
     "searchPlaceholder": "Search questions or tags...",
+    "searchMatch": "Match",
+    "searchNotMatch": "Not Match",
     "deleteSelected": "Delete Selected",
     "batchGenerate": "Batch Generate Datasets",
     "generating": "Generating Dataset",
@@ -182,6 +184,14 @@
     "updateTemplateFailed": "Failed to update question template",
     "deleteTemplateSuccess": "Question template deleted successfully",
     "deleteTemplateFailed": "Failed to delete question template",
+    "exportQuestions": "Export Questions",
+    "exportScope": "Export Scope",
+    "exportAll": "Export All ({{count}} questions)",
+    "exportSelected": "Export Selected ({{count}} questions)",
+    "exportFormat": "Export Format",
+    "txtFormat": "Plain Text (Questions Only)",
+    "exportSuccess": "Questions exported successfully",
+    "exportFailed": "Failed to export questions",
     "template": {
       "management": "Question Templates",
       "create": "Create Template",
@@ -437,6 +447,16 @@
     "defaultSelected": "Selected to use the default built-in strategy for parsing PDFs",
     "download": "Download the document",
     "deleteFile": "Delete document",
+    "batchDelete": "Batch Delete ({{count}})",
+    "batchDeleteTitle": "Batch Delete Files",
+    "batchDeleteConfirm": "Are you sure you want to delete the selected {{count}} files? This action cannot be undone.",
+    "batchDeleteSuccess": "Successfully deleted {{count}} files",
+    "batchDeleteFailed": "Batch delete failed",
+    "searchFiles": "Search files...",
+    "searchResults": "Found {{count}} files ({{total}} total)",
+    "noSearchResults": "No files found containing \"{{searchTerm}}\"",
+    "noResultsOnCurrentPage": "No search results on current page, please return to the first page",
+    "noDataOnCurrentPage": "No data on current page",
     "viewChunk": "View Text Chunk",
     "editChunk": "Edit Text Chunk {{chunkId}}",
     "editChunkSuccess": "Text chunk edited successfully",
@@ -1123,7 +1143,15 @@
     "batchGenerationFailed": "Batch GA pair generation failed",
     "batchGenerationSuccess": "Successfully generated GA pairs for {{count}} files",
     "selectAllFiles": "Select All",
-    "deselectAllFiles": "Deselect All"
+    "deselectAllFiles": "Deselect All",
+    "batchGenerateTitle": "Batch Generate GA Pairs",
+    "generationMode": "Generation Mode",
+    "aiGenerateMode": "AI Generate",
+    "manualAddMode": "Manual Add",
+    "genreDesc": "Genre Description",
+    "audienceDesc": "Audience Description",
+    "manualGaPairRequired": "Please fill in Genre Title and Audience Title",
+    "batchAddManual": "Batch Add"
   },
   "batchEdit": {
     "title": "Batch Edit Text Chunks",
@@ -1411,6 +1439,68 @@
         "customFormatRequired": "Please enter custom format",
         "invalidJson": "Invalid JSON format"
       }
+    }
+  },
+  "monitoring": {
+    "title": "Resource Monitoring Dashboard",
+    "timeRange": {
+      "24h": "Last 24 hours",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days"
+    },
+    "filters": {
+      "allProjects": "All Projects",
+      "allProviders": "All Providers",
+      "allStatus": "All Status"
+    },
+    "status": {
+      "success": "Success",
+      "failed": "Failed"
+    },
+    "actions": {
+      "export": "Export Report"
+    },
+    "stats": {
+      "totalTokens": "Total Token Usage",
+      "avgTokensPerCall": "Avg Tokens per Call",
+      "totalCalls": "Total Calls",
+      "avgLatency": "Avg Latency",
+      "inputOutput": "Input: {{input}} · Output: {{output}}",
+      "successCalls": "{{count}} Success",
+      "failedCalls": "{{count}} Failed",
+      "failureRate": "{{rate}}% Failure Rate",
+      "basedOnSuccessCalls": "Based on {{count}} successful calls",
+      "noSuccessCalls": "No successful calls"
+    },
+    "charts": {
+      "tokenTrend": "Token Usage Trend",
+      "inputLegend": "Input",
+      "outputLegend": "Output",
+      "distributionTitle": "Token Usage Distribution (by Model)",
+      "distributionSubtitle": "Resource usage share by model",
+      "tokensTooltip": "{{value}}K Tokens"
+    },
+    "table": {
+      "title": "Usage Details",
+      "searchPlaceholder": "Search project, model, or failure reason...",
+      "empty": "No data",
+      "rowsPerPage": "Rows per page:",
+      "columns": {
+        "projectName": "Project",
+        "provider": "Provider",
+        "model": "Model",
+        "status": "Status",
+        "failureReason": "Failure Reason",
+        "inputTokens": "Input Tokens",
+        "outputTokens": "Output Tokens",
+        "totalTokens": "Total",
+        "calls": "Calls",
+        "avgLatency": "Avg Latency"
+      }
+    },
+    "errors": {
+      "fetchSummaryFailed": "Failed to fetch monitoring summary",
+      "fetchLogsFailed": "Failed to fetch monitoring logs"
     }
   }
 }
