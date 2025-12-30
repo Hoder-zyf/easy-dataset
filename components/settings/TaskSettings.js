@@ -430,25 +430,6 @@ export default function TaskSettings({ projectId }) {
           </Grid>
         </CardContent>
       </Card>
-      <Card style={{ marginBottom: 20 }}>
-        <CardContent>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Typography variant="subtitle1" gutterBottom>
-                {t('settings.huggingfaceSettings')}
-              </Typography>
-              <TextField
-                fullWidth
-                label={t('settings.huggingfaceToken')}
-                name="huggingfaceToken"
-                value={taskSettings.huggingfaceToken || ''}
-                onChange={handleSettingChange}
-                type="password"
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
       {/* 多轮对话数据集设置 */}
       <Card style={{ marginBottom: 20 }}>
         <CardContent>
@@ -528,6 +509,151 @@ export default function TaskSettings({ projectId }) {
                   {t('settings.multiTurnDescription')}
                 </Typography>
               </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+      {/* 测试集生成设置 */}
+      <Card style={{ marginBottom: 20 }}>
+        <CardContent>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                {t('settings.evalQuestionSettings')}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {t('settings.evalQuestionSettingsDescription')}
+              </Typography>
+
+              <Grid container spacing={2}>
+                {/* 是否题 */}
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <TextField
+                    fullWidth
+                    label={t('settings.evalTrueFalseRatio')}
+                    type="number"
+                    value={taskSettings.evalQuestionTypeRatios?.true_false || 0}
+                    onChange={e => {
+                      const value = Math.max(0, parseInt(e.target.value) || 0);
+                      setTaskSettings(prev => ({
+                        ...prev,
+                        evalQuestionTypeRatios: {
+                          ...prev.evalQuestionTypeRatios,
+                          true_false: value
+                        }
+                      }));
+                    }}
+                    InputProps={{ inputProps: { min: 0 } }}
+                  />
+                </Grid>
+
+                {/* 单选题 */}
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <TextField
+                    fullWidth
+                    label={t('settings.evalSingleChoiceRatio')}
+                    type="number"
+                    value={taskSettings.evalQuestionTypeRatios?.single_choice || 0}
+                    onChange={e => {
+                      const value = Math.max(0, parseInt(e.target.value) || 0);
+                      setTaskSettings(prev => ({
+                        ...prev,
+                        evalQuestionTypeRatios: {
+                          ...prev.evalQuestionTypeRatios,
+                          single_choice: value
+                        }
+                      }));
+                    }}
+                    InputProps={{ inputProps: { min: 0 } }}
+                  />
+                </Grid>
+
+                {/* 多选题 */}
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <TextField
+                    fullWidth
+                    label={t('settings.evalMultipleChoiceRatio')}
+                    type="number"
+                    value={taskSettings.evalQuestionTypeRatios?.multiple_choice || 0}
+                    onChange={e => {
+                      const value = Math.max(0, parseInt(e.target.value) || 0);
+                      setTaskSettings(prev => ({
+                        ...prev,
+                        evalQuestionTypeRatios: {
+                          ...prev.evalQuestionTypeRatios,
+                          multiple_choice: value
+                        }
+                      }));
+                    }}
+                    InputProps={{ inputProps: { min: 0 } }}
+                  />
+                </Grid>
+
+                {/* 固定短答案 */}
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <TextField
+                    fullWidth
+                    label={t('settings.evalShortAnswerRatio')}
+                    type="number"
+                    value={taskSettings.evalQuestionTypeRatios?.short_answer || 0}
+                    onChange={e => {
+                      const value = Math.max(0, parseInt(e.target.value) || 0);
+                      setTaskSettings(prev => ({
+                        ...prev,
+                        evalQuestionTypeRatios: {
+                          ...prev.evalQuestionTypeRatios,
+                          short_answer: value
+                        }
+                      }));
+                    }}
+                    InputProps={{ inputProps: { min: 0 } }}
+                  />
+                </Grid>
+
+                {/* 开放式回答 */}
+                <Grid item xs={12} sm={6} md={2.4}>
+                  <TextField
+                    fullWidth
+                    label={t('settings.evalOpenEndedRatio')}
+                    type="number"
+                    value={taskSettings.evalQuestionTypeRatios?.open_ended || 0}
+                    onChange={e => {
+                      const value = Math.max(0, parseInt(e.target.value) || 0);
+                      setTaskSettings(prev => ({
+                        ...prev,
+                        evalQuestionTypeRatios: {
+                          ...prev.evalQuestionTypeRatios,
+                          open_ended: value
+                        }
+                      }));
+                    }}
+                    InputProps={{ inputProps: { min: 0 } }}
+                  />
+                </Grid>
+              </Grid>
+
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+                {t('settings.evalQuestionRatioHelper')}
+              </Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+      <Card style={{ marginBottom: 20 }}>
+        <CardContent>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                {t('settings.huggingfaceSettings')}
+              </Typography>
+              <TextField
+                fullWidth
+                label={t('settings.huggingfaceToken')}
+                name="huggingfaceToken"
+                value={taskSettings.huggingfaceToken || ''}
+                onChange={handleSettingChange}
+                type="password"
+              />
             </Grid>
           </Grid>
         </CardContent>
