@@ -1514,5 +1514,43 @@
       "fetchSummaryFailed": "Failed to fetch monitoring summary",
       "fetchLogsFailed": "Failed to fetch monitoring logs"
     }
+  },
+  "eval": {
+    "title": "Eval",
+    "datasets": "Eval Datasets",
+    "tasks": "Eval Tasks",
+    "datasetsTitle": "Evaluation Datasets",
+    "datasetsDescription": "Manage and view all generated evaluation test questions",
+    "tasksTitle": "Evaluation Tasks",
+    "tasksComingSoon": "Coming Soon",
+    "tasksComingSoonHint": "Evaluation task feature is under development",
+    "totalQuestions": "Total Questions",
+    "questionType": "Type",
+    "question": "Question",
+    "answer": "Answer",
+    "options": "Options",
+    "correct": "Correct",
+    "wrong": "Wrong",
+    "sourceChunk": "Source Chunk",
+    "tags": "Tags",
+    "tagsPlaceholder": "Enter tags, separated by commas",
+    "note": "Note",
+    "detail": "Detail",
+    "notFound": "Question not found",
+    "noData": "No evaluation data",
+    "noDataHint": "Please generate evaluation test set from text split page first",
+    "searchPlaceholder": "Search question content...",
+    "cardView": "Card View",
+    "listView": "List View",
+    "deleteSelected": "Delete Selected ({{count}})",
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteConfirmMessage": "Are you sure you want to delete {{count}} question(s)? This action cannot be undone.",
+    "questionTypes": {
+      "true_false": "True/False",
+      "single_choice": "Single Choice",
+      "multiple_choice": "Multiple Choice",
+      "short_answer": "Short Answer",
+      "open_ended": "Open Ended"
+    }
   }
 }

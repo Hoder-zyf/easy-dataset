@@ -8,6 +8,7 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import TokenOutlinedIcon from '@mui/icons-material/TokenOutlined';
 import QuestionAnswerOutlinedIcon from '@mui/icons-material/QuestionAnswerOutlined';
 import DatasetOutlinedIcon from '@mui/icons-material/DatasetOutlined';
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import * as styles from './styles';
@@ -23,6 +24,9 @@ export default function NavigationTabs({ theme, pathname, currentProject, handle
   const getCurrentTabValue = () => {
     if (pathname.includes('/settings') || pathname.includes('/playground') || pathname.includes('/datasets-sq')) {
       return 'more';
+    }
+    if (pathname.includes('/eval-datasets') || pathname.includes('/eval-tasks')) {
+      return 'eval';
     }
     if (pathname.includes('/datasets') || pathname.includes('/multi-turn') || pathname.includes('/image-datasets')) {
       return 'datasets';
@@ -88,6 +92,19 @@ export default function NavigationTabs({ theme, pathname, currentProject, handle
           }
           value="datasets"
           onMouseEnter={e => handleMenuOpen(e, 'dataset')}
+          sx={styles.tabIconWrapperStyles}
+        />
+        <Tab
+          icon={<AssessmentOutlinedIcon fontSize="small" />}
+          iconPosition="start"
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+              {t('eval.title')}
+              <ArrowDropDownIcon fontSize="small" sx={{ ml: 0.25 }} />
+            </Box>
+          }
+          value="eval"
+          onMouseEnter={e => handleMenuOpen(e, 'eval')}
           sx={styles.tabIconWrapperStyles}
         />
         <Tab
