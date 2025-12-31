@@ -317,6 +317,8 @@
     "description": "Project Description",
     "questions": "Questions",
     "datasets": "Datasets",
+    "evalDatasets": "Eval Datasets",
+    "tokens": "Tokens",
     "lastUpdated": "Last Updated",
     "viewDetails": "View Details",
     "createFirst": "Please create a project first",

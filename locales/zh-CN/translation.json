@@ -318,6 +318,8 @@
     "description": "项目描述",
     "questions": "问题",
     "datasets": "数据集",
+    "evalDatasets": "评估集",
+    "tokens": "Tokens",
     "lastUpdated": "最后更新",
     "viewDetails": "查看详情",
     "createFirst": "创建第一个项目",
