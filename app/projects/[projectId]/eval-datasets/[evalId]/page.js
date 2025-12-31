@@ -1,5 +1,5 @@
 'use client';
-
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import {
   Box,
@@ -16,7 +16,9 @@ import {
   Stack,
   RadioGroup,
   FormControlLabel,
-  Radio
+  Radio,
+  FormGroup,
+  Checkbox as MuiCheckbox
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useTheme, alpha } from '@mui/material/styles';
@@ -32,6 +34,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import useEvalDatasetDetails from './useEvalDatasetDetails';
 import EvalDatasetHeader from '../components/EvalDatasetHeader';
 import EvalEditableField from '../components/EvalEditableField';
+import TagSelector from '@/components/datasets/TagSelector';
 
 // 题型图标和颜色映射
 const QUESTION_TYPE_CONFIG = {
@@ -66,8 +69,28 @@ export default function EvalDatasetDetailPage() {
   const { projectId, evalId } = useParams();
   const { t } = useTranslation();
   const theme = useTheme();
+  const [availableTags, setAvailableTags] = useState([]);
 
   const { data, loading, error, handleNavigate, handleSave, handleDelete } = useEvalDatasetDetails(projectId, evalId);
+
+  // 获取项目中已使用的标签
+  useEffect(() => {
+    const fetchAvailableTags = async () => {
+      try {
+        const response = await fetch(`/api/projects/${projectId}/eval-datasets/tags`);
+        if (response.ok) {
+          const result = await response.json();
+          setAvailableTags(result.tags || []);
+        }
+      } catch (error) {
+        console.error('获取可用标签失败:', error);
+      }
+    };
+
+    if (projectId && !loading) {
+      fetchAvailableTags();
+    }
+  }, [projectId, loading]);
 
   if (loading) {
     return (
@@ -336,39 +359,28 @@ export default function EvalDatasetDetailPage() {
             <Card variant="outlined" sx={{ borderRadius: 2 }}>
               <CardContent>
                 <Box sx={{ mb: 3 }}>
-                  <EvalEditableField
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <TagIcon fontSize="small" />
-                        {t('eval.tags')}
-                      </Box>
+                  <Typography
+                    variant="subtitle2"
+                    color="text.secondary"
+                    sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
+                    <TagIcon fontSize="small" />
+                    {t('eval.tags')}
+                  </Typography>
+                  <TagSelector
+                    value={
+                      data.tags
+                        ? typeof data.tags === 'string'
+                          ? data.tags
+                              .split(/[,，]/)
+                              .map(t => t.trim())
+                              .filter(Boolean)
+                          : []
+                        : []
                     }
-                    value={data.tags}
-                    onSave={val => handleSave('tags', val)}
+                    onChange={newTags => handleSave('tags', newTags.join(', '))}
+                    availableTags={availableTags}
                     placeholder={t('eval.tagsPlaceholder')}
-                    multiline={false}
-                    renderPreview={val =>
-                      val ? (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {val.split(/[,，]/).map((tag, idx) => (
-                            <Chip
-                              key={idx}
-                              label={tag.trim()}
-                              size="small"
-                              sx={{
-                                bgcolor: alpha(theme.palette.info.main, 0.1),
-                                color: 'info.dark',
-                                fontWeight: 500
-                              }}
-                            />
-                          ))}
-                        </Box>
-                      ) : (
-                        <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
-                          {t('common.noData')}
-                        </Typography>
-                      )
-                    }
                   />
                 </Box>
 

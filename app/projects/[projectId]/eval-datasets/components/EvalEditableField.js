@@ -61,7 +61,7 @@ export default function EvalEditableField({
 
       {editing ? (
         <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.default', borderRadius: 2 }}>
-          {renderEditor ? (
+          {renderEditor && renderEditor(editValue, setEditValue) ? (
             <Box sx={{ mb: 2 }}>{renderEditor(editValue, setEditValue)}</Box>
           ) : (
             <TextField

@@ -286,7 +286,7 @@ export default function ChunkCard({
                 variant="body2"
                 color="textSecondary"
                 sx={{
-                  mb: 2,
+                  mb: 1,
                   lineHeight: 1.6,
                   opacity: 0.85
                 }}

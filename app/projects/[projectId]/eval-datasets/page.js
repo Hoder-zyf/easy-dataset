@@ -20,7 +20,6 @@ import { Masonry } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
 
 import useEvalDatasets from './hooks/useEvalDatasets';
-import EvalStatsBar from './components/EvalStatsBar';
 import EvalToolbar from './components/EvalToolbar';
 import EvalDatasetCard from './components/EvalDatasetCard';
 import EvalDatasetList from './components/EvalDatasetList';
@@ -36,6 +35,7 @@ export default function EvalDatasetsPage() {
     stats,
     totalPages,
     loading,
+    searching,
     error,
     page,
     setPage,
@@ -88,10 +88,7 @@ export default function EvalDatasetsPage() {
         </Alert>
       )}
 
-      {/* 统计栏 */}
-      <EvalStatsBar stats={stats} questionType={questionType} onTypeChange={setQuestionType} />
-
-      {/* 工具栏 */}
+      {/* 工具栏（包含统计筛选） */}
       <EvalToolbar
         keyword={keyword}
         onKeywordChange={setKeyword}
@@ -99,6 +96,9 @@ export default function EvalDatasetsPage() {
         onViewModeChange={setViewMode}
         selectedCount={selectedIds.length}
         onDeleteSelected={() => handleDelete(selectedIds)}
+        stats={stats}
+        questionType={questionType}
+        onTypeChange={setQuestionType}
         onRefresh={fetchData}
         loading={loading}
       />
@@ -112,9 +112,34 @@ export default function EvalDatasetsPage() {
 
       {/* 内容区域 */}
       {!loading && (
-        <>
+        <Box sx={{ position: 'relative', minHeight: searching ? 200 : 'auto' }}>
+          {/* 搜索加载遮罩 */}
+          {searching && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'rgba(255, 255, 255, 0.7)',
+                zIndex: 10,
+                borderRadius: 2
+              }}
+            >
+              <CircularProgress size={32} />
+            </Box>
+          )}
+
           {viewMode === 'card' ? (
-            <Masonry columns={{ xs: 1, sm: 2, md: 3, lg: 4 }} spacing={3}>
+            <Masonry
+              columns={{ xs: 1, sm: 2, md: 3, lg: 4 }}
+              spacing={3}
+              sx={{ opacity: searching ? 0.5 : 1, transition: 'opacity 0.2s' }}
+            >
               {items.map(item => (
                 <EvalDatasetCard
                   key={item.id}
@@ -128,15 +153,17 @@ export default function EvalDatasetsPage() {
               ))}
             </Masonry>
           ) : (
-            <EvalDatasetList
-              items={items}
-              selectedIds={selectedIds}
-              onSelect={toggleSelect}
-              onSelectAll={toggleSelectAll}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onView={handleView}
-            />
+            <Box sx={{ opacity: searching ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+              <EvalDatasetList
+                items={items}
+                selectedIds={selectedIds}
+                onSelect={toggleSelect}
+                onSelectAll={toggleSelectAll}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onView={handleView}
+              />
+            </Box>
           )}
 
           {/* 空状态 */}
@@ -172,7 +199,7 @@ export default function EvalDatasetsPage() {
               />
             </Box>
           )}
-        </>
+        </Box>
       )}
 
       {/* 删除确认对话框 */}

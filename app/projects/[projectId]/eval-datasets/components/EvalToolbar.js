@@ -9,15 +9,28 @@ import {
   ToggleButton,
   Button,
   Tooltip,
-  Divider
+  Divider,
+  Chip
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import ShortTextIcon from '@mui/icons-material/ShortText';
+import NotesIcon from '@mui/icons-material/Notes';
 import { useTranslation } from 'react-i18next';
 import { alpha, useTheme } from '@mui/material/styles';
+
+const STATS_CONFIG = [
+  { key: 'true_false', icon: CheckCircleIcon, color: 'success' },
+  { key: 'single_choice', icon: RadioButtonCheckedIcon, color: 'primary' },
+  { key: 'multiple_choice', icon: CheckBoxIcon, color: 'secondary' },
+  { key: 'short_answer', icon: ShortTextIcon, color: 'warning' },
+  { key: 'open_ended', icon: NotesIcon, color: 'info' }
+];
 
 export default function EvalToolbar({
   keyword,
@@ -26,116 +39,133 @@ export default function EvalToolbar({
   onViewModeChange,
   selectedCount,
   onDeleteSelected,
-  onRefresh,
-  loading
+  stats,
+  questionType,
+  onTypeChange
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 2,
-        mb: 3,
-        flexWrap: 'wrap'
-      }}
-    >
-      {/* 左侧：搜索框 */}
-      <Paper
-        component="form"
-        elevation={0}
-        variant="outlined"
+    <Paper variant="outlined" sx={{ p: 1.5, mb: 2 }}>
+      <Box
         sx={{
-          p: '2px 4px',
           display: 'flex',
           alignItems: 'center',
-          width: 400,
-          borderRadius: 2,
-          backgroundColor: 'background.paper',
-          transition: 'box-shadow 0.2s',
-          '&:focus-within': {
-            borderColor: 'primary.main',
-            boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
-          }
+          justifyContent: 'space-between',
+          gap: 1.5
         }}
-        onSubmit={e => e.preventDefault()}
       >
-        <IconButton sx={{ p: '10px' }} aria-label="search">
-          <SearchIcon color="action" />
-        </IconButton>
-        <InputBase
-          sx={{ ml: 1, flex: 1 }}
-          placeholder={t('eval.searchPlaceholder')}
-          value={keyword}
-          onChange={e => onKeywordChange(e.target.value)}
-        />
-      </Paper>
+        {/* 左侧：题型统计筛选 */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', flex: 1 }}>
+          {stats &&
+            STATS_CONFIG.map(({ key, icon: Icon, color }) => {
+              const count = stats.byType?.[key] || 0;
+              const isActive = questionType === key;
 
-      {/* 右侧：操作区 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        {selectedCount > 0 && (
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteIcon />}
-            onClick={onDeleteSelected}
-            sx={{ borderRadius: 2 }}
-          >
-            {t('eval.deleteSelected', { count: selectedCount })}
-          </Button>
-        )}
+              return (
+                <Chip
+                  key={key}
+                  icon={<Icon sx={{ fontSize: 16 }} />}
+                  label={`${t(`eval.questionTypes.${key}`)} (${count})`}
+                  color={isActive ? color : 'default'}
+                  variant={isActive ? 'filled' : 'outlined'}
+                  onClick={() => onTypeChange(isActive ? '' : key)}
+                  size="small"
+                  sx={{
+                    cursor: 'pointer',
+                    fontWeight: isActive ? 600 : 400,
+                    height: 28,
+                    '&:hover': { opacity: 0.85 }
+                  }}
+                />
+              );
+            })}
+        </Box>
 
-        <Divider orientation="vertical" flexItem sx={{ height: 28, alignSelf: 'center' }} />
+        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-        <Tooltip title={t('common.refresh')}>
-          <IconButton
-            onClick={onRefresh}
-            disabled={loading}
-            sx={{
-              border: '1px solid',
-              borderColor: 'divider',
-              borderRadius: 2
-            }}
-          >
-            <RefreshIcon />
-          </IconButton>
-        </Tooltip>
-
-        <ToggleButtonGroup
-          value={viewMode}
-          exclusive
-          onChange={(e, value) => value && onViewModeChange(value)}
-          size="small"
+        {/* 中间：搜索框 */}
+        <Paper
+          component="form"
+          elevation={0}
+          variant="outlined"
           sx={{
-            '& .MuiToggleButton-root': {
-              border: '1px solid',
-              borderColor: 'divider',
-              px: 1.5,
-              py: 0.5
-            },
-            '& .MuiToggleButton-root:first-of-type': {
-              borderRadius: '8px 0 0 8px'
-            },
-            '& .MuiToggleButton-root:last-of-type': {
-              borderRadius: '0 8px 8px 0'
+            p: '2px 4px',
+            display: 'flex',
+            alignItems: 'center',
+            width: 240,
+            borderRadius: 1.5,
+            backgroundColor: 'background.paper',
+            transition: 'box-shadow 0.2s',
+            '&:focus-within': {
+              borderColor: 'primary.main',
+              boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
             }
           }}
+          onSubmit={e => e.preventDefault()}
         >
-          <ToggleButton value="card">
-            <Tooltip title={t('eval.cardView')}>
-              <ViewModuleIcon fontSize="small" />
-            </Tooltip>
-          </ToggleButton>
-          <ToggleButton value="list">
-            <Tooltip title={t('eval.listView')}>
-              <ViewListIcon fontSize="small" />
-            </Tooltip>
-          </ToggleButton>
-        </ToggleButtonGroup>
+          <IconButton sx={{ p: '6px' }} aria-label="search" size="small">
+            <SearchIcon sx={{ fontSize: 18 }} color="action" />
+          </IconButton>
+          <InputBase
+            sx={{ ml: 0.5, flex: 1, fontSize: '0.875rem' }}
+            placeholder={t('eval.searchPlaceholder')}
+            value={keyword}
+            onChange={e => onKeywordChange(e.target.value)}
+          />
+        </Paper>
+
+        {/* 右侧：操作按钮组 */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {selectedCount > 0 && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon sx={{ fontSize: 16 }} />}
+              onClick={onDeleteSelected}
+              sx={{ borderRadius: 1.5, minWidth: 'auto', px: 1.5, height: 32 }}
+            >
+              {t('eval.deleteSelected', { count: selectedCount })}
+            </Button>
+          )}
+
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={(e, value) => value && onViewModeChange(value)}
+            size="small"
+            sx={{
+              height: 32,
+              '& .MuiToggleButton-root': {
+                border: '1px solid',
+                borderColor: 'divider',
+                px: 1,
+                py: 0.5,
+                minWidth: 32
+              },
+              '& .MuiToggleButton-root:first-of-type': {
+                borderRadius: '6px 0 0 6px'
+              },
+              '& .MuiToggleButton-root:last-of-type': {
+                borderRadius: '0 6px 6px 0'
+              }
+            }}
+          >
+            <ToggleButton value="card">
+              <Tooltip title={t('eval.cardView')}>
+                <ViewModuleIcon sx={{ fontSize: 16 }} />
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="list">
+              <Tooltip title={t('eval.listView')}>
+                <ViewListIcon sx={{ fontSize: 16 }} />
+              </Tooltip>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 }

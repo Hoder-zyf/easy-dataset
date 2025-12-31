@@ -9,6 +9,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 export default function useEvalDatasets(projectId) {
   const [data, setData] = useState({ items: [], total: 0, stats: null });
   const [loading, setLoading] = useState(true); // 初始加载时为 true
+  const [searching, setSearching] = useState(false); // 筛选/搜索时的加载状态
   const [error, setError] = useState(null);
   const isInitialMount = useRef(true);
 
@@ -22,6 +23,22 @@ export default function useEvalDatasets(projectId) {
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const [chunkId, setChunkId] = useState('');
 
+  // 包装 setter 函数，筛选条件变化时重置到第一页
+  const setQuestionTypeWithReset = useCallback(value => {
+    setQuestionType(value);
+    setPage(1);
+  }, []);
+
+  const setKeywordWithReset = useCallback(value => {
+    setKeyword(value);
+    // keyword 会通过 debounce，所以不在这里重置页码
+  }, []);
+
+  const setChunkIdWithReset = useCallback(value => {
+    setChunkId(value);
+    setPage(1);
+  }, []);
+
   // 视图模式
   const [viewMode, setViewMode] = useState('card'); // 'card' | 'list'
 
@@ -32,6 +49,10 @@ export default function useEvalDatasets(projectId) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedKeyword(keyword);
+      // 关键词变化时重置到第一页
+      if (keyword !== debouncedKeyword) {
+        setPage(1);
+      }
     }, 500);
 
     return () => clearTimeout(timer);
@@ -44,6 +65,8 @@ export default function useEvalDatasets(projectId) {
 
     if (showLoading) {
       setLoading(true);
+    } else {
+      setSearching(true);
     }
     setError(null);
 
@@ -71,6 +94,8 @@ export default function useEvalDatasets(projectId) {
     } finally {
       if (showLoading) {
         setLoading(false);
+      } else {
+        setSearching(false);
       }
     }
   };
@@ -149,6 +174,7 @@ export default function useEvalDatasets(projectId) {
 
     // 状态
     loading,
+    searching,
     error,
 
     // 分页
@@ -161,9 +187,9 @@ export default function useEvalDatasets(projectId) {
     questionType,
     keyword,
     chunkId,
-    setQuestionType,
-    setKeyword,
-    setChunkId,
+    setQuestionType: setQuestionTypeWithReset,
+    setKeyword: setKeywordWithReset,
+    setChunkId: setChunkIdWithReset,
     resetFilters,
 
     // 视图

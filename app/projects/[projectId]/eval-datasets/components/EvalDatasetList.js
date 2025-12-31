@@ -132,11 +132,6 @@ export default function EvalDatasetList({ items, selectedIds, onSelect, onSelect
                       <VisibilityIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title={t('common.edit')}>
-                    <IconButton size="small" onClick={() => onEdit(item)}>
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
                   <Tooltip title={t('common.delete')}>
                     <IconButton size="small" color="error" onClick={() => onDelete(item.id)}>
                       <DeleteIcon fontSize="small" />

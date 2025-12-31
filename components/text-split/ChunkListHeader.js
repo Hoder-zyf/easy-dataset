@@ -5,9 +5,11 @@ import QuizIcon from '@mui/icons-material/Quiz';
 import DownloadIcon from '@mui/icons-material/Download';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +38,18 @@ export default function ChunkListHeader({
 
   // 添加筛选对话框状态
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+
+  // 自动任务菜单状态
+  const [autoTasksMenuAnchorEl, setAutoTasksMenuAnchorEl] = useState(null);
+  const isAutoTasksMenuOpen = Boolean(autoTasksMenuAnchorEl);
+
+  const handleAutoTasksClick = event => {
+    setAutoTasksMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleAutoTasksClose = () => {
+    setAutoTasksMenuAnchorEl(null);
+  };
 
   // 打开更多菜单
   const handleMoreMenuClick = event => {
@@ -115,6 +129,37 @@ export default function ChunkListHeader({
     }
   };
 
+  // 创建自动生成评估数据集任务
+  const handleCreateAutoEvalGenerationTask = async () => {
+    if (!projectId || !selectedModel?.id) {
+      toast.error(t('textSplit.selectModelFirst', { defaultValue: '请先选择模型' }));
+      return;
+    }
+
+    try {
+      // 调用创建任务接口
+      const response = await axios.post(`/api/projects/${projectId}/tasks`, {
+        taskType: 'eval-generation',
+        modelInfo: selectedModel,
+        language: i18n.language,
+        detail: '批量生成评估数据集任务'
+      });
+
+      if (response.data?.code === 0) {
+        toast.success(
+          t('tasks.createSuccess', {
+            defaultValue: '后台任务已创建，系统将自动为所有未生成评估题目的文本块生成评估数据集'
+          })
+        );
+      } else {
+        toast.error(t('tasks.createFailed', { defaultValue: '创建任务失败' }) + ': ' + response.data?.message);
+      }
+    } catch (error) {
+      console.error('创建自动生成评估数据集任务失败:', error);
+      toast.error(t('tasks.createFailed', { defaultValue: '创建任务失败' }) + ': ' + error.message);
+    }
+  };
+
   // 导出文本块为JSON文件的函数
   const handleExportChunks = () => {
     if (!chunks || chunks.length === 0) return;
@@ -167,10 +212,7 @@ export default function ChunkListHeader({
           indeterminate={selectedChunks.length > 0 && selectedChunks.length < totalChunks}
           onChange={onSelectAll}
         />
-        <Typography variant="body1">
-          {t('textSplit.selectedCount', { count: selectedChunks.length })} ,
-          {t('textSplit.totalCount', { count: totalChunks })}
-        </Typography>
+        <Typography variant="body1">{t('textSplit.selectedCount', { count: selectedChunks.length })}</Typography>
       </Box>
 
       <Box
@@ -219,41 +261,84 @@ export default function ChunkListHeader({
             {t('textSplit.batchGenerateQuestions')}
           </Button>
 
-          <Tooltip
-            title={t('textSplit.autoGenerateQuestionsTip', {
-              defaultValue: '创建后台批量处理任务：自动查询待生成问题的文本块并提取问题'
-            })}
+          {/* 自动任务下拉菜单 */}
+          <Button
+            variant="outlined"
+            color="secondary"
+            startIcon={<AutoFixHighIcon />}
+            endIcon={<KeyboardArrowDownIcon />}
+            onClick={handleAutoTasksClick}
+            disabled={!projectId || !selectedModel?.id}
+            size="medium"
+            sx={{ minWidth: { xs: '48%', sm: 'auto' } }}
           >
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<AutoFixHighIcon />}
-              onClick={() => handleCreateAutoQuestionTask()}
-              disabled={!projectId || !selectedModel?.id}
-              size="medium"
-              sx={{ minWidth: { xs: '48%', sm: 'auto' } }}
-            >
-              {t('textSplit.autoGenerateQuestions')}
-            </Button>
-          </Tooltip>
+            {t('textSplit.autoTasks', { defaultValue: '自动任务' })}
+          </Button>
 
-          <Tooltip
-            title={t('textSplit.autoDataCleaningTip', {
-              defaultValue: '创建后台批量处理任务：自动对所有文本块进行数据清洗'
-            })}
+          <Menu
+            anchorEl={autoTasksMenuAnchorEl}
+            open={isAutoTasksMenuOpen}
+            onClose={handleAutoTasksClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
           >
-            <Button
-              variant="outlined"
-              color="success"
-              startIcon={<CleaningServicesIcon />}
-              onClick={() => handleCreateAutoDataCleaningTask()}
-              disabled={!projectId || !selectedModel?.id}
-              size="medium"
-              sx={{ minWidth: { xs: '48%', sm: 'auto' } }}
+            <Tooltip
+              title={t('textSplit.autoGenerateQuestionsTip', {
+                defaultValue: '创建后台批量处理任务：自动查询待生成问题的文本块并提取问题'
+              })}
+              placement="left"
             >
-              {t('textSplit.autoDataCleaning', { defaultValue: '自动数据清洗' })}
-            </Button>
-          </Tooltip>
+              <MenuItem
+                onClick={() => {
+                  handleCreateAutoQuestionTask();
+                  handleAutoTasksClose();
+                }}
+              >
+                <QuizIcon fontSize="small" sx={{ mr: 1, color: 'secondary.main' }} />
+                {t('textSplit.autoGenerateQuestions')}
+              </MenuItem>
+            </Tooltip>
+
+            <Tooltip
+              title={t('textSplit.autoEvalGenerationTip', {
+                defaultValue: '创建后台批量处理任务：自动为所有未生成评估题目的文本块生成评估数据集'
+              })}
+              placement="left"
+            >
+              <MenuItem
+                onClick={() => {
+                  handleCreateAutoEvalGenerationTask();
+                  handleAutoTasksClose();
+                }}
+              >
+                <AssessmentIcon fontSize="small" sx={{ mr: 1, color: 'secondary.main' }} />
+                {t('textSplit.autoEvalGeneration', { defaultValue: '自动生成评估集' })}
+              </MenuItem>
+            </Tooltip>
+
+            <Tooltip
+              title={t('textSplit.autoDataCleaningTip', {
+                defaultValue: '创建后台批量处理任务：自动对所有文本块进行数据清洗'
+              })}
+              placement="left"
+            >
+              <MenuItem
+                onClick={() => {
+                  handleCreateAutoDataCleaningTask();
+                  handleAutoTasksClose();
+                }}
+              >
+                <CleaningServicesIcon fontSize="small" sx={{ mr: 1, color: 'success.main' }} />
+                {t('textSplit.autoDataCleaning', { defaultValue: '自动数据清洗' })}
+              </MenuItem>
+            </Tooltip>
+          </Menu>
 
           {/* 更多菜单按钮 */}
           <Tooltip title={t('common.more', { defaultValue: '更多操作' })}>

@@ -15,10 +15,10 @@ export const DEFAULT_SETTINGS = {
   multiTurnRoleB: '',
   // 测试集生成配置
   evalQuestionTypeRatios: {
-    true_false: 0,
+    true_false: 1,
     single_choice: 1,
-    multiple_choice: 0,
-    short_answer: 0,
-    open_ended: 0
+    multiple_choice: 1,
+    short_answer: 1,
+    open_ended: 1
   }
 };
