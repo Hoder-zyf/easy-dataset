@@ -9,7 +9,6 @@ import {
   Avatar,
   Divider,
   IconButton,
-  Tooltip,
   Menu,
   MenuItem,
   ListItemIcon
@@ -20,12 +19,10 @@ import { useTheme, alpha } from '@mui/material/styles';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import TokenIcon from '@mui/icons-material/Token';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import QuizIcon from '@mui/icons-material/Quiz';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 
