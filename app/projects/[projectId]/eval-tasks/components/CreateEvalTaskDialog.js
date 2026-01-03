@@ -1,0 +1,248 @@
+'use client';
+
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
+  Divider,
+  CircularProgress,
+  FormHelperText
+} from '@mui/material';
+import { useTranslation } from 'react-i18next';
+import ModelSelector from './ModelSelector';
+import QuestionFilter from './QuestionFilter';
+import { useEvalTaskForm } from '../hooks/useEvalTaskForm';
+
+export default function CreateEvalTaskDialog({ open, onClose, projectId, onSuccess }) {
+  const { t } = useTranslation();
+  const [submitting, setSubmitting] = useState(false);
+
+  const {
+    models,
+    selectedModels,
+    setSelectedModels,
+    judgeModel,
+    setJudgeModel,
+    evalDatasets,
+    availableTags,
+    questionTypes,
+    setQuestionTypes,
+    selectedTags,
+    setSelectedTags,
+    searchKeyword,
+    setSearchKeyword,
+    questionCount,
+    setQuestionCount,
+    filteredDatasets,
+    finalDatasets,
+    hasSubjectiveQuestions,
+    loading,
+    error,
+    setError,
+    resetFilters,
+    resetForm
+  } = useEvalTaskForm(projectId, open);
+
+  // 统计各题型数量
+  const typeStats = {};
+  evalDatasets.forEach(d => {
+    typeStats[d.questionType] = (typeStats[d.questionType] || 0) + 1;
+  });
+
+  const getModelKey = model => `${model.providerId}::${model.modelId}`;
+
+  const handleModelSelectionChange = newSelection => {
+    setSelectedModels(newSelection);
+    setError('');
+  };
+
+  const handleSubmit = async () => {
+    // 先清除之前的错误
+    setError('');
+
+    // 验证
+    if (selectedModels.length === 0) {
+      setError(t('evalTasks.errorNoModels'));
+      return;
+    }
+
+    if (finalDatasets.length === 0) {
+      setError(t('evalTasks.errorNoQuestions'));
+      return;
+    }
+
+    if (hasSubjectiveQuestions && !judgeModel) {
+      setError(t('evalTasks.errorNoJudgeModel'));
+      return;
+    }
+
+    // 验证教师模型不在测试模型中
+    if (judgeModel && selectedModels.includes(judgeModel)) {
+      setError(t('evalTasks.errorJudgeSameAsTest'));
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError('');
+
+      // 解析选中的模型
+      const models = selectedModels.map(m => {
+        const [providerId, modelId] = m.split('::');
+        return { modelId, providerId }; // 注意顺序：modelId 在前
+      });
+
+      // 解析教师模型
+      let judgeModelId = null;
+      let judgeProviderId = null;
+      if (judgeModel) {
+        const [pId, mId] = judgeModel.split('::');
+        judgeProviderId = pId;
+        judgeModelId = mId;
+      }
+
+      // 创建任务
+      const response = await fetch(`/api/projects/${projectId}/eval-tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          models, // 后端期望的字段名
+          judgeModelId, // 分开传递
+          judgeProviderId, // 分开传递
+          evalDatasetIds: finalDatasets.map(d => d.id),
+          language: 'zh-CN'
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.code === 0) {
+        onSuccess && onSuccess(result.data);
+        handleClose();
+      } else {
+        setError(result.error || t('evalTasks.errorCreateFailed'));
+      }
+    } catch (err) {
+      console.error('创建评估任务失败:', err);
+      setError(t('evalTasks.errorCreateFailed'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  const handleJudgeModelChange = event => {
+    setJudgeModel(event.target.value);
+    setError('');
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+      <DialogTitle>{t('evalTasks.createTitle')}</DialogTitle>
+      <DialogContent>
+        <Box sx={{ mt: 1 }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+              {error}
+            </Alert>
+          )}
+
+          {/* 选择测试模型 */}
+          <ModelSelector
+            models={models}
+            selectedModels={selectedModels}
+            onSelectionChange={handleModelSelectionChange}
+            error={selectedModels.length === 0 && error}
+          />
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* 题目筛选 */}
+          <QuestionFilter
+            questionTypes={questionTypes}
+            selectedTags={selectedTags}
+            searchKeyword={searchKeyword}
+            questionCount={questionCount}
+            availableTags={availableTags}
+            typeStats={typeStats}
+            filteredCount={filteredDatasets.length}
+            onQuestionTypesChange={setQuestionTypes}
+            onTagsChange={setSelectedTags}
+            onSearchChange={setSearchKeyword}
+            onQuestionCountChange={setQuestionCount}
+            onReset={resetFilters}
+          />
+
+          {/* 最终题目统计 */}
+          <Box sx={{ mb: 3, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              最终选择：<strong>{finalDatasets.length}</strong> 道题目
+            </Typography>
+            {hasSubjectiveQuestions && (
+              <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>
+                {t('evalTasks.hasSubjectiveHint')}
+              </Typography>
+            )}
+          </Box>
+
+          {/* 选择教师模型（仅当有主观题时显示） */}
+          {hasSubjectiveQuestions && (
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>{t('evalTasks.selectJudgeModel')} *</InputLabel>
+              <Select
+                value={judgeModel}
+                onChange={handleJudgeModelChange}
+                label={`${t('evalTasks.selectJudgeModel')} *`}
+              >
+                <MenuItem value="">
+                  <em>{t('evalTasks.selectJudgeModelPlaceholder')}</em>
+                </MenuItem>
+                {models
+                  .filter(m => {
+                    const key = `${m.providerId}::${m.modelId}`;
+                    return !selectedModels.includes(key);
+                  })
+                  .map(model => {
+                    const key = `${model.providerId}::${model.modelId}`;
+                    return (
+                      <MenuItem key={key} value={key}>
+                        {model.providerId} / {model.modelId}
+                      </MenuItem>
+                    );
+                  })}
+              </Select>
+              <FormHelperText>{t('evalTasks.selectJudgeModelHint')}</FormHelperText>
+            </FormControl>
+          )}
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} disabled={submitting}>
+          {t('common.cancel')}
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          disabled={submitting || loading}
+          startIcon={submitting && <CircularProgress size={16} />}
+        >
+          {submitting ? t('common.creating') : t('evalTasks.startEval')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}

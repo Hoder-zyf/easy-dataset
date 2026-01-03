@@ -365,35 +365,35 @@ model EvalDatasets {
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
 
+  // 关联评估结果
+  EvalResults EvalResults[]
+
   @@index([projectId])
   @@index([projectId, questionType])
   @@index([chunkId])
 }
 
-/*
--- CreateTable
-CREATE TABLE "EvalDatasets" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "projectId" TEXT NOT NULL,
-    "question" TEXT NOT NULL,
-    "questionType" TEXT NOT NULL,
-    "chunkId" TEXT,
-    "options" TEXT NOT NULL DEFAULT '',
-    "correctAnswer" TEXT NOT NULL,
-    "tags" TEXT NOT NULL DEFAULT '',
-    "note" TEXT NOT NULL DEFAULT '',
-    "createAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updateAt" DATETIME NOT NULL,
-    CONSTRAINT "EvalDatasets_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Projects" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "EvalDatasets_chunkId_fkey" FOREIGN KEY ("chunkId") REFERENCES "Chunks" ("id") ON DELETE SET NULL ON UPDATE CASCADE
-);
+model EvalResults {
+  id        String @id @default(nanoid())
+  projectId String
+  taskId    String // 关联到 Task 表
 
--- CreateIndex
-CREATE INDEX "EvalDatasets_projectId_idx" ON "EvalDatasets"("projectId");
+  // 关联评估题目
+  evalDataset   EvalDatasets @relation(fields: [evalDatasetId], references: [id], onDelete: Cascade)
+  evalDatasetId String
 
--- CreateIndex
-CREATE INDEX "EvalDatasets_projectId_questionType_idx" ON "EvalDatasets"("projectId", "questionType");
+  // 评估结果
+  modelAnswer   String // 模型的回答
+  score         Float   @default(0) // 得分 (0-1 之间)
+  isCorrect     Boolean @default(false) // 是否正确（用于客观题）
+  judgeResponse String  @default("") // LLM 评分的响应（用于主观题）
 
--- CreateIndex
-CREATE INDEX "EvalDatasets_chunkId_idx" ON "EvalDatasets"("chunkId");
-*/
+  // 时间戳
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@unique([taskId, evalDatasetId]) // 每个任务对每道题只能有一个结果
+  @@index([projectId])
+  @@index([taskId])
+  @@index([evalDatasetId])
+}
