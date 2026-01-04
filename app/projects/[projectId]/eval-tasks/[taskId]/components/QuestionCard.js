@@ -6,14 +6,39 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ReactMarkdown from 'react-markdown';
 import { detailStyles } from '../detailStyles';
 import { useTranslation } from 'react-i18next';
 import 'github-markdown-css/github-markdown-light.css';
 
-export default function QuestionCard({ result, index }) {
+// 答题状态常量
+const EVAL_STATUS = {
+  SUCCESS: 0,
+  FORMAT_ERROR: 1,
+  API_ERROR: 2
+};
+
+// 状态标签配置
+const STATUS_CONFIG = {
+  [EVAL_STATUS.SUCCESS]: { label: 'evalTasks.statusSuccess', color: 'success' },
+  [EVAL_STATUS.FORMAT_ERROR]: { label: 'evalTasks.statusFormatError', color: 'warning' },
+  [EVAL_STATUS.API_ERROR]: { label: 'evalTasks.statusApiError', color: 'error' }
+};
+
+export default function QuestionCard({ result, index, task }) {
   const { t } = useTranslation();
-  const { evalDataset, modelAnswer, isCorrect, score, judgeResponse } = result;
+  const {
+    evalDataset,
+    modelAnswer,
+    isCorrect,
+    score,
+    judgeResponse,
+    duration = 0,
+    status = 0,
+    errorMessage = ''
+  } = result;
   const { question, questionType, options, correctAnswer } = evalDataset;
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -118,7 +143,7 @@ export default function QuestionCard({ result, index }) {
       </Box>
 
       {/* 题号与类型标签 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1.5, flexWrap: 'wrap' }}>
         <Box
           sx={{
             ...detailStyles.questionIndex,
@@ -137,6 +162,32 @@ export default function QuestionCard({ result, index }) {
           color="primary"
           sx={{ borderRadius: 1 }}
         />
+
+        {/* 答题耗时 */}
+        {duration > 0 && (
+          <Chip
+            icon={<AccessTimeIcon sx={{ fontSize: 14 }} />}
+            label={duration >= 1000 ? `${(duration / 1000).toFixed(1)}s` : `${duration}ms`}
+            size="small"
+            variant="outlined"
+            sx={{ height: 24, '& .MuiChip-label': { px: 0.75, fontSize: '0.75rem' } }}
+          />
+        )}
+
+        {/* 答题状态 */}
+        {status !== EVAL_STATUS.SUCCESS && (
+          <Chip
+            icon={<ErrorOutlineIcon sx={{ fontSize: 14 }} />}
+            label={t(
+              STATUS_CONFIG[status]?.label || 'evalTasks.statusUnknown',
+              status === EVAL_STATUS.FORMAT_ERROR ? '格式错误' : 'API错误'
+            )}
+            size="small"
+            color={STATUS_CONFIG[status]?.color || 'default'}
+            variant="outlined"
+            sx={{ height: 24, '& .MuiChip-label': { px: 0.75, fontSize: '0.75rem' } }}
+          />
+        )}
       </Box>
 
       {/* 题目内容 */}
@@ -261,6 +312,24 @@ export default function QuestionCard({ result, index }) {
           )}
         </Box>
       </Box>
+
+      {/* 错误信息显示 */}
+      {errorMessage && (
+        <Box
+          sx={{
+            mt: 1.5,
+            p: 1.5,
+            bgcolor: 'error.lighter',
+            borderRadius: 1,
+            border: '1px solid',
+            borderColor: 'error.light'
+          }}
+        >
+          <Typography variant="body2" color="error.main" sx={{ fontSize: '0.8rem' }}>
+            {errorMessage}
+          </Typography>
+        </Box>
+      )}
 
       {/* 教师点评 (气泡样式) */}
       {judgeResponse && (

@@ -12,12 +12,17 @@ export default function EvalHeader({ task, stats, filterCorrect, onFilterCorrect
 
   if (!task) return null;
 
-  const { modelInfo, createAt, status } = task;
-  const score = task.detail?.finalScore || 0;
+  const { modelInfo, createAt, status, detail } = task;
+  const score = detail?.finalScore || 0;
   const isPass = score >= 60;
   const totalTime = task.endTime ? Math.floor((new Date(task.endTime) - new Date(task.createAt)) / 1000) : 0;
 
   const incorrectCount = (stats?.totalQuestions || 0) - (stats?.correctCount || 0);
+
+  // 获取教师模型信息
+  const judgeModelId = detail?.judgeModelId;
+  const judgeProviderId = detail?.judgeProviderId;
+  const hasJudgeModel = judgeModelId && judgeProviderId;
 
   return (
     <Paper sx={detailStyles.headerCard}>
@@ -45,15 +50,18 @@ export default function EvalHeader({ task, stats, filterCorrect, onFilterCorrect
           </Box>
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-              {modelInfo?.modelName || modelInfo?.modelId}
+              {modelInfo?.providerName || modelInfo?.providerId} / {modelInfo?.modelName || modelInfo?.modelId}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
-              <Chip
-                label={modelInfo?.providerName || modelInfo?.providerId}
-                size="small"
-                variant="outlined"
-                sx={{ borderRadius: 1 }}
-              />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary', flexWrap: 'wrap' }}>
+              {hasJudgeModel && (
+                <Chip
+                  label={`${t('evalTasks.judgeModel')}: ${judgeProviderId} / ${judgeModelId}`}
+                  size="small"
+                  variant="outlined"
+                  color="secondary"
+                  sx={{ borderRadius: 1 }}
+                />
+              )}
               <Box sx={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem' }}>
                 <AccessTimeIcon sx={{ fontSize: 16, mr: 0.5 }} />
                 {new Date(createAt).toLocaleString()}

@@ -388,6 +388,11 @@ model EvalResults {
   isCorrect     Boolean @default(false) // 是否正确（用于客观题）
   judgeResponse String  @default("") // LLM 评分的响应（用于主观题）
 
+  // 答题详情
+  duration     Int    @default(0) // 答题耗时（毫秒）
+  status       Int    @default(0) // 答题状态：0-成功, 1-输出不符合规范, 2-LLM调用报错
+  errorMessage String @default("") // 答题报错信息
+
   // 时间戳
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
