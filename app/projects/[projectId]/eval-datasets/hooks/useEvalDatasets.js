@@ -22,6 +22,7 @@ export default function useEvalDatasets(projectId) {
   const [keyword, setKeyword] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const [chunkId, setChunkId] = useState('');
+  const [tags, setTags] = useState([]); // 改为数组
 
   // 包装 setter 函数，筛选条件变化时重置到第一页
   const setQuestionTypeWithReset = useCallback(value => {
@@ -36,6 +37,11 @@ export default function useEvalDatasets(projectId) {
 
   const setChunkIdWithReset = useCallback(value => {
     setChunkId(value);
+    setPage(1);
+  }, []);
+
+  const setTagsWithReset = useCallback(value => {
+    setTags(value);
     setPage(1);
   }, []);
 
@@ -80,6 +86,9 @@ export default function useEvalDatasets(projectId) {
       if (questionType) params.append('questionType', questionType);
       if (debouncedKeyword) params.append('keyword', debouncedKeyword);
       if (chunkId) params.append('chunkId', chunkId);
+      if (tags.length > 0) {
+        tags.forEach(t => params.append('tags', t));
+      }
 
       const response = await fetch(`/api/projects/${projectId}/eval-datasets?${params}`);
 
@@ -113,7 +122,7 @@ export default function useEvalDatasets(projectId) {
     } else {
       fetchDataRef.current?.(false);
     }
-  }, [projectId, page, pageSize, questionType, debouncedKeyword, chunkId]);
+  }, [projectId, page, pageSize, questionType, debouncedKeyword, chunkId, tags]);
 
   // 删除数据
   const deleteItems = useCallback(
@@ -148,6 +157,7 @@ export default function useEvalDatasets(projectId) {
     setQuestionType('');
     setKeyword('');
     setChunkId('');
+    setTags([]);
     setPage(1);
   }, []);
 
@@ -187,9 +197,11 @@ export default function useEvalDatasets(projectId) {
     questionType,
     keyword,
     chunkId,
+    tags,
     setQuestionType: setQuestionTypeWithReset,
     setKeyword: setKeywordWithReset,
     setChunkId: setChunkIdWithReset,
+    setTags: setTagsWithReset,
     resetFilters,
 
     // 视图

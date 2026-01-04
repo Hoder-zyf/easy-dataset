@@ -10,7 +10,9 @@ import {
   Button,
   Tooltip,
   Divider,
-  Chip
+  Chip,
+  Autocomplete,
+  TextField
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
@@ -41,80 +43,134 @@ export default function EvalToolbar({
   onDeleteSelected,
   stats,
   questionType,
-  onTypeChange
+  onTypeChange,
+  tags,
+  onTagsChange
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
 
+  const tagOptions = stats?.byTag
+    ? Object.keys(stats.byTag).map(tag => ({
+        label: tag,
+        count: stats.byTag[tag]
+      }))
+    : [];
+
   return (
     <Paper variant="outlined" sx={{ p: 1.5, mb: 2 }}>
+      {/* 顶部：题型统计筛选 */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 1.5 }}>
+        {stats &&
+          STATS_CONFIG.map(({ key, icon: Icon, color }) => {
+            const count = stats.byType?.[key] || 0;
+            const isActive = questionType === key;
+
+            return (
+              <Chip
+                key={key}
+                icon={<Icon sx={{ fontSize: 16 }} />}
+                label={`${t(`eval.questionTypes.${key}`)} (${count})`}
+                color={isActive ? color : 'default'}
+                variant={isActive ? 'filled' : 'outlined'}
+                onClick={() => onTypeChange(isActive ? '' : key)}
+                size="small"
+                sx={{
+                  cursor: 'pointer',
+                  fontWeight: isActive ? 600 : 400,
+                  height: 28,
+                  '&:hover': { opacity: 0.85 }
+                }}
+              />
+            );
+          })}
+      </Box>
+
+      <Divider sx={{ mb: 1.5 }} />
+
+      {/* 底部：筛选和操作 */}
       <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 1.5
+          gap: 1.5,
+          flexWrap: 'wrap'
         }}
       >
-        {/* 左侧：题型统计筛选 */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', flex: 1 }}>
-          {stats &&
-            STATS_CONFIG.map(({ key, icon: Icon, color }) => {
-              const count = stats.byType?.[key] || 0;
-              const isActive = questionType === key;
+        {/* 左侧：筛选器组 */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, minWidth: 300 }}>
+          {/* 搜索框 */}
+          <Paper
+            component="form"
+            elevation={0}
+            variant="outlined"
+            sx={{
+              p: '2px 4px',
+              display: 'flex',
+              alignItems: 'center',
+              width: 240,
+              height: 40, // 统一高度
+              borderRadius: 1.5,
+              backgroundColor: 'background.paper',
+              transition: 'box-shadow 0.2s',
+              '&:focus-within': {
+                borderColor: 'primary.main',
+                boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
+              }
+            }}
+            onSubmit={e => e.preventDefault()}
+          >
+            <IconButton sx={{ p: '6px' }} aria-label="search" size="small">
+              <SearchIcon sx={{ fontSize: 18 }} color="action" />
+            </IconButton>
+            <InputBase
+              sx={{ ml: 0.5, flex: 1, fontSize: '0.875rem' }}
+              placeholder={t('eval.searchPlaceholder')}
+              value={keyword}
+              onChange={e => onKeywordChange(e.target.value)}
+            />
+          </Paper>
 
-              return (
+          {/* 标签筛选 */}
+          <Autocomplete
+            multiple
+            size="small"
+            options={tagOptions}
+            getOptionLabel={option => `${option.label} (${option.count})`}
+            value={tagOptions.filter(o => tags.includes(o.label))}
+            onChange={(e, newValue) => onTagsChange(newValue.map(v => v.label))}
+            renderInput={params => (
+              <TextField
+                {...params}
+                placeholder={tags.length === 0 ? t('eval.tags') : ''}
+                size="small"
+                sx={{
+                  width: 300,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1.5,
+                    backgroundColor: 'background.paper',
+                    minHeight: 40 // 允许高度根据内容撑开，但最小高度保持一致
+                  }
+                }}
+              />
+            )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
                 <Chip
-                  key={key}
-                  icon={<Icon sx={{ fontSize: 16 }} />}
-                  label={`${t(`eval.questionTypes.${key}`)} (${count})`}
-                  color={isActive ? color : 'default'}
-                  variant={isActive ? 'filled' : 'outlined'}
-                  onClick={() => onTypeChange(isActive ? '' : key)}
+                  variant="outlined"
+                  label={option.label}
                   size="small"
-                  sx={{
-                    cursor: 'pointer',
-                    fontWeight: isActive ? 600 : 400,
-                    height: 28,
-                    '&:hover': { opacity: 0.85 }
-                  }}
+                  {...getTagProps({ index })}
+                  sx={{ height: 24 }}
                 />
-              );
-            })}
-        </Box>
-
-        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
-
-        {/* 中间：搜索框 */}
-        <Paper
-          component="form"
-          elevation={0}
-          variant="outlined"
-          sx={{
-            p: '2px 4px',
-            display: 'flex',
-            alignItems: 'center',
-            width: 240,
-            borderRadius: 1.5,
-            backgroundColor: 'background.paper',
-            transition: 'box-shadow 0.2s',
-            '&:focus-within': {
-              borderColor: 'primary.main',
-              boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
+              ))
             }
-          }}
-          onSubmit={e => e.preventDefault()}
-        >
-          <IconButton sx={{ p: '6px' }} aria-label="search" size="small">
-            <SearchIcon sx={{ fontSize: 18 }} color="action" />
-          </IconButton>
-          <InputBase
-            sx={{ ml: 0.5, flex: 1, fontSize: '0.875rem' }}
-            placeholder={t('eval.searchPlaceholder')}
-            value={keyword}
-            onChange={e => onKeywordChange(e.target.value)}
+            sx={{
+              '& .MuiOutlinedInput-root': { padding: '2px 9px' }
+            }}
           />
-        </Paper>
+        </Box>
 
         {/* 右侧：操作按钮组 */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

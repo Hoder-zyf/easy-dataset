@@ -288,17 +288,32 @@ export default function EvalDatasetCard({ item, selected, onSelect, onEdit, onDe
           )}
 
           {item.tags && (
-            <Chip
-              label={item.tags.split(/[,，]/)[0]}
-              size="small"
-              sx={{
-                fontSize: 11,
-                height: 22,
-                bgcolor: alpha(theme.palette.info.main, 0.08),
-                color: 'info.dark',
-                maxWidth: 100
-              }}
-            />
+            <Tooltip title={item.tags}>
+              <Box sx={{ display: 'flex', gap: 0.5, overflow: 'hidden', maxWidth: 120 }}>
+                {item.tags
+                  .split(/[,，]/)
+                  .slice(0, 2)
+                  .map((tag, index) => (
+                    <Chip
+                      key={index}
+                      label={tag}
+                      size="small"
+                      sx={{
+                        fontSize: 11,
+                        height: 22,
+                        bgcolor: alpha(theme.palette.info.main, 0.08),
+                        color: 'info.dark',
+                        maxWidth: 80
+                      }}
+                    />
+                  ))}
+                {item.tags.split(/[,，]/).length > 2 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: 11, alignSelf: 'center' }}>
+                    +{item.tags.split(/[,，]/).length - 2}
+                  </Typography>
+                )}
+              </Box>
+            </Tooltip>
           )}
         </Box>
       </CardContent>

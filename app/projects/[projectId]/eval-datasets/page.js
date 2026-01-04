@@ -41,6 +41,8 @@ export default function EvalDatasetsPage() {
     setPage,
     questionType,
     setQuestionType,
+    tags,
+    setTags,
     keyword,
     setKeyword,
     viewMode,
@@ -99,6 +101,8 @@ export default function EvalDatasetsPage() {
         stats={stats}
         questionType={questionType}
         onTypeChange={setQuestionType}
+        tags={tags}
+        onTagsChange={setTags}
         onRefresh={fetchData}
         loading={loading}
       />
@@ -135,23 +139,25 @@ export default function EvalDatasetsPage() {
           )}
 
           {viewMode === 'card' ? (
-            <Masonry
-              columns={{ xs: 1, sm: 2, md: 3, lg: 4 }}
-              spacing={3}
-              sx={{ opacity: searching ? 0.5 : 1, transition: 'opacity 0.2s' }}
-            >
-              {items.map(item => (
-                <EvalDatasetCard
-                  key={item.id}
-                  item={item}
-                  selected={selectedIds.includes(item.id)}
-                  onSelect={toggleSelect}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  projectId={projectId}
-                />
-              ))}
-            </Masonry>
+            <Box>
+              <Masonry
+                columns={{ xs: 1, sm: 2, md: 3, lg: 4 }}
+                spacing={3}
+                sx={{ opacity: searching ? 0.5 : 1, transition: 'opacity 0.2s', width: 'auto' }}
+              >
+                {items.map(item => (
+                  <EvalDatasetCard
+                    key={item.id}
+                    item={item}
+                    selected={selectedIds.includes(item.id)}
+                    onSelect={toggleSelect}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    projectId={projectId}
+                  />
+                ))}
+              </Masonry>
+            </Box>
           ) : (
             <Box sx={{ opacity: searching ? 0.5 : 1, transition: 'opacity 0.2s' }}>
               <EvalDatasetList

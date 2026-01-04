@@ -15,6 +15,14 @@ export async function GET(request, { params }) {
     const questionType = searchParams.get('questionType') || '';
     const keyword = searchParams.get('keyword') || '';
     const chunkId = searchParams.get('chunkId') || '';
+    // 支持多个 tag 参数，或者逗号分隔
+    const tags =
+      searchParams.getAll('tags').length > 0
+        ? searchParams.getAll('tags')
+        : searchParams.get('tag')
+          ? searchParams.get('tag').split(',')
+          : [];
+
     const includeStats = searchParams.get('includeStats') === 'true';
 
     // 获取分页数据
@@ -23,7 +31,8 @@ export async function GET(request, { params }) {
       pageSize,
       questionType: questionType || undefined,
       keyword: keyword || undefined,
-      chunkId: chunkId || undefined
+      chunkId: chunkId || undefined,
+      tags: tags.length > 0 ? tags : undefined
     });
 
     // 如果需要统计数据
