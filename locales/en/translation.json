@@ -293,7 +293,19 @@
     "items": "items",
     "detailInfo": "Detail Info",
     "reset": "Reset",
-    "apply": "Apply"
+    "apply": "Apply",
+    "mainNavigation": "Main Navigation",
+    "goHome": "Go to Home",
+    "goToHomePage": "Go to Home Page",
+    "mobileNavigation": "Mobile Navigation Menu",
+    "navigation": "Navigation",
+    "closeMenu": "Close Menu",
+    "documentation": "Documentation",
+    "viewOnGitHub": "View on GitHub",
+    "back": "Back",
+    "refresh": "Refresh",
+    "expand": "Expand All",
+    "collapse": "Collapse"
   },
   "home": {
     "title": "Easy Dataset",

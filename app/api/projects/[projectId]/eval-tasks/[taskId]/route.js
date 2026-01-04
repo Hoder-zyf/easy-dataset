@@ -36,8 +36,21 @@ export async function GET(request, { params }) {
       console.error('解析任务详情失败:', e);
     }
 
-    // 获取评估结果
-    const results = await getEvalResultsByTaskId(taskId);
+    // 获取查询参数
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const pageSize = parseInt(searchParams.get('pageSize') || '10');
+    const type = searchParams.get('type') || null;
+    const isCorrectStr = searchParams.get('isCorrect');
+    const isCorrect = isCorrectStr === 'true' ? true : isCorrectStr === 'false' ? false : null;
+
+    // 获取评估结果（支持分页和筛选）
+    const { items: results, total } = await getEvalResultsByTaskId(taskId, {
+      page,
+      pageSize,
+      type,
+      isCorrect
+    });
 
     // 获取统计数据
     const stats = await getEvalResultsStats(taskId);
@@ -51,6 +64,9 @@ export async function GET(request, { params }) {
           modelInfo
         },
         results,
+        total,
+        page,
+        pageSize,
         stats
       }
     });
