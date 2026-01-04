@@ -20,6 +20,10 @@ export default function QuestionCard({ result, index }) {
   const [shouldShowExpand, setShouldShowExpand] = useState(false);
   const contentRef = useRef(null);
 
+  const [isCorrectExpanded, setIsCorrectExpanded] = useState(false);
+  const [shouldShowCorrectExpand, setShouldShowCorrectExpand] = useState(false);
+  const correctContentRef = useRef(null);
+
   // 检查内容是否超过高度限制
   useEffect(() => {
     if (contentRef.current) {
@@ -27,6 +31,13 @@ export default function QuestionCard({ result, index }) {
       setShouldShowExpand(hasOverflow);
     }
   }, [modelAnswer]);
+
+  useEffect(() => {
+    if (correctContentRef.current) {
+      const hasOverflow = correctContentRef.current.scrollHeight > 200;
+      setShouldShowCorrectExpand(hasOverflow);
+    }
+  }, [correctAnswer]);
 
   // 解析选项
   let parsedOptions = [];
@@ -207,9 +218,47 @@ export default function QuestionCard({ result, index }) {
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
             {t('evalTasks.correctAnswer')}
           </Typography>
-          <Typography variant="body1" sx={{ fontFamily: 'monospace', color: 'text.primary', whiteSpace: 'pre-wrap' }}>
-            {formatAnswer(correctAnswer)}
-          </Typography>
+          <Box ref={correctContentRef} sx={detailStyles.markdownContainer(isCorrectExpanded)}>
+            {questionType === 'open_ended' || questionType === 'short_answer' ? (
+              <div className="markdown-body">
+                <ReactMarkdown>{correctAnswer || ''}</ReactMarkdown>
+              </div>
+            ) : (
+              <Typography
+                variant="body1"
+                sx={{ fontFamily: 'monospace', color: 'text.primary', whiteSpace: 'pre-wrap' }}
+              >
+                {formatAnswer(correctAnswer)}
+              </Typography>
+            )}
+
+            {/* 展开/收起 遮罩和按钮 */}
+            {shouldShowCorrectExpand && !isCorrectExpanded && (
+              <Box sx={detailStyles.expandMask}>
+                <Button
+                  size="small"
+                  onClick={() => setIsCorrectExpanded(true)}
+                  startIcon={<ExpandMoreIcon />}
+                  sx={detailStyles.expandButton}
+                >
+                  {t('common.expand', '展开全部')}
+                </Button>
+              </Box>
+            )}
+          </Box>
+
+          {isCorrectExpanded && shouldShowCorrectExpand && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+              <Button
+                size="small"
+                onClick={() => setIsCorrectExpanded(false)}
+                startIcon={<ExpandLessIcon />}
+                sx={{ fontSize: '0.75rem', textTransform: 'none' }}
+              >
+                {t('common.collapse', '收起内容')}
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
 

@@ -111,6 +111,23 @@ export async function POST(request, { params }) {
     for (const model of models) {
       const { modelId, providerId } = model;
 
+      // 从数据库查询完整的模型配置信息
+      const modelConfig = await db.modelConfig.findFirst({
+        where: {
+          projectId,
+          providerId,
+          modelId
+        }
+      });
+
+      // 保留原始 providerId 用于查询，添加 providerName 用于显示
+      const modelInfo = {
+        modelId,
+        modelName: modelConfig?.modelName || modelId,
+        providerId: providerId, // 保留原始 providerId（数据库ID）
+        providerName: modelConfig?.providerName || providerId // 添加 providerName 用于显示
+      };
+
       // 构建任务详情
       const taskDetail = {
         evalDatasetIds,
@@ -126,7 +143,7 @@ export async function POST(request, { params }) {
           projectId,
           taskType: 'model-evaluation',
           status: 0, // 处理中
-          modelInfo: JSON.stringify({ modelId, providerId }),
+          modelInfo: JSON.stringify(modelInfo),
           language,
           detail: JSON.stringify(taskDetail),
           totalCount: evalDatasetIds.length,

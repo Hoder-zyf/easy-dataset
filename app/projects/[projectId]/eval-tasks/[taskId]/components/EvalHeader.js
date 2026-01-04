@@ -5,6 +5,7 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { detailStyles } from '../detailStyles';
 import { useTranslation } from 'react-i18next';
+import { getModelIcon } from '@/lib/util/modelIcon';
 
 export default function EvalHeader({ task, stats, filterCorrect, onFilterCorrectSelect }) {
   const { t } = useTranslation();
@@ -28,21 +29,31 @@ export default function EvalHeader({ task, stats, filterCorrect, onFilterCorrect
               width: 60,
               height: 60,
               borderRadius: 2,
-              bgcolor: 'primary.main',
+              bgcolor: 'transparent',
+              border: '2px solid',
+              borderColor: 'divider',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white'
+              justifyContent: 'center'
             }}
           >
-            <SmartToyIcon sx={{ fontSize: 32 }} />
+            <img
+              src={getModelIcon(modelInfo?.modelId)}
+              alt={modelInfo?.modelId || 'model'}
+              style={{ width: 44, height: 44, objectFit: 'contain' }}
+            />
           </Box>
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-              {modelInfo?.modelId}
+              {modelInfo?.modelName || modelInfo?.modelId}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
-              <Chip label={modelInfo?.providerId} size="small" variant="outlined" sx={{ borderRadius: 1 }} />
+              <Chip
+                label={modelInfo?.providerName || modelInfo?.providerId}
+                size="small"
+                variant="outlined"
+                sx={{ borderRadius: 1 }}
+              />
               <Box sx={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem' }}>
                 <AccessTimeIcon sx={{ fontSize: 16, mr: 0.5 }} />
                 {new Date(createAt).toLocaleString()}

@@ -53,7 +53,7 @@ export default function ModelSelector({ models, selectedModels, onSelectionChang
                   <Checkbox checked={selectedModels.includes(modelKey)} sx={{ p: 0, mr: 1.5 }} />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {model.providerId} / {model.modelId}
+                      {model.providerName || model.providerId} / {model.modelName || model.modelId}
                     </Typography>
                   </Box>
                 </Box>

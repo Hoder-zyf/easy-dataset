@@ -26,6 +26,7 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import QuizIcon from '@mui/icons-material/Quiz';
 import { useTranslation } from 'react-i18next';
+import { getModelIcon } from '@/lib/util/modelIcon';
 import styles from '../styles';
 
 const STATUS_CONFIG = {
@@ -72,15 +73,19 @@ export default function EvalTaskCard({ task, onView, onDelete, onInterrupt }) {
         {/* 头部 */}
         <Box sx={styles.taskCardHeader}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, overflow: 'hidden' }}>
-            <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
-              <SmartToyIcon fontSize="small" />
+            <Avatar sx={{ bgcolor: 'transparent', width: 40, height: 40, border: '1px solid', borderColor: 'divider' }}>
+              <img
+                src={getModelIcon(modelInfo?.modelId)}
+                alt={modelInfo?.modelId || 'model'}
+                style={{ width: 28, height: 28, objectFit: 'contain' }}
+              />
             </Avatar>
             <Box sx={styles.taskCardModel}>
               <Typography sx={styles.taskCardModelName} noWrap>
-                {modelInfo?.modelId}
+                {modelInfo?.modelName || modelInfo?.modelId}
               </Typography>
               <Typography variant="caption" color="text.secondary" noWrap>
-                {modelInfo?.providerId}
+                {modelInfo?.providerName || modelInfo?.providerId}
               </Typography>
             </Box>
           </Box>
