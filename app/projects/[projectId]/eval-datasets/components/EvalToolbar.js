@@ -23,6 +23,7 @@ import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import ShortTextIcon from '@mui/icons-material/ShortText';
 import NotesIcon from '@mui/icons-material/Notes';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { useTranslation } from 'react-i18next';
 import { alpha, useTheme } from '@mui/material/styles';
 
@@ -45,7 +46,8 @@ export default function EvalToolbar({
   questionType,
   onTypeChange,
   tags,
-  onTagsChange
+  onTagsChange,
+  onImport
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -174,6 +176,17 @@ export default function EvalToolbar({
 
         {/* 右侧：操作按钮组 */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* 导入按钮 */}
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<UploadFileIcon sx={{ fontSize: 16 }} />}
+            onClick={onImport}
+            sx={{ borderRadius: 1.5, minWidth: 'auto', px: 1.5, height: 32 }}
+          >
+            {t('common.import', '导入')}
+          </Button>
+
           {selectedCount > 0 && (
             <Button
               size="small"

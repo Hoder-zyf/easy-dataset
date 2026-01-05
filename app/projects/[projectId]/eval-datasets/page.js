@@ -14,7 +14,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button
+  Button,
+  Snackbar
 } from '@mui/material';
 import { Masonry } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,7 @@ import useEvalDatasets from './hooks/useEvalDatasets';
 import EvalToolbar from './components/EvalToolbar';
 import EvalDatasetCard from './components/EvalDatasetCard';
 import EvalDatasetList from './components/EvalDatasetList';
+import ImportDialog from './components/ImportDialog';
 
 export default function EvalDatasetsPage() {
   const { projectId } = useParams();
@@ -56,6 +58,22 @@ export default function EvalDatasetsPage() {
 
   // 删除确认对话框
   const [deleteDialog, setDeleteDialog] = useState({ open: false, ids: [] });
+
+  // 导入对话框
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+
+  // Toast 提示
+  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+
+  // 处理导入成功
+  const handleImportSuccess = result => {
+    setToast({
+      open: true,
+      message: t('evalDatasets.import.successMessage', { count: result.total }),
+      severity: 'success'
+    });
+    fetchData(); // 刷新数据
+  };
 
   // 处理删除
   const handleDelete = async ids => {
@@ -105,6 +123,7 @@ export default function EvalDatasetsPage() {
         onTagsChange={setTags}
         onRefresh={fetchData}
         loading={loading}
+        onImport={() => setImportDialogOpen(true)}
       />
 
       {/* 加载状态 */}
@@ -221,6 +240,26 @@ export default function EvalDatasetsPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* 导入对话框 */}
+      <ImportDialog
+        open={importDialogOpen}
+        onClose={() => setImportDialogOpen(false)}
+        projectId={projectId}
+        onSuccess={handleImportSuccess}
+      />
+
+      {/* Toast 提示 */}
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={4000}
+        onClose={() => setToast({ ...toast, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity={toast.severity} onClose={() => setToast({ ...toast, open: false })}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

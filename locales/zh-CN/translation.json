@@ -281,6 +281,8 @@
     "label": "标签",
     "confirmDeleteDescription": "确认删除吗？此操作不可恢复。",
     "more": "更多",
+    "import": "导入",
+    "export": "导出",
     "fetchError": "获取数据出错",
     "confirmDeleteQuestion": "确认删除此问题吗？此操作不可恢复。",
     "deleteSuccess": "删除成功",
@@ -1554,6 +1556,30 @@
       "multiple_choice": "多选题",
       "short_answer": "简答题",
       "open_ended": "开放题"
+    }
+  },
+  "evalDatasets": {
+    "import": {
+      "title": "导入评估数据集",
+      "questionType": "题型",
+      "selectTypeFirst": "请先选择题型",
+      "selectFile": "请选择要导入的文件",
+      "invalidFileType": "不支持的文件格式，请上传 json、xls 或 xlsx 文件",
+      "formatPreview": "数据格式预览",
+      "downloadTemplate": "下载模板",
+      "template": "模板",
+      "uploadFile": "上传文件",
+      "dropOrClick": "点击或拖拽文件到此处",
+      "supportedFormats": "支持 JSON、XLS、XLSX 格式",
+      "tags": "标签（可选）",
+      "tagsPlaceholder": "为导入的数据添加标签，多个标签用逗号分隔",
+      "tagsHelp": "导入的所有数据将打上这些标签",
+      "import": "导入",
+      "importing": "导入中...",
+      "failed": "导入失败",
+      "success": "导入成功",
+      "successMessage": "成功导入 {{count}} 条评估数据",
+      "showingErrors": "显示前 {{count}} 条错误"
     }
   },
   "evalTasks": {

@@ -175,11 +175,24 @@ export default function EvalDatasetCard({ item, selected, onSelect, onEdit, onDe
           <Box sx={{ mb: 2, flex: 1 }}>
             {(item.questionType === 'multiple_choice' ? options : options.slice(0, 4)).map((option, index) => {
               const optionLabel = String.fromCharCode(65 + index); // A, B, C, D
+              // 解析多选题答案，支持多种格式：数组、JSON字符串、逗号分隔字符串
+              const parseMultipleAnswers = answer => {
+                if (Array.isArray(answer)) return answer;
+                if (!answer) return [];
+                // 尝试解析 JSON 数组
+                if (answer.startsWith('[')) {
+                  try {
+                    return JSON.parse(answer);
+                  } catch (e) {
+                    return [];
+                  }
+                }
+                // 逗号分隔字符串格式，如 "A,B,D"
+                return answer.split(',').map(s => s.trim());
+              };
               const isCorrect =
                 item.questionType === 'multiple_choice'
-                  ? (Array.isArray(correctAnswer) ? correctAnswer : JSON.parse(correctAnswer || '[]')).includes(
-                      optionLabel
-                    )
+                  ? parseMultipleAnswers(correctAnswer).includes(optionLabel)
                   : correctAnswer === optionLabel;
 
               return (
