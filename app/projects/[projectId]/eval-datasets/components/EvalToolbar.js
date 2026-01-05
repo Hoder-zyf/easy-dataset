@@ -2,30 +2,39 @@
 
 import {
   Box,
-  Paper,
-  InputBase,
   IconButton,
   ToggleButtonGroup,
   ToggleButton,
   Button,
   Tooltip,
   Divider,
-  Chip,
   Autocomplete,
   TextField
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewListIcon from '@mui/icons-material/ViewList';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteIcon from '@mui/icons-material/DeleteOutline'; // 使用 Outline 版本更精致
+import CheckCircleIcon from '@mui/icons-material/CheckCircleOutline'; // 统一使用 Outline 风格图标
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import CheckBoxIcon from '@mui/icons-material/CheckBoxOutlineBlank'; // 或者 CheckBox
 import ShortTextIcon from '@mui/icons-material/ShortText';
 import NotesIcon from '@mui/icons-material/Notes';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { useTranslation } from 'react-i18next';
-import { alpha, useTheme } from '@mui/material/styles';
+import { useTheme, alpha } from '@mui/material/styles';
+
+import {
+  ToolbarContainer,
+  FilterGroup,
+  FilterButton,
+  SearchWrapper,
+  StyledInputBase,
+  ActionGroup,
+  ActionButton,
+  DeleteActionButton,
+  StyledToggleButtonGroup
+} from './EvalToolbar.styles';
 
 const STATS_CONFIG = [
   { key: 'true_false', icon: CheckCircleIcon, color: 'success' },
@@ -60,35 +69,32 @@ export default function EvalToolbar({
     : [];
 
   return (
-    <Paper variant="outlined" sx={{ p: 1.5, mb: 2 }}>
+    <ToolbarContainer elevation={0} variant="outlined">
       {/* 顶部：题型统计筛选 */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 1.5 }}>
+      <FilterGroup>
         {stats &&
           STATS_CONFIG.map(({ key, icon: Icon, color }) => {
             const count = stats.byType?.[key] || 0;
             const isActive = questionType === key;
 
             return (
-              <Chip
+              <FilterButton
                 key={key}
-                icon={<Icon sx={{ fontSize: 16 }} />}
-                label={`${t(`eval.questionTypes.${key}`)} (${count})`}
-                color={isActive ? color : 'default'}
-                variant={isActive ? 'filled' : 'outlined'}
+                startIcon={<Icon sx={{ fontSize: 18 }} />}
+                active={isActive}
+                colorType={color}
                 onClick={() => onTypeChange(isActive ? '' : key)}
-                size="small"
-                sx={{
-                  cursor: 'pointer',
-                  fontWeight: isActive ? 600 : 400,
-                  height: 28,
-                  '&:hover': { opacity: 0.85 }
-                }}
-              />
+              >
+                {t(`eval.questionTypes.${key}`)}
+                <Box component="span" sx={{ ml: 0.8, opacity: 0.9, fontSize: '0.8em' }}>
+                  ({count})
+                </Box>
+              </FilterButton>
             );
           })}
-      </Box>
+      </FilterGroup>
 
-      <Divider sx={{ mb: 1.5 }} />
+      <Divider sx={{ opacity: 0.6 }} />
 
       {/* 底部：筛选和操作 */}
       <Box
@@ -96,43 +102,23 @@ export default function EvalToolbar({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 1.5,
+          gap: 2,
           flexWrap: 'wrap'
         }}
       >
         {/* 左侧：筛选器组 */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, minWidth: 300 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, minWidth: 300 }}>
           {/* 搜索框 */}
-          <Paper
-            component="form"
-            elevation={0}
-            variant="outlined"
-            sx={{
-              p: '2px 4px',
-              display: 'flex',
-              alignItems: 'center',
-              width: 240,
-              height: 40, // 统一高度
-              borderRadius: 1.5,
-              backgroundColor: 'background.paper',
-              transition: 'box-shadow 0.2s',
-              '&:focus-within': {
-                borderColor: 'primary.main',
-                boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`
-              }
-            }}
-            onSubmit={e => e.preventDefault()}
-          >
-            <IconButton sx={{ p: '6px' }} aria-label="search" size="small">
-              <SearchIcon sx={{ fontSize: 18 }} color="action" />
+          <SearchWrapper>
+            <IconButton sx={{ p: '8px' }} aria-label="search" disabled>
+              <SearchIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
             </IconButton>
-            <InputBase
-              sx={{ ml: 0.5, flex: 1, fontSize: '0.875rem' }}
-              placeholder={t('eval.searchPlaceholder')}
+            <StyledInputBase
+              placeholder={t('eval.searchPlaceholder', '搜索题目内容...')}
               value={keyword}
               onChange={e => onKeywordChange(e.target.value)}
             />
-          </Paper>
+          </SearchWrapper>
 
           {/* 标签筛选 */}
           <Autocomplete
@@ -145,96 +131,72 @@ export default function EvalToolbar({
             renderInput={params => (
               <TextField
                 {...params}
-                placeholder={tags.length === 0 ? t('eval.tags') : ''}
+                placeholder={tags.length === 0 ? t('eval.tags', '标签') : ''}
                 size="small"
                 sx={{
-                  width: 300,
+                  width: 280,
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 1.5,
                     backgroundColor: 'background.paper',
-                    minHeight: 40 // 允许高度根据内容撑开，但最小高度保持一致
+                    minHeight: 42,
+                    fieldset: {
+                      borderColor: theme.palette.divider
+                    },
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.text.secondary
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: theme.palette.primary.main,
+                      borderWidth: 1,
+                      boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`
+                    }
                   }
                 }}
               />
             )}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip
-                  variant="outlined"
-                  label={option.label}
-                  size="small"
-                  {...getTagProps({ index })}
-                  sx={{ height: 24 }}
-                />
-              ))
-            }
             sx={{
-              '& .MuiOutlinedInput-root': { padding: '2px 9px' }
+              '& .MuiAutocomplete-tag': {
+                height: 24,
+                borderRadius: 1
+              }
             }}
           />
         </Box>
 
         {/* 右侧：操作按钮组 */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <ActionGroup>
           {/* 导入按钮 */}
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<UploadFileIcon sx={{ fontSize: 16 }} />}
-            onClick={onImport}
-            sx={{ borderRadius: 1.5, minWidth: 'auto', px: 1.5, height: 32 }}
-          >
+          <ActionButton variant="outlined" startIcon={<UploadFileIcon />} onClick={onImport}>
             {t('common.import', '导入')}
-          </Button>
+          </ActionButton>
 
           {selectedCount > 0 && (
-            <Button
-              size="small"
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon sx={{ fontSize: 16 }} />}
-              onClick={onDeleteSelected}
-              sx={{ borderRadius: 1.5, minWidth: 'auto', px: 1.5, height: 32 }}
-            >
-              {t('eval.deleteSelected', { count: selectedCount })}
-            </Button>
+            <DeleteActionButton variant="soft" startIcon={<DeleteIcon />} onClick={onDeleteSelected}>
+              {t('eval.deleteSelectedCount', `删除选中 (${selectedCount})`, { count: selectedCount })}
+            </DeleteActionButton>
           )}
 
-          <ToggleButtonGroup
+          <Divider orientation="vertical" flexItem sx={{ height: 24, alignSelf: 'center', mx: 0.5 }} />
+
+          <StyledToggleButtonGroup
             value={viewMode}
             exclusive
             onChange={(e, value) => value && onViewModeChange(value)}
             size="small"
-            sx={{
-              height: 32,
-              '& .MuiToggleButton-root': {
-                border: '1px solid',
-                borderColor: 'divider',
-                px: 1,
-                py: 0.5,
-                minWidth: 32
-              },
-              '& .MuiToggleButton-root:first-of-type': {
-                borderRadius: '6px 0 0 6px'
-              },
-              '& .MuiToggleButton-root:last-of-type': {
-                borderRadius: '0 6px 6px 0'
-              }
-            }}
           >
-            <ToggleButton value="card">
-              <Tooltip title={t('eval.cardView')}>
-                <ViewModuleIcon sx={{ fontSize: 16 }} />
+            <ToggleButton value="card" aria-label="card view">
+              <Tooltip title={t('eval.cardView', '卡片视图')}>
+                <ViewModuleIcon fontSize="small" />
               </Tooltip>
             </ToggleButton>
-            <ToggleButton value="list">
-              <Tooltip title={t('eval.listView')}>
-                <ViewListIcon sx={{ fontSize: 16 }} />
+            <ToggleButton value="list" aria-label="list view">
+              <Tooltip title={t('eval.listView', '列表视图')}>
+                <ViewListIcon fontSize="small" />
               </Tooltip>
             </ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
+          </StyledToggleButtonGroup>
+        </ActionGroup>
       </Box>
-    </Paper>
+    </ToolbarContainer>
   );
 }
