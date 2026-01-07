@@ -127,7 +127,7 @@ export default function EvalDatasetList({ items, selectedIds, onSelect, onSelect
               </TableCell>
               <TableCell align="center">
                 <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
-                  <Tooltip title={t('common.view')}>
+                  <Tooltip title={t('datasets.viewDetails')}>
                     <IconButton size="small" onClick={() => onView(item)}>
                       <VisibilityIcon fontSize="small" />
                     </IconButton>

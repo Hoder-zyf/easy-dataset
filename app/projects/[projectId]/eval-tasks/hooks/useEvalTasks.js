@@ -9,31 +9,38 @@ export default function useEvalTasks(projectId) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [total, setTotal] = useState(0);
 
   // 加载任务列表
-  const loadTasks = useCallback(async () => {
-    if (!projectId) return;
+  const loadTasks = useCallback(
+    async (isRefresh = false) => {
+      if (!projectId) return;
 
-    try {
-      setLoading(true);
-      setError('');
-      const response = await fetch(`/api/projects/${projectId}/eval-tasks`);
-      const result = await response.json();
+      try {
+        if (!isRefresh) setLoading(true);
+        setError('');
+        const response = await fetch(`/api/projects/${projectId}/eval-tasks?page=${page}&pageSize=${pageSize}`);
+        const result = await response.json();
 
-      if (result.code === 0) {
-        setTasks(result.data || []);
-      } else {
-        setError(result.error || '加载失败');
+        if (result.code === 0) {
+          setTasks(result.data.items || []);
+          setTotal(result.data.total || 0);
+        } else {
+          setError(result.error || '加载失败');
+        }
+      } catch (err) {
+        console.error('加载评估任务失败:', err);
+        setError('加载失败');
+      } finally {
+        if (!isRefresh) setLoading(false);
       }
-    } catch (err) {
-      console.error('加载评估任务失败:', err);
-      setError('加载失败');
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
+    },
+    [projectId, page, pageSize]
+  );
 
-  // 初始加载
+  // 初始加载和分页变化加载
   useEffect(() => {
     loadTasks();
   }, [loadTasks]);
@@ -43,7 +50,7 @@ export default function useEvalTasks(projectId) {
     const hasProcessingTasks = tasks.some(t => t.status === 0);
     if (!hasProcessingTasks) return;
 
-    const interval = setInterval(loadTasks, 5000);
+    const interval = setInterval(() => loadTasks(true), 5000);
     return () => clearInterval(interval);
   }, [tasks, loadTasks]);
 
@@ -57,7 +64,7 @@ export default function useEvalTasks(projectId) {
         const result = await response.json();
 
         if (result.code === 0) {
-          setTasks(prev => prev.filter(t => t.id !== taskId));
+          loadTasks();
           return true;
         } else {
           setError(result.error || '删除失败');
@@ -132,6 +139,11 @@ export default function useEvalTasks(projectId) {
     loadTasks,
     deleteTask,
     interruptTask,
-    createTasks
+    createTasks,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
+    total
   };
 }

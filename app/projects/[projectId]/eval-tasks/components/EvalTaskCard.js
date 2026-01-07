@@ -161,7 +161,7 @@ export default function EvalTaskCard({ task, onView, onDelete, onInterrupt }) {
           <ListItemIcon>
             <VisibilityIcon fontSize="small" />
           </ListItemIcon>
-          {t('common.view')}
+          {t('datasets.viewDetails')}
         </MenuItem>
         {status === 0 && (
           <MenuItem onClick={handleAction(onInterrupt)}>

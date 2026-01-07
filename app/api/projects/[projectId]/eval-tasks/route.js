@@ -8,19 +8,34 @@ import { processTask } from '@/lib/services/tasks';
 export async function GET(request, { params }) {
   try {
     const { projectId } = params;
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const pageSize = parseInt(searchParams.get('pageSize') || '20');
 
     if (!projectId) {
       return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
 
-    // 获取评估任务列表
-    const tasks = await db.task.findMany({
-      where: {
-        projectId,
-        taskType: 'model-evaluation'
-      },
-      orderBy: { createAt: 'desc' }
-    });
+    const skip = (page - 1) * pageSize;
+
+    // 获取评估任务列表和总数
+    const [tasks, total] = await Promise.all([
+      db.task.findMany({
+        where: {
+          projectId,
+          taskType: 'model-evaluation'
+        },
+        orderBy: { createAt: 'desc' },
+        skip,
+        take: pageSize
+      }),
+      db.task.count({
+        where: {
+          projectId,
+          taskType: 'model-evaluation'
+        }
+      })
+    ]);
 
     // 解析任务详情
     const tasksWithDetails = tasks.map(task => {
@@ -41,7 +56,13 @@ export async function GET(request, { params }) {
 
     return NextResponse.json({
       code: 0,
-      data: tasksWithDetails
+      data: {
+        items: tasksWithDetails,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
+      }
     });
   } catch (error) {
     console.error('获取评估任务列表失败:', error);
