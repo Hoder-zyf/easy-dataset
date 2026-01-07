@@ -23,6 +23,7 @@ import ShortTextIcon from '@mui/icons-material/ShortText';
 import NotesIcon from '@mui/icons-material/Notes';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import StorageIcon from '@mui/icons-material/Storage';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useTranslation } from 'react-i18next';
 import { useTheme, alpha } from '@mui/material/styles';
 import { useState } from 'react';
@@ -60,7 +61,8 @@ export default function EvalToolbar({
   tags,
   onTagsChange,
   onImport,
-  onBuiltinImport
+  onBuiltinImport,
+  onExport
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -220,6 +222,11 @@ export default function EvalToolbar({
               {t('evalDatasets.import.builtin', '导入内置数据集')}
             </MenuItem>
           </Menu>
+
+          {/* 导出按钮 */}
+          <ActionButton variant="outlined" startIcon={<FileDownloadIcon />} onClick={onExport}>
+            {t('common.export', '导出')}
+          </ActionButton>
 
           {selectedCount > 0 && (
             <DeleteActionButton variant="soft" startIcon={<DeleteIcon />} onClick={onDeleteSelected}>

@@ -1601,6 +1601,20 @@
       "confirmImportTitle": "Confirm Import",
       "confirmImportMessage": "Are you sure you want to import dataset \"{{name}}\"? This will add new evaluation data to the current project.",
       "downloading": "Downloading..."
+    },
+    "export": {
+      "title": "Export Eval Datasets",
+      "formatLabel": "Export Format",
+      "filterLabel": "Filter Criteria",
+      "previewLabel": "Data to export: ",
+      "records": " records",
+      "largeDataHint": "Large dataset, streaming export will be used, please wait",
+      "exporting": "Exporting...",
+      "exportBtn": "Export",
+      "jsonDesc": "Standard JSON array",
+      "jsonlDesc": "One record per line",
+      "csvDesc": "Table format",
+      "noTagsAvailable": "No tags available"
     }
   },
   "evalTasks": {

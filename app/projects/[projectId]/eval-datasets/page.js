@@ -21,11 +21,13 @@ import { Masonry } from '@mui/lab';
 import { useTranslation } from 'react-i18next';
 
 import useEvalDatasets from './hooks/useEvalDatasets';
+import useExportEvalDatasets from './hooks/useExportEvalDatasets';
 import EvalToolbar from './components/EvalToolbar';
 import EvalDatasetCard from './components/EvalDatasetCard';
 import EvalDatasetList from './components/EvalDatasetList';
 import ImportDialog from './components/ImportDialog';
 import BuiltinDatasetDialog from './components/BuiltinDatasetDialog';
+import ExportEvalDialog from './components/ExportEvalDialog';
 
 export default function EvalDatasetsPage() {
   const { projectId } = useParams();
@@ -56,6 +58,28 @@ export default function EvalDatasetsPage() {
     fetchData,
     deleteItems
   } = useEvalDatasets(projectId);
+
+  // 导出 Hook
+  const {
+    dialogOpen: exportDialogOpen,
+    openDialog: openExportDialog,
+    closeDialog: closeExportDialog,
+    exporting,
+    error: exportError,
+    format: exportFormat,
+    setFormat: setExportFormat,
+    questionTypes: exportQuestionTypes,
+    setQuestionTypes: setExportQuestionTypes,
+    selectedTags: exportSelectedTags,
+    setSelectedTags: setExportSelectedTags,
+    keyword: exportKeyword,
+    setKeyword: setExportKeyword,
+    previewTotal,
+    previewLoading,
+    availableTags: exportAvailableTags,
+    resetFilters: resetExportFilters,
+    handleExport
+  } = useExportEvalDatasets(projectId, stats);
 
   // 删除确认对话框
   const [deleteDialog, setDeleteDialog] = useState({ open: false, ids: [] });
@@ -127,6 +151,7 @@ export default function EvalDatasetsPage() {
         loading={loading}
         onImport={() => setImportDialogOpen(true)}
         onBuiltinImport={() => setBuiltinImportOpen(true)}
+        onExport={openExportDialog}
       />
 
       {/* 加载状态 */}
@@ -258,6 +283,27 @@ export default function EvalDatasetsPage() {
         onClose={() => setBuiltinImportOpen(false)}
         projectId={projectId}
         onSuccess={handleImportSuccess}
+      />
+
+      {/* 导出对话框 */}
+      <ExportEvalDialog
+        open={exportDialogOpen}
+        onClose={closeExportDialog}
+        exporting={exporting}
+        error={exportError}
+        format={exportFormat}
+        setFormat={setExportFormat}
+        questionTypes={exportQuestionTypes}
+        setQuestionTypes={setExportQuestionTypes}
+        selectedTags={exportSelectedTags}
+        setSelectedTags={setExportSelectedTags}
+        keyword={exportKeyword}
+        setKeyword={setExportKeyword}
+        previewTotal={previewTotal}
+        previewLoading={previewLoading}
+        availableTags={exportAvailableTags}
+        resetFilters={resetExportFilters}
+        onExport={handleExport}
       />
 
       {/* Toast 提示 */}
