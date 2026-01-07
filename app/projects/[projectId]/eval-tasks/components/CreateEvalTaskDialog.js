@@ -43,12 +43,13 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
     setSearchKeyword,
     questionCount,
     setQuestionCount,
-    filteredDatasets,
-    finalDatasets,
+    filteredTotal,
+    sampledIds,
     hasSubjectiveQuestions,
     loading,
     error,
     setError,
+    setSampledIds,
     resetFilters,
     resetForm
   } = useEvalTaskForm(projectId, open);
@@ -76,7 +77,7 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
       return;
     }
 
-    if (finalDatasets.length === 0) {
+    if (filteredTotal === 0) {
       setError(t('evalTasks.errorNoQuestions'));
       return;
     }
@@ -111,6 +112,34 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
         judgeModelId = mId;
       }
 
+      // 调用后端采样接口获取题目 ID
+      const sampleBody = {
+        questionType: questionTypes.length === 1 ? questionTypes[0] : '',
+        tags: selectedTags,
+        keyword: searchKeyword.trim() || '',
+        limit: questionCount > 0 ? questionCount : undefined
+      };
+
+      const sampleResponse = await fetch(`/api/projects/${projectId}/eval-datasets/sample`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sampleBody)
+      });
+
+      const sampleResult = await sampleResponse.json();
+      if (!sampleResponse.ok || sampleResult.code !== 0) {
+        setError(sampleResult.error || t('evalTasks.errorCreateFailed'));
+        return;
+      }
+
+      const ids = sampleResult?.data?.ids || [];
+      if (ids.length === 0) {
+        setError(t('evalTasks.errorNoQuestions'));
+        return;
+      }
+
+      setSampledIds(ids);
+
       // 创建任务
       const response = await fetch(`/api/projects/${projectId}/eval-tasks`, {
         method: 'POST',
@@ -119,7 +148,7 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
           models, // 后端期望的字段名
           judgeModelId, // 分开传递
           judgeProviderId, // 分开传递
-          evalDatasetIds: finalDatasets.map(d => d.id),
+          evalDatasetIds: ids,
           language: 'zh-CN'
         })
       });
@@ -179,7 +208,7 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
             questionCount={questionCount}
             availableTags={availableTags}
             typeStats={typeStats}
-            filteredCount={filteredDatasets.length}
+            filteredCount={filteredTotal}
             onQuestionTypesChange={setQuestionTypes}
             onTagsChange={setSelectedTags}
             onSearchChange={setSearchKeyword}
@@ -190,7 +219,8 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
           {/* 最终题目统计 */}
           <Box sx={{ mb: 3, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              最终选择：<strong>{finalDatasets.length}</strong> 道题目
+              最终选择：<strong>{sampledIds.length || (questionCount > 0 ? questionCount : filteredTotal)}</strong>{' '}
+              道题目
             </Typography>
             {hasSubjectiveQuestions && (
               <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>

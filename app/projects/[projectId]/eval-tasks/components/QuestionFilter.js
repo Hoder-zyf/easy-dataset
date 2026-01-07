@@ -91,7 +91,7 @@ export default function QuestionFilter({
               {QUESTION_TYPES.map(type => (
                 <MenuItem key={type.value} value={type.value}>
                   <Checkbox checked={questionTypes.includes(type.value)} />
-                  <ListItemText primary={`${t(type.labelKey)} (${typeStats[type.value] || 0})`} />
+                  <ListItemText primary={`${t(type.labelKey)} `} />
                 </MenuItem>
               ))}
             </Select>

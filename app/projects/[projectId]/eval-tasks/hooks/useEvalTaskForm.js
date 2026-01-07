@@ -15,15 +15,15 @@ export function useEvalTaskForm(projectId, open) {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [questionCount, setQuestionCount] = useState(0);
 
-  // 筛选后的结果
-  const [filteredDatasets, setFilteredDatasets] = useState([]);
-  const [finalDatasets, setFinalDatasets] = useState([]);
+  // 后端统计 & 采样结果
+  const [filteredTotal, setFilteredTotal] = useState(0);
+  const [sampledIds, setSampledIds] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   // 检查是否有主观题
-  const hasSubjectiveQuestions = finalDatasets.some(
+  const hasSubjectiveQuestions = evalDatasets.some(
     d => d.questionType === 'short_answer' || d.questionType === 'open_ended'
   );
 
@@ -35,40 +35,46 @@ export function useEvalTaskForm(projectId, open) {
     }
   }, [open, projectId]);
 
-  // 根据筛选条件过滤题目
+  // 当筛选条件变化时，调用后端统计数量
   useEffect(() => {
-    let filtered = evalDatasets;
+    if (!open || !projectId) return;
 
-    if (questionTypes.length > 0) {
-      filtered = filtered.filter(d => questionTypes.includes(d.questionType));
-    }
+    const controller = new AbortController();
 
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter(d => {
-        const datasetTags = d.tags ? d.tags.split(',').map(t => t.trim()) : [];
-        return selectedTags.some(tag => datasetTags.includes(tag));
-      });
-    }
+    const fetchCount = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (questionTypes.length === 1) {
+          params.append('questionType', questionTypes[0]);
+        }
+        if (searchKeyword.trim()) {
+          params.append('keyword', searchKeyword.trim());
+        }
+        if (selectedTags.length > 0) {
+          selectedTags.forEach(tag => params.append('tags', tag));
+        }
 
-    if (searchKeyword.trim()) {
-      const keyword = searchKeyword.toLowerCase();
-      filtered = filtered.filter(
-        d => d.question?.toLowerCase().includes(keyword) || d.correctAnswer?.toLowerCase().includes(keyword)
-      );
-    }
+        const response = await fetch(`/api/projects/${projectId}/eval-datasets/count?${params.toString()}`, {
+          signal: controller.signal
+        });
+        if (response.ok) {
+          const result = await response.json();
+          const total = result?.data?.total ?? 0;
+          setFilteredTotal(total);
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('加载评估题目数量失败:', err);
+        }
+      }
+    };
 
-    setFilteredDatasets(filtered);
-  }, [questionTypes, selectedTags, searchKeyword, evalDatasets]);
+    fetchCount();
 
-  // 根据题目数量限制进行随机抽取
-  useEffect(() => {
-    if (questionCount > 0 && questionCount < filteredDatasets.length) {
-      const shuffled = [...filteredDatasets].sort(() => Math.random() - 0.5);
-      setFinalDatasets(shuffled.slice(0, questionCount));
-    } else {
-      setFinalDatasets(filteredDatasets);
-    }
-  }, [questionCount, filteredDatasets]);
+    return () => {
+      controller.abort();
+    };
+  }, [open, projectId, questionTypes, selectedTags, searchKeyword]);
 
   const loadModels = async () => {
     try {
@@ -88,22 +94,19 @@ export function useEvalTaskForm(projectId, open) {
   const loadEvalDatasets = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/projects/${projectId}/eval-datasets?pageSize=1000`);
+      // 这里只需要拿到全部可用标签和题型分布，可以复用已有列表接口或标签接口
+      const response = await fetch(`/api/projects/${projectId}/eval-datasets?includeStats=true&page=1&pageSize=20`);
       if (response.ok) {
         const data = await response.json();
-        const datasets = data.items || [];
-        setEvalDatasets(datasets);
+        const stats = data.stats || {};
+        const byTag = stats.byTag || {};
+        const tags = Object.keys(byTag);
+        setAvailableTags(tags.sort());
 
-        const tagsSet = new Set();
-        datasets.forEach(d => {
-          if (d.tags) {
-            d.tags.split(',').forEach(tag => {
-              const trimmed = tag.trim();
-              if (trimmed) tagsSet.add(trimmed);
-            });
-          }
-        });
-        setAvailableTags(Array.from(tagsSet).sort());
+        // 用部分数据来判断是否存在主观题（类型统计更准确）
+        const byType = stats.byType || {};
+        const mockDatasets = Object.entries(byType).map(([type]) => ({ questionType: type }));
+        setEvalDatasets(mockDatasets);
       }
     } catch (err) {
       console.error('加载评估题目失败:', err);
@@ -117,6 +120,8 @@ export function useEvalTaskForm(projectId, open) {
     setSelectedTags([]);
     setSearchKeyword('');
     setQuestionCount(0);
+    setFilteredTotal(0);
+    setSampledIds([]);
   };
 
   const resetForm = () => {
@@ -142,12 +147,13 @@ export function useEvalTaskForm(projectId, open) {
     setSearchKeyword,
     questionCount,
     setQuestionCount,
-    filteredDatasets,
-    finalDatasets,
+    filteredTotal,
+    sampledIds,
     hasSubjectiveQuestions,
     loading,
     error,
     setError,
+    setSampledIds,
     resetFilters,
     resetForm
   };
