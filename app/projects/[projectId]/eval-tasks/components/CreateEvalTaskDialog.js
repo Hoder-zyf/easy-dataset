@@ -114,7 +114,7 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
 
       // 调用后端采样接口获取题目 ID
       const sampleBody = {
-        questionType: questionTypes.length === 1 ? questionTypes[0] : '',
+        questionTypes: questionTypes,
         tags: selectedTags,
         keyword: searchKeyword.trim() || '',
         limit: questionCount > 0 ? questionCount : undefined

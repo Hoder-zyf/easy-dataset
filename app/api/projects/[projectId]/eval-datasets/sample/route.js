@@ -19,10 +19,19 @@ export async function POST(request, { params }) {
     const { projectId } = params;
     const body = await request.json();
 
-    const { questionType = '', keyword = '', chunkId = '', tags = [], limit = 0, strategy = 'random' } = body || {};
+    const {
+      questionType = '',
+      questionTypes = [],
+      keyword = '',
+      chunkId = '',
+      tags = [],
+      limit = 0,
+      strategy = 'random'
+    } = body || {};
 
     const where = buildEvalQuestionWhere(projectId, {
       questionType: questionType || undefined,
+      questionTypes: Array.isArray(questionTypes) && questionTypes.length > 0 ? questionTypes : undefined,
       keyword: keyword || undefined,
       chunkId: chunkId || undefined,
       tags: Array.isArray(tags) && tags.length > 0 ? tags : undefined

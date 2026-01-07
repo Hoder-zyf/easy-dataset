@@ -18,14 +18,10 @@ export function useEvalTaskForm(projectId, open) {
   // 后端统计 & 采样结果
   const [filteredTotal, setFilteredTotal] = useState(0);
   const [sampledIds, setSampledIds] = useState([]);
+  const [hasSubjectiveQuestions, setHasSubjectiveQuestions] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  // 检查是否有主观题
-  const hasSubjectiveQuestions = evalDatasets.some(
-    d => d.questionType === 'short_answer' || d.questionType === 'open_ended'
-  );
 
   // 加载数据
   useEffect(() => {
@@ -44,8 +40,8 @@ export function useEvalTaskForm(projectId, open) {
     const fetchCount = async () => {
       try {
         const params = new URLSearchParams();
-        if (questionTypes.length === 1) {
-          params.append('questionType', questionTypes[0]);
+        if (questionTypes.length > 0) {
+          questionTypes.forEach(t => params.append('questionTypes', t));
         }
         if (searchKeyword.trim()) {
           params.append('keyword', searchKeyword.trim());
@@ -60,7 +56,9 @@ export function useEvalTaskForm(projectId, open) {
         if (response.ok) {
           const result = await response.json();
           const total = result?.data?.total ?? 0;
+          const hasSubjective = result?.data?.hasSubjective ?? false;
           setFilteredTotal(total);
+          setHasSubjectiveQuestions(hasSubjective);
         }
       } catch (err) {
         if (err.name !== 'AbortError') {

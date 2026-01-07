@@ -11,6 +11,8 @@ export async function GET(request, { params }) {
     const keyword = searchParams.get('keyword') || '';
     const chunkId = searchParams.get('chunkId') || '';
 
+    const questionTypes = searchParams.getAll('questionTypes') || [];
+
     const tags =
       searchParams.getAll('tags').length > 0
         ? searchParams.getAll('tags')
@@ -20,17 +22,32 @@ export async function GET(request, { params }) {
 
     const where = buildEvalQuestionWhere(projectId, {
       questionType: questionType || undefined,
+      questionTypes: questionTypes.length > 0 ? questionTypes : undefined,
       keyword: keyword || undefined,
       chunkId: chunkId || undefined,
       tags: tags.length > 0 ? tags : undefined
     });
 
-    const total = await db.evalDatasets.count({ where });
+    const [total, byTypeRaw] = await Promise.all([
+      db.evalDatasets.count({ where }),
+      db.evalDatasets.groupBy({
+        by: ['questionType'],
+        where,
+        _count: { id: true }
+      })
+    ]);
+
+    const byType = {};
+    byTypeRaw.forEach(item => {
+      byType[item.questionType] = item._count.id;
+    });
+
+    const hasSubjective = (byType.short_answer || 0) > 0 || (byType.open_ended || 0) > 0;
 
     return NextResponse.json(
       {
         code: 0,
-        data: { total }
+        data: { total, byType, hasSubjective }
       },
       { status: 200 }
     );

@@ -1,6 +1,18 @@
 'use client';
 
-import { Box, Typography, Checkbox, FormHelperText } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Checkbox,
+  FormHelperText,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  ListItemText,
+  OutlinedInput,
+  Chip
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 export default function ModelSelector({ models, selectedModels, onSelectionChange, error }) {
@@ -8,61 +20,68 @@ export default function ModelSelector({ models, selectedModels, onSelectionChang
 
   const getModelKey = model => `${model.providerId}::${model.modelId}`;
 
-  const handleToggle = modelKey => {
-    const newSelection = selectedModels.includes(modelKey)
-      ? selectedModels.filter(m => m !== modelKey)
-      : [...selectedModels, modelKey];
-    onSelectionChange(newSelection);
+  const handleChange = event => {
+    const {
+      target: { value }
+    } = event;
+    // On autofill we get a stringified value.
+    onSelectionChange(typeof value === 'string' ? value.split(',') : value);
+  };
+
+  const getModelLabel = modelKey => {
+    const model = models.find(m => getModelKey(m) === modelKey);
+    if (!model) return modelKey;
+    return `${model.providerName || model.providerId} / ${model.modelName || model.modelId}`;
   };
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
-        {t('evalTasks.selectModels')} *
-      </Typography>
-      <Box
-        sx={{
-          p: 2,
-          border: 1,
-          borderColor: error ? 'error.main' : 'divider',
-          borderRadius: 1,
-          bgcolor: 'background.paper'
-        }}
-      >
-        {models.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
-            暂无可用模型，请先在设置中配置模型
-          </Typography>
-        ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {models.map(model => {
+      <FormControl fullWidth error={!!error} size="small">
+        <InputLabel id="model-selector-label">{t('evalTasks.selectModels')} *</InputLabel>
+        <Select
+          labelId="model-selector-label"
+          multiple
+          value={selectedModels}
+          onChange={handleChange}
+          input={<OutlinedInput label={`${t('evalTasks.selectModels')} *`} />}
+          renderValue={selected => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {selected.map(value => (
+                <Chip key={value} label={getModelLabel(value)} size="small" />
+              ))}
+            </Box>
+          )}
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 300,
+                width: 250
+              }
+            }
+          }}
+        >
+          {models.length === 0 ? (
+            <MenuItem disabled value="">
+              <Typography variant="body2" color="text.secondary">
+                暂无可用模型，请先在设置中配置模型
+              </Typography>
+            </MenuItem>
+          ) : (
+            models.map(model => {
               const modelKey = getModelKey(model);
               return (
-                <Box
-                  key={modelKey}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    p: 1,
-                    borderRadius: 1,
-                    '&:hover': { bgcolor: 'action.hover' },
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => handleToggle(modelKey)}
-                >
-                  <Checkbox checked={selectedModels.includes(modelKey)} sx={{ p: 0, mr: 1.5 }} />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {model.providerName || model.providerId} / {model.modelName || model.modelId}
-                    </Typography>
-                  </Box>
-                </Box>
+                <MenuItem key={modelKey} value={modelKey}>
+                  <Checkbox checked={selectedModels.includes(modelKey)} />
+                  <ListItemText
+                    primary={`${model.providerName || model.providerId} / ${model.modelName || model.modelId}`}
+                  />
+                </MenuItem>
               );
-            })}
-          </Box>
-        )}
-      </Box>
-      <FormHelperText>{t('evalTasks.selectModelsHint')}</FormHelperText>
+            })
+          )}
+        </Select>
+        <FormHelperText>{error || t('evalTasks.selectModelsHint')}</FormHelperText>
+      </FormControl>
     </Box>
   );
 }
