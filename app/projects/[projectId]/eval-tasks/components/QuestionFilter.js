@@ -33,7 +33,6 @@ export default function QuestionFilter({
   searchKeyword,
   questionCount,
   availableTags,
-  typeStats,
   filteredCount,
   onQuestionTypesChange,
   onTagsChange,
@@ -50,11 +49,11 @@ export default function QuestionFilter({
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <FilterAltIcon sx={{ mr: 1, color: 'primary.main' }} />
         <Typography variant="subtitle2" sx={{ fontWeight: 600, flex: 1 }}>
-          题目筛选
+          {t('evalTasks.filterTitle')}
         </Typography>
         {hasFilters && (
           <Button size="small" startIcon={<ClearIcon />} onClick={onReset}>
-            清空筛选
+            {t('evalTasks.clearFilter')}
           </Button>
         )}
       </Box>
@@ -64,8 +63,8 @@ export default function QuestionFilter({
         <TextField
           fullWidth
           size="small"
-          label="搜索关键字"
-          placeholder="搜索题目或答案内容..."
+          label={t('evalTasks.searchKeyword')}
+          placeholder={t('evalTasks.searchPlaceholder')}
           value={searchKeyword}
           onChange={e => onSearchChange(e.target.value)}
         />
@@ -74,12 +73,12 @@ export default function QuestionFilter({
         <Box sx={{ display: 'flex', gap: 2 }}>
           {/* 题型筛选 */}
           <FormControl fullWidth size="small">
-            <InputLabel>题型筛选</InputLabel>
+            <InputLabel>{t('evalTasks.filterByTypeLabel')}</InputLabel>
             <Select
               multiple
               value={questionTypes}
               onChange={e => onQuestionTypesChange(e.target.value)}
-              input={<OutlinedInput label="题型筛选" />}
+              input={<OutlinedInput label={t('evalTasks.filterByTypeLabel')} />}
               renderValue={selected => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selected.map(value => (
@@ -100,12 +99,12 @@ export default function QuestionFilter({
           {/* 标签筛选 */}
           {availableTags.length > 0 && (
             <FormControl fullWidth size="small">
-              <InputLabel>标签筛选</InputLabel>
+              <InputLabel>{t('evalTasks.filterByTagLabel')}</InputLabel>
               <Select
                 multiple
                 value={selectedTags}
                 onChange={e => onTagsChange(e.target.value)}
-                input={<OutlinedInput label="标签筛选" />}
+                input={<OutlinedInput label={t('evalTasks.filterByTagLabel')} />}
                 renderValue={selected => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                     {selected.map(value => (
@@ -129,7 +128,8 @@ export default function QuestionFilter({
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Typography variant="body2" sx={{ flex: 1 }}>
-              题目数量：{questionCount === 0 ? '全部' : questionCount} / {filteredCount}
+              {t('evalTasks.questionCountLabel')}
+              {questionCount === 0 ? t('common.all') : questionCount} / {filteredCount}
             </Typography>
             <TextField
               size="small"
@@ -149,7 +149,9 @@ export default function QuestionFilter({
             valueLabelDisplay="auto"
           />
           <Typography variant="caption" color="text.secondary">
-            {questionCount === 0 ? '使用全部筛选结果' : `将从 ${filteredCount} 道题中随机抽取 ${questionCount} 道`}
+            {questionCount === 0
+              ? t('evalTasks.useAllQuestions')
+              : t('evalTasks.randomSampleHint', { filteredCount, questionCount })}
           </Typography>
         </Box>
       </Box>

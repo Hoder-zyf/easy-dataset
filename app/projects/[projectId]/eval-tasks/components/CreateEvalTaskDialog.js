@@ -219,8 +219,9 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
           {/* 最终题目统计 */}
           <Box sx={{ mb: 3, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              最终选择：<strong>{sampledIds.length || (questionCount > 0 ? questionCount : filteredTotal)}</strong>{' '}
-              道题目
+              {t('evalTasks.finalSelection')}
+              <strong>{sampledIds.length || (questionCount > 0 ? questionCount : filteredTotal)}</strong>{' '}
+              {t('evalTasks.questionsSuffix')}
             </Typography>
             {hasSubjectiveQuestions && (
               <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>

@@ -63,7 +63,7 @@ export default function ModelSelector({ models, selectedModels, onSelectionChang
           {models.length === 0 ? (
             <MenuItem disabled value="">
               <Typography variant="body2" color="text.secondary">
-                暂无可用模型，请先在设置中配置模型
+                {t('evalTasks.noModelsAvailable')}
               </Typography>
             </MenuItem>
           ) : (

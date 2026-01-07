@@ -65,7 +65,7 @@ export default function EvalHeader({ task, stats, filterCorrect, onFilterCorrect
               <Box sx={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem' }}>
                 <AccessTimeIcon sx={{ fontSize: 16, mr: 0.5 }} />
                 {new Date(createAt).toLocaleString()}
-                {totalTime > 0 && ` (耗时 ${totalTime}s)`}
+                {totalTime > 0 && ` ${t('evalTasks.durationFormat', { time: totalTime })}`}
               </Box>
             </Box>
           </Box>
@@ -88,7 +88,7 @@ export default function EvalHeader({ task, stats, filterCorrect, onFilterCorrect
               {stats?.totalQuestions || 0}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              总题数
+              {t('evalTasks.totalQuestionsLabel')}
             </Typography>
           </Box>
           <Box
@@ -106,7 +106,7 @@ export default function EvalHeader({ task, stats, filterCorrect, onFilterCorrect
               {stats?.correctCount || 0}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              正确
+              {t('evalTasks.correctLabel')}
             </Typography>
           </Box>
           <Box
@@ -124,7 +124,7 @@ export default function EvalHeader({ task, stats, filterCorrect, onFilterCorrect
               {incorrectCount}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              错误
+              {t('evalTasks.incorrectLabel')}
             </Typography>
           </Box>
         </Box>

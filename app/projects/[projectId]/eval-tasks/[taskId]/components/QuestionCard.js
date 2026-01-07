@@ -180,7 +180,7 @@ export default function QuestionCard({ result, index, task }) {
             icon={<ErrorOutlineIcon sx={{ fontSize: 14 }} />}
             label={t(
               STATUS_CONFIG[status]?.label || 'evalTasks.statusUnknown',
-              status === EVAL_STATUS.FORMAT_ERROR ? '格式错误' : 'API错误'
+              status === EVAL_STATUS.FORMAT_ERROR ? t('evalTasks.statusFormatError') : t('evalTasks.statusApiError')
             )}
             size="small"
             color={STATUS_CONFIG[status]?.color || 'default'}
@@ -335,7 +335,7 @@ export default function QuestionCard({ result, index, task }) {
       {judgeResponse && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Box sx={detailStyles.judgeComment}>
-            <Typography sx={detailStyles.judgeLabel}>AI 教师点评:</Typography>
+            <Typography sx={detailStyles.judgeLabel}>{t('evalTasks.judgeComment')}</Typography>
             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
               {getJudgeDisplayContent(judgeResponse)}
             </Typography>
@@ -351,7 +351,7 @@ export default function QuestionCard({ result, index, task }) {
                   pt: 0.5
                 }}
               >
-                {(score * 100).toFixed(0)} 分
+                {(score * 100).toFixed(0)} {t('evalTasks.scoreUnit')}
               </Typography>
             )}
           </Box>
