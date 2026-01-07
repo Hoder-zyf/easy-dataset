@@ -1593,7 +1593,14 @@
       "failed": "Import failed",
       "success": "Import successful",
       "successMessage": "Successfully imported {{count}} evaluation datasets",
-      "showingErrors": "Showing first {{count}} errors"
+      "showingErrors": "Showing first {{count}} errors",
+      "custom": "Custom Import",
+      "builtin": "Built-in Datasets",
+      "builtinTitle": "Select Built-in Dataset",
+      "searchPlaceholder": "Search datasets...",
+      "confirmImportTitle": "Confirm Import",
+      "confirmImportMessage": "Are you sure you want to import dataset \"{{name}}\"? This will add new evaluation data to the current project.",
+      "downloading": "Downloading..."
     }
   },
   "evalTasks": {

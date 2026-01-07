@@ -43,13 +43,6 @@ function validateSingleChoice(item, index) {
   if (!item.correctAnswer || !/^[A-Z]$/.test(item.correctAnswer)) {
     errors.push(`第 ${index + 1} 条: correctAnswer 必须是单个大写字母 (A-Z)`);
   }
-  // 验证答案索引是否在选项范围内
-  if (options && item.correctAnswer) {
-    const answerIndex = item.correctAnswer.charCodeAt(0) - 65;
-    if (answerIndex >= options.length) {
-      errors.push(`第 ${index + 1} 条: correctAnswer "${item.correctAnswer}" 超出选项范围`);
-    }
-  }
   return errors;
 }
 
@@ -96,12 +89,6 @@ function validateMultipleChoice(item, index) {
     for (const ans of correctAnswer) {
       if (!/^[A-Z]$/.test(ans)) {
         errors.push(`第 ${index + 1} 条: correctAnswer 中的 "${ans}" 不是有效的选项字母`);
-      }
-      if (options) {
-        const answerIndex = ans.charCodeAt(0) - 65;
-        if (answerIndex >= options.length) {
-          errors.push(`第 ${index + 1} 条: correctAnswer "${ans}" 超出选项范围`);
-        }
       }
     }
   }

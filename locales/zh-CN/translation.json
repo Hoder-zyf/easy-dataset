@@ -1579,7 +1579,14 @@
       "failed": "导入失败",
       "success": "导入成功",
       "successMessage": "成功导入 {{count}} 条评估数据",
-      "showingErrors": "显示前 {{count}} 条错误"
+      "showingErrors": "显示前 {{count}} 条错误",
+      "custom": "导入自定义数据集",
+      "builtin": "导入内置数据集",
+      "builtinTitle": "选择内置数据集",
+      "searchPlaceholder": "搜索数据集...",
+      "confirmImportTitle": "确认导入",
+      "confirmImportMessage": "确定要导入数据集 \"{{name}}\" 吗？这将添加新的评估数据到当前项目。",
+      "downloading": "下载中..."
     }
   },
   "evalTasks": {

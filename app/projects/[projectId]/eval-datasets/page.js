@@ -25,6 +25,7 @@ import EvalToolbar from './components/EvalToolbar';
 import EvalDatasetCard from './components/EvalDatasetCard';
 import EvalDatasetList from './components/EvalDatasetList';
 import ImportDialog from './components/ImportDialog';
+import BuiltinDatasetDialog from './components/BuiltinDatasetDialog';
 
 export default function EvalDatasetsPage() {
   const { projectId } = useParams();
@@ -61,6 +62,7 @@ export default function EvalDatasetsPage() {
 
   // 导入对话框
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [builtinImportOpen, setBuiltinImportOpen] = useState(false);
 
   // Toast 提示
   const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
@@ -124,6 +126,7 @@ export default function EvalDatasetsPage() {
         onRefresh={fetchData}
         loading={loading}
         onImport={() => setImportDialogOpen(true)}
+        onBuiltinImport={() => setBuiltinImportOpen(true)}
       />
 
       {/* 加载状态 */}
@@ -245,6 +248,14 @@ export default function EvalDatasetsPage() {
       <ImportDialog
         open={importDialogOpen}
         onClose={() => setImportDialogOpen(false)}
+        projectId={projectId}
+        onSuccess={handleImportSuccess}
+      />
+
+      {/* 内置数据集导入对话框 */}
+      <BuiltinDatasetDialog
+        open={builtinImportOpen}
+        onClose={() => setBuiltinImportOpen(false)}
         projectId={projectId}
         onSuccess={handleImportSuccess}
       />

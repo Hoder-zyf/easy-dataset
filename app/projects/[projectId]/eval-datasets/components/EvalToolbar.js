@@ -3,13 +3,13 @@
 import {
   Box,
   IconButton,
-  ToggleButtonGroup,
   ToggleButton,
-  Button,
   Tooltip,
   Divider,
   Autocomplete,
-  TextField
+  TextField,
+  Menu,
+  MenuItem
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
@@ -17,12 +17,15 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import DeleteIcon from '@mui/icons-material/DeleteOutline'; // 使用 Outline 版本更精致
 import CheckCircleIcon from '@mui/icons-material/CheckCircleOutline'; // 统一使用 Outline 风格图标
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import CheckBoxIcon from '@mui/icons-material/CheckBoxOutlineBlank'; // 或者 CheckBox
 import ShortTextIcon from '@mui/icons-material/ShortText';
 import NotesIcon from '@mui/icons-material/Notes';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import StorageIcon from '@mui/icons-material/Storage';
 import { useTranslation } from 'react-i18next';
 import { useTheme, alpha } from '@mui/material/styles';
+import { useState } from 'react';
 
 import {
   ToolbarContainer,
@@ -56,10 +59,31 @@ export default function EvalToolbar({
   onTypeChange,
   tags,
   onTagsChange,
-  onImport
+  onImport,
+  onBuiltinImport
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
+
+  const [importAnchorEl, setImportAnchorEl] = useState(null);
+
+  const handleImportClick = event => {
+    setImportAnchorEl(event.currentTarget);
+  };
+
+  const handleImportClose = () => {
+    setImportAnchorEl(null);
+  };
+
+  const handleCustomImport = () => {
+    handleImportClose();
+    onImport?.();
+  };
+
+  const handleBuiltinImport = () => {
+    handleImportClose();
+    onBuiltinImport?.();
+  };
 
   const tagOptions = stats?.byTag
     ? Object.keys(stats.byTag).map(tag => ({
@@ -165,10 +189,37 @@ export default function EvalToolbar({
 
         {/* 右侧：操作按钮组 */}
         <ActionGroup>
-          {/* 导入按钮 */}
-          <ActionButton variant="outlined" startIcon={<UploadFileIcon />} onClick={onImport}>
+          {/* 导入按钮下拉菜单 */}
+          <ActionButton
+            variant="outlined"
+            startIcon={<UploadFileIcon />}
+            endIcon={<KeyboardArrowDownIcon />}
+            onClick={handleImportClick}
+          >
             {t('common.import', '导入')}
           </ActionButton>
+          <Menu
+            anchorEl={importAnchorEl}
+            open={Boolean(importAnchorEl)}
+            onClose={handleImportClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+          >
+            <MenuItem onClick={handleCustomImport} disableRipple>
+              <UploadFileIcon fontSize="small" sx={{ mr: 1.5, color: 'text.secondary' }} />
+              {t('evalDatasets.import.custom', '导入自定义数据集')}
+            </MenuItem>
+            <MenuItem onClick={handleBuiltinImport} disableRipple>
+              <StorageIcon fontSize="small" sx={{ mr: 1.5, color: 'text.secondary' }} />
+              {t('evalDatasets.import.builtin', '导入内置数据集')}
+            </MenuItem>
+          </Menu>
 
           {selectedCount > 0 && (
             <DeleteActionButton variant="soft" startIcon={<DeleteIcon />} onClick={onDeleteSelected}>
