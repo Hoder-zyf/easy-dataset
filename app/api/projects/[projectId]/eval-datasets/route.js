@@ -13,6 +13,7 @@ export async function GET(request, { params }) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = parseInt(searchParams.get('pageSize') || '20', 10);
     const questionType = searchParams.get('questionType') || '';
+    const questionTypes = searchParams.getAll('questionTypes');
     const keyword = searchParams.get('keyword') || '';
     const chunkId = searchParams.get('chunkId') || '';
     // 支持多个 tag 参数，或者逗号分隔
@@ -30,6 +31,7 @@ export async function GET(request, { params }) {
       page,
       pageSize,
       questionType: questionType || undefined,
+      questionTypes: questionTypes.length > 0 ? questionTypes : undefined,
       keyword: keyword || undefined,
       chunkId: chunkId || undefined,
       tags: tags.length > 0 ? tags : undefined

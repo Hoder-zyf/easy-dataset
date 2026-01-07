@@ -177,6 +177,18 @@ export default function DesktopMenus({ theme, menuState, isMenuOpen, handleMenuC
           </ListItemIcon>
           <ListItemText primary={t('eval.tasks')} primaryTypographyProps={styles.smallListItemTextStyles} />
         </MenuItem>
+        <Divider sx={{ my: 0.5, mx: 1 }} />
+        <MenuItem
+          component={Link}
+          href={`/projects/${currentProject}/blind-test-tasks`}
+          onClick={handleMenuClose}
+          sx={styles.getSimpleMenuItemStyles(theme)}
+        >
+          <ListItemIcon sx={styles.smallListItemIconStyles}>
+            <PlaylistPlayIcon fontSize="small" sx={styles.getPrimaryIconColorStyles(theme)} />
+          </ListItemIcon>
+          <ListItemText primary={t('blindTest.title')} primaryTypographyProps={styles.smallListItemTextStyles} />
+        </MenuItem>
       </Menu>
 
       {/* 更多菜单 */}

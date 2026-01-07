@@ -274,6 +274,18 @@ export default function MobileDrawer({
               </ListItemIcon>
               <ListItemText primary={t('eval.tasks')} primaryTypographyProps={styles.smallListItemTextStyles} />
             </ListItemButton>
+            <ListItemButton
+              role="menuitem"
+              sx={styles.getDrawerSubmenuItemStyles(theme)}
+              component={Link}
+              href={`/projects/${currentProject}/blind-test-tasks`}
+              onClick={toggleDrawer}
+            >
+              <ListItemIcon sx={styles.smallListItemIconStyles}>
+                <PlaylistPlayIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary={t('blindTest.title')} primaryTypographyProps={styles.smallListItemTextStyles} />
+            </ListItemButton>
           </List>
         </Collapse>
 
