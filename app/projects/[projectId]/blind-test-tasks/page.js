@@ -144,9 +144,9 @@ export default function BlindTestTasksPage() {
       {/* 任务列表 */}
       {!loading && tasks.length > 0 && (
         <>
-          <Grid container spacing={2.5}>
+          <Grid container spacing={2}>
             {tasks.map(task => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={task.id}>
+              <Grid item xs={12} key={task.id}>
                 <BlindTestTaskCard
                   task={task}
                   onView={handleView}

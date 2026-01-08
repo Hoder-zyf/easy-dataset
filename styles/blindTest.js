@@ -7,7 +7,8 @@ export const blindTestStyles = theme => ({
     height: 'calc(100vh - 64px)',
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    bgcolor: 'background.default'
   },
 
   // 头部
@@ -50,7 +51,8 @@ export const blindTestStyles = theme => ({
     borderRadius: 3,
     border: `1px solid ${theme.palette.divider}`,
     boxShadow: 'none',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    bgcolor: theme.palette.background.paper
   },
   answerHeader: {
     p: 2,
@@ -58,7 +60,7 @@ export const blindTestStyles = theme => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    bgcolor: alpha(theme.palette.primary.main, 0.03)
+    bgcolor: theme.palette.background.default
   },
   answerContent: {
     flex: 1,
@@ -89,16 +91,16 @@ export const blindTestStyles = theme => ({
 
   // 底部投票栏
   voteBar: {
-    p: 2,
+    p: 1.5,
     borderRadius: 4,
     mx: 'auto',
-    maxWidth: 800,
-    width: '100%',
-    mt: 2,
-    bgcolor: alpha(theme.palette.background.paper, 0.9),
-    backdropFilter: 'blur(10px)',
+    width: 'fit-content',
+    minWidth: 600,
+    mt: 'auto',
+    bgcolor: alpha(theme.palette.background.paper, 0.8),
+    backdropFilter: 'blur(20px)',
     border: `1px solid ${theme.palette.divider}`,
-    boxShadow: theme.shadows[4]
+    boxShadow: theme.shadows[8]
   },
   voteButtons: {
     display: 'flex',
@@ -108,12 +110,12 @@ export const blindTestStyles = theme => ({
   voteBtn: {
     flex: 1,
     py: 1.2,
-    borderRadius: 2,
+    borderRadius: 3,
     fontWeight: 600,
     textTransform: 'none',
     boxShadow: 'none',
     '&:hover': {
-      boxShadow: theme.shadows[2]
+      boxShadow: theme.shadows[4]
     }
   },
 
@@ -148,13 +150,14 @@ export const blindTestStyles = theme => ({
   // 详细结果列表项
   resultItem: {
     mb: 2,
-    borderRadius: 2,
+    borderRadius: 3,
     border: `1px solid ${theme.palette.divider}`,
     boxShadow: 'none',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    transition: 'all 0.2s ease'
   },
   resultItemHeader: {
-    p: 2,
+    p: 2.5,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',

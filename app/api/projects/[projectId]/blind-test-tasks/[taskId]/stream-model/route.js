@@ -54,7 +54,7 @@ export async function GET(request, { params }) {
 
     // Resolve model config based on modelType
     const modelConfigKey = modelType === 'A' ? 'modelA' : 'modelB';
-    const modelConfig = await getModelConfigById(modelInfo[modelConfigKey].providerId);
+    const modelConfig = await getModelConfigById(modelInfo[modelConfigKey].id);
 
     if (!modelConfig) {
       return NextResponse.json({ error: 'Model configuration not found' }, { status: 400 });

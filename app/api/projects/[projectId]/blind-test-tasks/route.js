@@ -133,12 +133,14 @@ export async function POST(request, { params }) {
     // Build model info (two models)
     const modelInfo = {
       modelA: {
+        id: modelConfigA?.id,
         modelId: modelA.modelId,
         modelName: modelConfigA?.modelName || modelA.modelId,
         providerId: modelA.providerId,
         providerName: modelConfigA?.providerName || modelA.providerId
       },
       modelB: {
+        id: modelConfigB?.id,
         modelId: modelB.modelId,
         modelName: modelConfigB?.modelName || modelB.modelId,
         providerId: modelB.providerId,
@@ -146,11 +148,10 @@ export async function POST(request, { params }) {
       }
     };
 
-    // Build task detail
+    // Build task detail (only store evalDatasetIds and currentIndex)
     const taskDetail = {
       evalDatasetIds,
-      currentIndex: 0, // Current question index
-      results: [] // Per-question votes: [{ questionId, vote, modelAScore, modelBScore }]
+      currentIndex: 0 // Current question index
     };
 
     // Create task

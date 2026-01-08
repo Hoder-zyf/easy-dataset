@@ -3,6 +3,7 @@ import { db } from '@/lib/db/index';
 
 /**
  * Get blind-test task details
+ * Results are fetched from EvalResults table
  */
 export async function GET(request, { params }) {
   try {
@@ -30,9 +31,10 @@ export async function GET(request, { params }) {
     }
 
     // Fetch all related evaluation questions
+    const evalDatasetIds = detail.evalDatasetIds || [];
     const evalDatasets = await db.evalDatasets.findMany({
       where: {
-        id: { in: detail.evalDatasetIds || [] }
+        id: { in: evalDatasetIds }
       },
       select: {
         id: true,
@@ -44,15 +46,44 @@ export async function GET(request, { params }) {
     });
 
     // Sort by evalDatasetIds order
-    const orderedDatasets = (detail.evalDatasetIds || [])
-      .map(id => evalDatasets.find(d => d.id === id))
-      .filter(Boolean);
+    const orderedDatasets = evalDatasetIds.map(id => evalDatasets.find(d => d.id === id)).filter(Boolean);
+
+    // Fetch results from EvalResults table
+    const evalResults = await db.evalResults.findMany({
+      where: { taskId },
+      orderBy: { createAt: 'asc' }
+    });
+
+    // Parse results into the format expected by frontend
+    const results = evalResults.map(r => {
+      let modelAnswer = {};
+      let judgeData = {};
+      try {
+        modelAnswer = JSON.parse(r.modelAnswer || '{}');
+        judgeData = JSON.parse(r.judgeResponse || '{}');
+      } catch (e) {
+        // Ignore parse errors
+      }
+      return {
+        questionId: r.evalDatasetId,
+        vote: judgeData.vote,
+        isSwapped: judgeData.isSwapped,
+        modelAScore: judgeData.modelAScore || 0,
+        modelBScore: judgeData.modelBScore || 0,
+        leftAnswer: modelAnswer.leftAnswer || '',
+        rightAnswer: modelAnswer.rightAnswer || '',
+        timestamp: r.createAt
+      };
+    });
 
     return NextResponse.json({
       code: 0,
       data: {
         ...task,
-        detail,
+        detail: {
+          ...detail,
+          results // Include results from EvalResults table
+        },
         modelInfo,
         evalDatasets: orderedDatasets
       }
@@ -117,7 +148,7 @@ export async function PUT(request, { params }) {
 }
 
 /**
- * Delete blind-test task
+ * Delete blind-test task and its results
  */
 export async function DELETE(request, { params }) {
   try {
@@ -135,6 +166,12 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ code: 404, error: 'Task not found' }, { status: 404 });
     }
 
+    // Delete related EvalResults first
+    await db.evalResults.deleteMany({
+      where: { taskId }
+    });
+
+    // Then delete the task
     await db.task.delete({
       where: { id: taskId }
     });
