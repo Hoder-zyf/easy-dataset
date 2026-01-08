@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { createLlmModels, getLlmModelsByProviderId } from '@/lib/db/llm-models'; // 导入db实例
+import { getLlmModelsByProviderId } from '@/lib/db/llm-models';
 
-// 获取LLM模型
+// Get LLM models
 export async function GET(request) {
   try {
     const searchParams = request.nextUrl.searchParams;
     let providerId = searchParams.get('providerId');
     if (!providerId) {
-      return NextResponse.json({ error: '参数错误' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
     const models = await getLlmModelsByProviderId(providerId);
     if (!models) {
@@ -20,7 +20,7 @@ export async function GET(request) {
   }
 }
 
-//同步最新模型列表
+// Sync latest model list
 export async function POST(request) {
   try {
     const { newModels, providerId } = await request.json();

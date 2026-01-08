@@ -9,8 +9,6 @@ export async function GET(request) {
     const provider = searchParams.get('provider');
     const status = searchParams.get('status');
 
-    // 计算时间范围
-    const now = new Date();
     let startDate = new Date();
 
     if (timeRange === '24h') {
@@ -21,7 +19,6 @@ export async function GET(request) {
       startDate.setDate(startDate.getDate() - 7);
     }
 
-    // 构建查询条件
     const where = {
       createAt: {
         gte: startDate
@@ -38,7 +35,6 @@ export async function GET(request) {
       where.status = status;
     }
 
-    // 获取汇总数据
     const logs = await db.llmUsageLogs.findMany({
       where,
       select: {
@@ -53,7 +49,6 @@ export async function GET(request) {
       }
     });
 
-    // 数据处理与聚合
     const summary = {
       totalTokens: 0,
       inputTokens: 0,
@@ -80,7 +75,6 @@ export async function GET(request) {
         summary.failedCalls++;
       }
 
-      // Trend
       let timeKey;
       if (timeRange === '24h') {
         const date = new Date(log.createAt);
@@ -95,7 +89,6 @@ export async function GET(request) {
       trendMap[timeKey].input += log.inputTokens;
       trendMap[timeKey].output += log.outputTokens;
 
-      // Model Distribution
       const modelKey = log.model;
       if (!modelStats[modelKey]) {
         modelStats[modelKey] = { name: modelKey, value: 0 };
@@ -103,7 +96,6 @@ export async function GET(request) {
       modelStats[modelKey].value += log.totalTokens;
     });
 
-    // 计算平均值
     if (summary.successCalls > 0) {
       summary.avgLatency = Math.round(summary.totalLatency / summary.successCalls);
     }
@@ -113,13 +105,11 @@ export async function GET(request) {
     const trend = Object.values(trendMap).sort((a, b) => a.name.localeCompare(b.name));
     const modelDistribution = Object.values(modelStats).sort((a, b) => b.value - a.value);
 
-    // 获取所有项目列表（不仅仅是有日志的项目）
     const projects = await db.projects.findMany({
       select: { id: true, name: true },
       orderBy: { createAt: 'desc' }
     });
 
-    // 从日志表中统计所有出现过的提供商（去重）
     const allLogs = await db.llmUsageLogs.findMany({
       select: { provider: true },
       distinct: ['provider']

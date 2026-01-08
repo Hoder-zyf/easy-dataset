@@ -12,8 +12,6 @@ export async function GET(request) {
     const pageSize = parseInt(searchParams.get('pageSize') || '10', 10);
     const searchTerm = searchParams.get('search') || '';
 
-    // 计算时间范围
-    const now = new Date();
     let startDate = new Date();
 
     if (timeRange === '24h') {
@@ -24,7 +22,6 @@ export async function GET(request) {
       startDate.setDate(startDate.getDate() - 7);
     }
 
-    // 构建查询条件
     const where = {
       createAt: {
         gte: startDate
@@ -41,15 +38,11 @@ export async function GET(request) {
       where.status = status;
     }
 
-    // 搜索条件
     if (searchTerm) {
       where.OR = [{ model: { contains: searchTerm } }, { errorMessage: { contains: searchTerm } }];
     }
 
-    // 获取总数
     const total = await db.llmUsageLogs.count({ where });
-
-    // 获取分页数据
     const logs = await db.llmUsageLogs.findMany({
       where,
       select: {
@@ -72,7 +65,6 @@ export async function GET(request) {
       take: pageSize
     });
 
-    // 获取项目信息映射
     const projectIds = [...new Set(logs.map(log => log.projectId))];
     const projects = await db.projects.findMany({
       where: { id: { in: projectIds } },
@@ -83,7 +75,6 @@ export async function GET(request) {
       return acc;
     }, {});
 
-    // 格式化数据
     const details = logs.map(log => ({
       id: log.id,
       projectId: log.projectId,
@@ -95,7 +86,7 @@ export async function GET(request) {
       inputTokens: log.inputTokens,
       outputTokens: log.outputTokens,
       totalTokens: log.totalTokens,
-      calls: 1, // 单条记录
+      calls: 1, // Single record
       avgLatency: log.status === 'SUCCESS' ? (log.latency / 1000).toFixed(2) + 's' : '-',
       createAt: log.createAt
     }));

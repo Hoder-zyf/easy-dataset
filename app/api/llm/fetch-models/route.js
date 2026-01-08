@@ -1,23 +1,23 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-// 从模型提供商获取模型列表
+// Fetch model list from provider
 export async function POST(request) {
   try {
     const { endpoint, providerId, apiKey } = await request.json();
 
     if (!endpoint) {
-      return NextResponse.json({ error: '缺少 endpoint 参数' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required parameter: endpoint' }, { status: 400 });
     }
 
-    let url = endpoint.replace(/\/$/, ''); // 去除末尾的斜杠
+    let url = endpoint.replace(/\/$/, ''); // Remove trailing slash
 
-    // 处理 Ollama endpoint
+    // Handle Ollama endpoint
     if (providerId === 'ollama') {
-      // 移除可能存在的 /v1 或其他版本前缀
+      // Remove possible /v1 or other version suffix
       url = url.replace(/\/v\d+$/, '');
 
-      // 如果 endpoint 不包含 /api，则添加
+      // Append /api if missing
       if (!url.includes('/api')) {
         url += '/api';
       }
@@ -33,10 +33,10 @@ export async function POST(request) {
 
     const response = await axios.get(url, { headers });
 
-    // 根据不同提供商格式化返回数据
+    // Format response per provider
     let formattedModels = [];
     if (providerId === 'ollama') {
-      // Ollama /api/tags 返回的格式: { models: [{ name: 'model-name', ... }] }
+      // Ollama /api/tags format: { models: [{ name: 'model-name', ... }] }
       if (response.data.models && Array.isArray(response.data.models)) {
         formattedModels = response.data.models.map(item => ({
           modelId: item.name,
@@ -45,7 +45,7 @@ export async function POST(request) {
         }));
       }
     } else {
-      // 默认处理方式（適用于 OpenAI 等）
+      // Default handling (OpenAI-compatible)
       if (response.data.data && Array.isArray(response.data.data)) {
         formattedModels = response.data.data.map(item => ({
           modelId: item.id,
@@ -57,19 +57,19 @@ export async function POST(request) {
 
     return NextResponse.json(formattedModels);
   } catch (error) {
-    console.error('获取模型列表失败:', String(error));
+    console.error('Failed to fetch model list:', String(error));
 
-    // 处理特定错误
+    // Handle known error shapes
     if (error.response) {
       if (error.response.status === 401) {
-        return NextResponse.json({ error: 'API Key 无效' }, { status: 401 });
+        return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
       }
       return NextResponse.json(
-        { error: `获取模型列表失败: ${error.response.statusText}` },
+        { error: `Failed to fetch model list: ${error.response.statusText}` },
         { status: error.response.status }
       );
     }
 
-    return NextResponse.json({ error: `获取模型列表失败: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: `Failed to fetch model list: ${error.message}` }, { status: 500 });
   }
 }
