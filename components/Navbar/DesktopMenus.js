@@ -13,6 +13,7 @@ import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import StorageIcon from '@mui/icons-material/Storage';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import * as styles from './styles';
 
 /**
@@ -185,7 +186,7 @@ export default function DesktopMenus({ theme, menuState, isMenuOpen, handleMenuC
           sx={styles.getSimpleMenuItemStyles(theme)}
         >
           <ListItemIcon sx={styles.smallListItemIconStyles}>
-            <PlaylistPlayIcon fontSize="small" sx={styles.getPrimaryIconColorStyles(theme)} />
+            <VisibilityIcon fontSize="small" sx={styles.getPrimaryIconColorStyles(theme)} />
           </ListItemIcon>
           <ListItemText primary={t('blindTest.title')} primaryTypographyProps={styles.smallListItemTextStyles} />
         </MenuItem>

@@ -33,6 +33,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import UpdateChecker from '../UpdateChecker';
 import * as styles from './styles';
 
@@ -282,7 +283,7 @@ export default function MobileDrawer({
               onClick={toggleDrawer}
             >
               <ListItemIcon sx={styles.smallListItemIconStyles}>
-                <PlaylistPlayIcon fontSize="small" />
+                <VisibilityIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText primary={t('blindTest.title')} primaryTypographyProps={styles.smallListItemTextStyles} />
             </ListItemButton>
