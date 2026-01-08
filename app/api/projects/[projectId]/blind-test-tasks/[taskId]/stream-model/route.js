@@ -72,14 +72,7 @@ export async function GET(request, { params }) {
     // Create LLM client
     const client = new LLMClient({
       projectId,
-      providerId: modelConfig.providerId,
-      endpoint: modelConfig.endpoint,
-      apiKey: modelConfig.apiKey,
-      modelName: modelConfig.modelName,
-      temperature: modelConfig.temperature,
-      maxTokens: modelConfig.maxTokens,
-      topP: modelConfig.topP,
-      topK: modelConfig.topK
+      ...modelConfig
     });
 
     // Call streaming API and return response directly

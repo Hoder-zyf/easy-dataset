@@ -87,26 +87,12 @@ export async function GET(request, { params }) {
           // Create LLM clients
           const clientA = new LLMClient({
             projectId,
-            providerId: modelConfigA.providerId,
-            endpoint: modelConfigA.endpoint,
-            apiKey: modelConfigA.apiKey,
-            modelName: modelConfigA.modelName,
-            temperature: modelConfigA.temperature,
-            maxTokens: modelConfigA.maxTokens,
-            topP: modelConfigA.topP,
-            topK: modelConfigA.topK
+            ...modelConfigA
           });
 
           const clientB = new LLMClient({
             projectId,
-            providerId: modelConfigB.providerId,
-            endpoint: modelConfigB.endpoint,
-            apiKey: modelConfigB.apiKey,
-            modelName: modelConfigB.modelName,
-            temperature: modelConfigB.temperature,
-            maxTokens: modelConfigB.maxTokens,
-            topP: modelConfigB.topP,
-            topK: modelConfigB.topK
+            ...modelConfigB
           });
 
           let answerA = '';

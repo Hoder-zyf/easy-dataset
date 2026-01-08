@@ -19,7 +19,7 @@ export async function POST(request, { params }) {
       return NextResponse.json({ success: false, message: '项目ID不能为空' }, { status: 400 });
     }
 
-    if (!model || !model.modelName) {
+    if (!model || !model.modelId) {
       return NextResponse.json({ success: false, message: '模型配置不能为空' }, { status: 400 });
     }
 

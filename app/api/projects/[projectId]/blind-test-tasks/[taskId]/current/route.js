@@ -94,16 +94,7 @@ export async function GET(request, { params }) {
 
     try {
       // Call model A
-      const clientA = new LLMClient({
-        providerId: modelConfigA.providerId,
-        endpoint: modelConfigA.endpoint,
-        apiKey: modelConfigA.apiKey,
-        modelName: modelConfigA.modelName,
-        temperature: modelConfigA.temperature,
-        maxTokens: modelConfigA.maxTokens,
-        topP: modelConfigA.topP,
-        topK: modelConfigA.topK
-      });
+      const clientA = new LLMClient(modelConfigA);
 
       const resultA = await clientA.chat([
         { role: 'system', content: systemPrompt },
@@ -120,16 +111,7 @@ export async function GET(request, { params }) {
 
     try {
       // Call model B
-      const clientB = new LLMClient({
-        providerId: modelConfigB.providerId,
-        endpoint: modelConfigB.endpoint,
-        apiKey: modelConfigB.apiKey,
-        modelName: modelConfigB.modelName,
-        temperature: modelConfigB.temperature,
-        maxTokens: modelConfigB.maxTokens,
-        topP: modelConfigB.topP,
-        topK: modelConfigB.topK
-      });
+      const clientB = new LLMClient(modelConfigB);
 
       const resultB = await clientB.chat([
         { role: 'system', content: systemPrompt },

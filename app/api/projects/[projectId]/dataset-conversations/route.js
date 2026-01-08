@@ -85,7 +85,7 @@ export async function POST(request, { params }) {
       );
     }
 
-    if (!model || !model.modelName) {
+    if (!model || !model.modelId) {
       return NextResponse.json(
         {
           success: false,
