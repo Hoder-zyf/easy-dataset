@@ -29,45 +29,66 @@ export default function useBlindTestDetail(projectId, taskId) {
   const [completed, setCompleted] = useState(false);
 
   // 加载任务详情
-  const loadTask = useCallback(async () => {
-    if (!projectId || !taskId) return;
+  const loadTask = useCallback(
+    async (silent = false) => {
+      if (!projectId || !taskId) return;
 
-    try {
-      setLoading(true);
-      setError('');
-      const response = await fetch(`/api/projects/${projectId}/blind-test-tasks/${taskId}`);
-      const result = await response.json();
+      try {
+        if (!silent) setLoading(true);
+        setError('');
+        // 添加时间戳防止缓存
+        const response = await fetch(`/api/projects/${projectId}/blind-test-tasks/${taskId}?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            Pragma: 'no-cache',
+            'Cache-Control': 'no-cache'
+          }
+        });
+        const result = await response.json();
 
-      if (result.code === 0) {
-        setTask(result.data);
-        // 检查任务是否已完成 (0=进行中, 1=已完成, 2=失败, 3=已中断)
-        if (result.data.status !== 0) {
-          setCompleted(true);
+        if (result.code === 0) {
+          console.log('任务状态更新:', result.data.completedCount, '/', result.data.totalCount);
+          setTask(result.data);
+          // 检查任务是否已完成 (0=进行中, 1=已完成, 2=失败, 3=已中断)
+          if (result.data.status !== 0) {
+            setCompleted(true);
+          }
+        } else {
+          if (!silent) setError(result.error || '加载任务详情失败');
         }
-      } else {
-        setError(result.error || '加载任务详情失败');
+      } catch (err) {
+        console.error('加载任务详情失败:', err);
+        if (!silent) setError('加载任务详情失败');
+      } finally {
+        if (!silent) setLoading(false);
       }
-    } catch (err) {
-      console.error('加载任务详情失败:', err);
-      setError('加载任务详情失败');
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId, taskId]);
+    },
+    [projectId, taskId]
+  );
 
   // 流式获取当前题目和模型回答
   const fetchCurrentQuestion = useCallback(async () => {
     if (!projectId || !taskId) return;
 
+    // 取消上一次的请求
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       setAnswersLoading(true);
       setError('');
       setCurrentQuestion(null);
-      setLeftAnswer({ content: '', duration: 0, error: null });
-      setRightAnswer({ content: '', duration: 0, error: null });
+      setLeftAnswer({ fullContent: '', content: '', thinking: '', isThinking: false, duration: 0, error: null });
+      setRightAnswer({ fullContent: '', content: '', thinking: '', isThinking: false, duration: 0, error: null });
 
       // 1. 先获取题目信息
-      const questionRes = await fetch(`/api/projects/${projectId}/blind-test-tasks/${taskId}/question`);
+      const questionRes = await fetch(`/api/projects/${projectId}/blind-test-tasks/${taskId}/question`, {
+        signal: controller.signal,
+        cache: 'no-store'
+      });
 
       if (!questionRes.ok) throw new Error('获取题目失败');
 
@@ -81,6 +102,7 @@ export default function useBlindTestDetail(projectId, taskId) {
       setCurrentQuestion({
         id: questionData.questionId,
         question: questionData.question,
+        answer: questionData.answer,
         index: questionData.questionIndex,
         total: questionData.totalQuestions
       });
@@ -88,14 +110,16 @@ export default function useBlindTestDetail(projectId, taskId) {
       setCompleted(false);
 
       // 2. 并行调用两个模型的流式接口
-      const startTime = Date.now();
       setStreamingA(true);
       setStreamingB(true);
 
       const processStream = async (modelType, setAnswer, setStreaming) => {
+        const modelStartTime = Date.now();
         try {
           const streamUrl = `/api/projects/${projectId}/blind-test-tasks/${taskId}/stream-model?model=${modelType}`;
-          const response = await fetch(streamUrl);
+          const response = await fetch(streamUrl, {
+            signal: controller.signal
+          });
 
           if (!response.ok) {
             throw new Error(`模型${modelType}调用失败: ${response.status}`);
@@ -103,27 +127,84 @@ export default function useBlindTestDetail(projectId, taskId) {
 
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
-          let content = '';
+
+          let fullContent = '';
+          let currentContent = '';
+          let currentThinking = '';
+          let isInThinking = false;
+          let pendingBuffer = ''; // 用于处理跨 chunk 的标签识别
 
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
             const chunk = decoder.decode(value, { stream: true });
-            content += chunk;
+            pendingBuffer += chunk;
+
+            // 处理缓冲区中的内容
+            while (pendingBuffer.length > 0) {
+              // 如果正在思考中，寻找结束标签
+              if (isInThinking) {
+                const endTagIndex = pendingBuffer.indexOf('</think>');
+                if (endTagIndex !== -1) {
+                  const thinkingPart = pendingBuffer.substring(0, endTagIndex);
+                  currentThinking += thinkingPart;
+                  fullContent += thinkingPart + '</think>';
+                  isInThinking = false;
+                  pendingBuffer = pendingBuffer.substring(endTagIndex + 8);
+                  continue;
+                } else {
+                  // 没有找到结束标签，但可能缓冲区末尾包含了部分结束标签
+                  // 保留最后 7 个字符（"</think>" 长度为 8）以防被截断
+                  const safeLength = Math.max(0, pendingBuffer.length - 7);
+                  const processingPart = pendingBuffer.substring(0, safeLength);
+                  currentThinking += processingPart;
+                  fullContent += processingPart;
+                  pendingBuffer = pendingBuffer.substring(safeLength);
+                  break; // 等待下一个 chunk
+                }
+              } else {
+                // 不在思考中，寻找开始标签
+                const startTagIndex = pendingBuffer.indexOf('<think>');
+                if (startTagIndex !== -1) {
+                  const contentPart = pendingBuffer.substring(0, startTagIndex);
+                  currentContent += contentPart;
+                  fullContent += contentPart + '<think>';
+                  isInThinking = true;
+                  pendingBuffer = pendingBuffer.substring(startTagIndex + 7);
+                  continue;
+                } else {
+                  // 没有找到开始标签，保留最后 6 个字符以防开始标签被截断
+                  const safeLength = Math.max(0, pendingBuffer.length - 6);
+                  const processingPart = pendingBuffer.substring(0, safeLength);
+                  currentContent += processingPart;
+                  fullContent += processingPart;
+                  pendingBuffer = pendingBuffer.substring(safeLength);
+                  break; // 等待下一个 chunk
+                }
+              }
+            }
 
             setAnswer(prev => ({
               ...prev,
-              content
+              fullContent,
+              content: currentContent,
+              thinking: currentThinking,
+              isThinking: isInThinking
             }));
           }
 
+          const modelDuration = Date.now() - modelStartTime;
+          setAnswer(prev => ({ ...prev, duration: modelDuration }));
           setStreaming(false);
         } catch (err) {
+          if (err.name === 'AbortError') return;
           console.error(`模型${modelType}错误:`, err);
+          const modelDuration = Date.now() - modelStartTime;
           setAnswer(prev => ({
             ...prev,
-            error: err.message
+            error: err.message,
+            duration: modelDuration
           }));
           setStreaming(false);
         }
@@ -137,17 +218,17 @@ export default function useBlindTestDetail(projectId, taskId) {
         processStream(leftModel, setLeftAnswer, setStreamingA),
         processStream(rightModel, setRightAnswer, setStreamingB)
       ]);
-
-      const duration = Date.now() - startTime;
-      setLeftAnswer(prev => ({ ...prev, duration }));
-      setRightAnswer(prev => ({ ...prev, duration }));
     } catch (err) {
+      if (err.name === 'AbortError') return;
       console.error('获取题目失败:', err);
       setError(err.message || '获取当前题目失败');
       setStreamingA(false);
       setStreamingB(false);
     } finally {
-      setAnswersLoading(false);
+      // 只有当前请求未被取消时才重置loading
+      if (abortControllerRef.current === controller) {
+        setAnswersLoading(false);
+      }
     }
   }, [projectId, taskId]);
 
@@ -167,17 +248,20 @@ export default function useBlindTestDetail(projectId, taskId) {
             vote,
             questionId: currentQuestion.id,
             isSwapped,
-            leftAnswer: leftAnswer?.content || '',
-            rightAnswer: rightAnswer?.content || ''
+            // 使用 fullContent 提交，包含思考过程
+            leftAnswer: leftAnswer?.fullContent || leftAnswer?.content || '',
+            rightAnswer: rightAnswer?.fullContent || rightAnswer?.content || ''
           })
         });
 
         const result = await response.json();
 
         if (result.code === 0) {
+          // 等待任务状态更新（进度条）
+          await loadTask(true);
+
           if (result.data.isCompleted) {
             setCompleted(true);
-            loadTask();
           } else {
             // 获取下一题
             await fetchCurrentQuestion();

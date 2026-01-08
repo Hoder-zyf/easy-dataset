@@ -52,6 +52,7 @@ export async function GET(request, { params }) {
     return NextResponse.json({
       questionId: currentQuestion.id,
       question: currentQuestion.question,
+      answer: currentQuestion.correctAnswer || '',
       questionIndex: currentIndex + 1,
       totalQuestions: questionIds.length,
       isSwapped
