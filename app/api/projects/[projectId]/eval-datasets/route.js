@@ -2,21 +2,21 @@ import { NextResponse } from 'next/server';
 import { getEvalQuestionsWithPagination, getEvalQuestionsStats, deleteEvalQuestion } from '@/lib/db/evalDatasets';
 
 /**
- * 获取项目的评估数据集列表（分页）
+ * Get project's evaluation dataset list (paginated)
  */
 export async function GET(request, { params }) {
   try {
     const { projectId } = params;
     const { searchParams } = new URL(request.url);
 
-    // 解析查询参数
+    // Parse query params
     const page = parseInt(searchParams.get('page') || '1', 10);
     const pageSize = parseInt(searchParams.get('pageSize') || '20', 10);
     const questionType = searchParams.get('questionType') || '';
     const questionTypes = searchParams.getAll('questionTypes');
     const keyword = searchParams.get('keyword') || '';
     const chunkId = searchParams.get('chunkId') || '';
-    // 支持多个 tag 参数，或者逗号分隔
+    // Support multiple tags params or comma-separated tag
     const tags =
       searchParams.getAll('tags').length > 0
         ? searchParams.getAll('tags')
@@ -26,7 +26,7 @@ export async function GET(request, { params }) {
 
     const includeStats = searchParams.get('includeStats') === 'true';
 
-    // 获取分页数据
+    // Fetch paginated data
     const result = await getEvalQuestionsWithPagination(projectId, {
       page,
       pageSize,
@@ -37,7 +37,7 @@ export async function GET(request, { params }) {
       tags: tags.length > 0 ? tags : undefined
     });
 
-    // 如果需要统计数据
+    // Attach stats if requested
     if (includeStats) {
       const stats = await getEvalQuestionsStats(projectId);
       result.stats = stats;
@@ -51,20 +51,17 @@ export async function GET(request, { params }) {
 }
 
 /**
- * 批量删除评估数据集
+ * Batch delete evaluation datasets
  */
 export async function DELETE(request, { params }) {
   try {
-    const { projectId } = params;
     const { ids } = await request.json();
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ error: 'Invalid request: ids array is required' }, { status: 400 });
     }
 
-    // 批量删除
     const results = await Promise.all(ids.map(id => deleteEvalQuestion(id).catch(err => ({ error: err.message, id }))));
-
     const deleted = results.filter(r => !r.error).length;
     const failed = results.filter(r => r.error).length;
 

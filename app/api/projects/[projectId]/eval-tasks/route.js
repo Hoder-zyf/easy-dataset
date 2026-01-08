@@ -3,7 +3,7 @@ import { db } from '@/lib/db/index';
 import { processTask } from '@/lib/services/tasks';
 
 /**
- * 获取项目的所有评估任务
+ * Get all evaluation tasks for a project
  */
 export async function GET(request, { params }) {
   try {
@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
 
     const skip = (page - 1) * pageSize;
 
-    // 获取评估任务列表和总数
+    // Fetch task list and total count
     const [tasks, total] = await Promise.all([
       db.task.findMany({
         where: {
@@ -37,7 +37,7 @@ export async function GET(request, { params }) {
       })
     ]);
 
-    // 解析任务详情
+    // Parse task detail fields
     const tasksWithDetails = tasks.map(task => {
       let detail = {};
       let modelInfo = {};
@@ -45,7 +45,7 @@ export async function GET(request, { params }) {
         detail = task.detail ? JSON.parse(task.detail) : {};
         modelInfo = task.modelInfo ? JSON.parse(task.modelInfo) : {};
       } catch (e) {
-        console.error('解析任务详情失败:', e);
+        console.error('Failed to parse task detail:', e);
       }
       return {
         ...task,
@@ -65,14 +65,17 @@ export async function GET(request, { params }) {
       }
     });
   } catch (error) {
-    console.error('获取评估任务列表失败:', error);
-    return NextResponse.json({ code: 500, error: '获取评估任务列表失败', message: error.message }, { status: 500 });
+    console.error('Failed to fetch evaluation task list:', error);
+    return NextResponse.json(
+      { code: 500, error: 'Failed to fetch evaluation task list', message: error.message },
+      { status: 500 }
+    );
   }
 }
 
 /**
- * 创建评估任务
- * 支持同时选择多个模型，为每个模型创建一个任务
+ * Create evaluation tasks
+ * Supports selecting multiple models and creating one task per model
  */
 export async function POST(request, { params }) {
   try {
@@ -80,24 +83,24 @@ export async function POST(request, { params }) {
     const data = await request.json();
 
     const {
-      models, // 要测试的模型列表 [{ modelId, providerId }]
-      evalDatasetIds, // 要评估的题目ID列表
-      judgeModelId, // 教师模型ID（用于主观题评分）
-      judgeProviderId, // 教师模型提供商ID
+      models, // Models to evaluate: [{ modelId, providerId }]
+      evalDatasetIds, // Evaluation question IDs
+      judgeModelId, // Judge model ID (for subjective grading)
+      judgeProviderId, // Judge provider ID
       language = 'zh-CN',
-      filterOptions = {} // 筛选选项（用于显示）
+      filterOptions = {} // Filter options (for display)
     } = data;
 
-    // 验证必填字段
+    // Validate required fields
     if (!models || models.length === 0) {
-      return NextResponse.json({ code: 400, error: '请至少选择一个模型进行评估' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Please select at least one model to evaluate' }, { status: 400 });
     }
 
     if (!evalDatasetIds || evalDatasetIds.length === 0) {
-      return NextResponse.json({ code: 400, error: '请选择要评估的题目' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Please select questions to evaluate' }, { status: 400 });
     }
 
-    // 检查是否有主观题
+    // Check for subjective questions
     const evalDatasets = await db.evalDatasets.findMany({
       where: {
         id: { in: evalDatasetIds },
@@ -110,29 +113,35 @@ export async function POST(request, { params }) {
       q => q.questionType === 'short_answer' || q.questionType === 'open_ended'
     );
 
-    // 如果有主观题，必须提供教师模型
+    // If there are subjective questions, a judge model is required
     if (hasSubjectiveQuestions && (!judgeModelId || !judgeProviderId)) {
-      return NextResponse.json({ code: 400, error: '存在简答题或开放题，请选择一个教师模型用于评分' }, { status: 400 });
+      return NextResponse.json(
+        { code: 400, error: 'Short-answer or open-ended questions found. Please select a judge model for grading' },
+        { status: 400 }
+      );
     }
 
-    // 验证教师模型不能与测试模型相同
+    // Judge model must not be the same as any test model
     if (judgeModelId && judgeProviderId) {
       const judgeModel = { modelId: judgeModelId, providerId: judgeProviderId };
       const isJudgeInTestModels = models.some(
         m => m.modelId === judgeModel.modelId && m.providerId === judgeModel.providerId
       );
       if (isJudgeInTestModels) {
-        return NextResponse.json({ code: 400, error: '教师模型不能与测试模型相同' }, { status: 400 });
+        return NextResponse.json(
+          { code: 400, error: 'Judge model cannot be the same as a test model' },
+          { status: 400 }
+        );
       }
     }
 
-    // 为每个模型创建一个任务
+    // Create one task per model
     const createdTasks = [];
 
     for (const model of models) {
       const { modelId, providerId } = model;
 
-      // 从数据库查询完整的模型配置信息
+      // Fetch full model config
       const modelConfig = await db.modelConfig.findFirst({
         where: {
           projectId,
@@ -141,15 +150,15 @@ export async function POST(request, { params }) {
         }
       });
 
-      // 保留原始 providerId 用于查询，添加 providerName 用于显示
+      // Keep providerId for lookup, add providerName for display
       const modelInfo = {
         modelId,
         modelName: modelConfig?.modelName || modelId,
-        providerId: providerId, // 保留原始 providerId（数据库ID）
-        providerName: modelConfig?.providerName || providerId // 添加 providerName 用于显示
+        providerId: providerId, // Provider ID (DB ID)
+        providerName: modelConfig?.providerName || providerId // Provider display name
       };
 
-      // 构建任务详情
+      // Build task detail
       const taskDetail = {
         evalDatasetIds,
         judgeModelId: judgeModelId || null,
@@ -158,12 +167,12 @@ export async function POST(request, { params }) {
         hasSubjectiveQuestions
       };
 
-      // 创建任务
+      // Create task
       const newTask = await db.task.create({
         data: {
           projectId,
           taskType: 'model-evaluation',
-          status: 0, // 处理中
+          status: 0, // Processing
           modelInfo: JSON.stringify(modelInfo),
           language,
           detail: JSON.stringify(taskDetail),
@@ -175,19 +184,22 @@ export async function POST(request, { params }) {
 
       createdTasks.push(newTask);
 
-      // 异步启动任务处理
+      // Start task processing asynchronously
       processTask(newTask.id).catch(err => {
-        console.error(`评估任务启动失败: ${newTask.id}`, err);
+        console.error(`Failed to start evaluation task: ${newTask.id}`, err);
       });
     }
 
     return NextResponse.json({
       code: 0,
       data: createdTasks,
-      message: `成功创建 ${createdTasks.length} 个评估任务`
+      message: `Successfully created ${createdTasks.length} evaluation tasks`
     });
   } catch (error) {
-    console.error('创建评估任务失败:', error);
-    return NextResponse.json({ code: 500, error: '创建评估任务失败', message: error.message }, { status: 500 });
+    console.error('Failed to create evaluation task:', error);
+    return NextResponse.json(
+      { code: 500, error: 'Failed to create evaluation task', message: error.message },
+      { status: 500 }
+    );
   }
 }

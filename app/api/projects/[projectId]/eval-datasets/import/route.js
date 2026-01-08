@@ -4,91 +4,91 @@ import { nanoid } from 'nanoid';
 import * as XLSX from 'xlsx';
 
 /**
- * 验证判断题数据格式
+ * Validate true/false item schema
  */
 function validateTrueFalse(item, index) {
   const errors = [];
   if (!item.question || typeof item.question !== 'string') {
-    errors.push(`第 ${index + 1} 条: question 字段缺失或格式错误`);
+    errors.push(`Item ${index + 1}: missing or invalid "question"`);
   }
   if (!item.correctAnswer || (item.correctAnswer !== '✅' && item.correctAnswer !== '❌')) {
-    errors.push(`第 ${index + 1} 条: correctAnswer 必须是 "✅" 或 "❌"`);
+    errors.push(`Item ${index + 1}: "correctAnswer" must be "✅" or "❌"`);
   }
   return errors;
 }
 
 /**
- * 验证单选题数据格式
+ * Validate single-choice item schema
  */
 function validateSingleChoice(item, index) {
   const errors = [];
   if (!item.question || typeof item.question !== 'string') {
-    errors.push(`第 ${index + 1} 条: question 字段缺失或格式错误`);
+    errors.push(`Item ${index + 1}: missing or invalid "question"`);
   }
 
-  // 标准化 options 格式
+  // Normalize options
   let options = item.options;
   if (typeof options === 'string') {
     try {
       options = JSON.parse(options);
     } catch (e) {
-      errors.push(`第 ${index + 1} 条: options 格式错误，无法解析`);
+      errors.push(`Item ${index + 1}: invalid "options" format; unable to parse`);
       return errors;
     }
   }
 
   if (!options || !Array.isArray(options) || options.length < 2) {
-    errors.push(`第 ${index + 1} 条: options 必须是包含至少2个选项的数组`);
+    errors.push(`Item ${index + 1}: "options" must be an array with at least 2 items`);
   }
   if (!item.correctAnswer || !/^[A-Z]$/.test(item.correctAnswer)) {
-    errors.push(`第 ${index + 1} 条: correctAnswer 必须是单个大写字母 (A-Z)`);
+    errors.push(`Item ${index + 1}: "correctAnswer" must be a single uppercase letter (A-Z)`);
   }
   return errors;
 }
 
 /**
- * 验证多选题数据格式
+ * Validate multiple-choice item schema
  */
 function validateMultipleChoice(item, index) {
   const errors = [];
   if (!item.question || typeof item.question !== 'string') {
-    errors.push(`第 ${index + 1} 条: question 字段缺失或格式错误`);
+    errors.push(`Item ${index + 1}: missing or invalid "question"`);
   }
 
-  // 标准化 options 格式
+  // Normalize options
   let options = item.options;
   if (typeof options === 'string') {
     try {
       options = JSON.parse(options);
     } catch (e) {
-      errors.push(`第 ${index + 1} 条: options 格式错误，无法解析`);
+      errors.push(`Item ${index + 1}: invalid "options" format; unable to parse`);
       return errors;
     }
   }
 
   if (!options || !Array.isArray(options) || options.length < 2) {
-    errors.push(`第 ${index + 1} 条: options 必须是包含至少2个选项的数组`);
+    errors.push(`Item ${index + 1}: "options" must be an array with at least 2 items`);
   }
 
-  // 标准化 correctAnswer 格式
+  // Normalize correctAnswer
   let correctAnswer = item.correctAnswer;
   if (typeof correctAnswer === 'string') {
     try {
       correctAnswer = JSON.parse(correctAnswer);
     } catch (e) {
-      errors.push(`第 ${index + 1} 条: correctAnswer 格式错误，无法解析`);
+      errors.push(`Item ${index + 1}: invalid "correctAnswer" format; unable to parse`);
       return errors;
     }
   }
 
   if (!correctAnswer || !Array.isArray(correctAnswer) || correctAnswer.length < 1) {
-    errors.push(`第 ${index + 1} 条: correctAnswer 必须是包含至少1个答案的数组`);
+    errors.push(`Item ${index + 1}: "correctAnswer" must be an array with at least 1 item`);
   }
-  // 验证每个答案是否是有效的字母
+  // Validate each answer token
   if (Array.isArray(correctAnswer)) {
     for (const ans of correctAnswer) {
       if (!/^[A-Z]$/.test(ans)) {
-        errors.push(`第 ${index + 1} 条: correctAnswer 中的 "${ans}" 不是有效的选项字母`);
+        errors.push(`Item ${index + 1}: "${ans}" is not a valid option letter in "correctAnswer"`);
       }
     }
   }
@@ -96,21 +96,21 @@ function validateMultipleChoice(item, index) {
 }
 
 /**
- * 验证问答题数据格式 (短答案和开放式问题)
+ * Validate QA item schema (short_answer and open_ended)
  */
 function validateQA(item, index) {
   const errors = [];
   if (!item.question || typeof item.question !== 'string') {
-    errors.push(`第 ${index + 1} 条: question 字段缺失或格式错误`);
+    errors.push(`Item ${index + 1}: missing or invalid "question"`);
   }
   if (!item.correctAnswer || typeof item.correctAnswer !== 'string') {
-    errors.push(`第 ${index + 1} 条: correctAnswer 字段缺失或格式错误`);
+    errors.push(`Item ${index + 1}: missing or invalid "correctAnswer"`);
   }
   return errors;
 }
 
 /**
- * 根据题型验证数据
+ * Validate data by question type
  */
 function validateData(data, questionType) {
   const allErrors = [];
@@ -132,7 +132,7 @@ function validateData(data, questionType) {
         errors = validateQA(data[i], i);
         break;
       default:
-        errors = [`不支持的题型: ${questionType}`];
+        errors = [`Unsupported question type: ${questionType}`];
     }
     allErrors.push(...errors);
   }
@@ -141,37 +141,44 @@ function validateData(data, questionType) {
 }
 
 /**
- * 解析 Excel 文件
+ * Parse an Excel file
  */
 function parseExcel(buffer, questionType) {
+  const excelHeaders = {
+    question: '\u9898\u76ee',
+    correctAnswer: '\u6b63\u786e\u7b54\u6848',
+    answer: '\u7b54\u6848',
+    options: '\u9009\u9879'
+  };
+
   const workbook = XLSX.read(buffer, { type: 'buffer' });
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
   const rawData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
-  // 转换数据格式
+  // Convert to normalized schema
   const data = rawData.map(row => {
     const item = {
-      question: row.question || row['题目'] || '',
-      correctAnswer: row.correctAnswer || row['正确答案'] || row['答案'] || ''
+      question: row.question || row[excelHeaders.question] || '',
+      correctAnswer: row.correctAnswer || row[excelHeaders.correctAnswer] || row[excelHeaders.answer] || ''
     };
 
-    // 处理选项 (选择题)
+    // Handle options (choice questions)
     if (questionType === 'single_choice' || questionType === 'multiple_choice') {
-      // 尝试从 options 列解析
-      if (row.options || row['选项']) {
-        let optionsStr = (row.options || row['选项']).trim();
+      // Try to parse from options column
+      if (row.options || row[excelHeaders.options]) {
+        let optionsStr = (row.options || row[excelHeaders.options]).trim();
 
-        // 将单引号替换为双引号，使其成为有效的 JSON
+        // Replace single quotes so it becomes valid JSON
         if (optionsStr.startsWith('[') && optionsStr.includes("'")) {
           optionsStr = optionsStr.replace(/'/g, '"');
         }
 
         try {
-          // 尝试 JSON 解析
+          // Try JSON parsing
           item.options = JSON.parse(optionsStr);
         } catch {
-          // 尝试用分隔符分割
+          // Fallback: split by separators
           item.options = optionsStr
             .split(/[,;|，；]/)
             .map(o => o.trim())
@@ -180,25 +187,25 @@ function parseExcel(buffer, questionType) {
       }
     }
 
-    // 处理多选答案
+    // Handle multiple-choice correctAnswer
     if (questionType === 'multiple_choice') {
       if (typeof item.correctAnswer === 'string') {
         let answerStr = item.correctAnswer.trim();
 
-        // 将单引号替换为双引号，使其成为有效的 JSON
+        // Replace single quotes so it becomes valid JSON
         if (answerStr.startsWith('[') && answerStr.includes("'")) {
           answerStr = answerStr.replace(/'/g, '"');
         }
 
-        // 尝试 JSON 解析
+        // Try JSON parsing
         try {
           item.correctAnswer = JSON.parse(answerStr);
         } catch {
-          // 分割字符串，如 "A,B,C" 或 "ABC"
+          // Split string such as "A,B,C" or "ABC"
           if (answerStr.includes(',') || answerStr.includes('，')) {
             item.correctAnswer = answerStr.split(/[,，]/).map(a => a.trim().toUpperCase());
           } else {
-            // 直接分割字符，如 "ABC" -> ["A", "B", "C"]
+            // Split characters such as "ABC" -> ["A", "B", "C"]
             item.correctAnswer = answerStr
               .toUpperCase()
               .split('')
@@ -215,14 +222,14 @@ function parseExcel(buffer, questionType) {
 }
 
 /**
- * 解析 JSON 文件
+ * Parse a JSON file
  */
 function parseJSON(content) {
   return JSON.parse(content);
 }
 
 /**
- * POST - 导入评估数据集
+ * POST - Import evaluation datasets
  */
 export async function POST(request, { params }) {
   try {
@@ -233,41 +240,41 @@ export async function POST(request, { params }) {
     const questionType = formData.get('questionType');
     const tags = formData.get('tags') || '';
 
-    console.log(`[导入] 开始处理，项目: ${projectId}, 题型: ${questionType}, 标签: ${tags}`);
+    console.log(`[Import] Start processing. Project: ${projectId}, questionType: ${questionType}, tags: ${tags}`);
 
     if (!file) {
-      return NextResponse.json({ code: 400, error: '请上传文件' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Please upload a file' }, { status: 400 });
     }
 
     if (!questionType) {
-      return NextResponse.json({ code: 400, error: '请选择题型' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Please select a question type' }, { status: 400 });
     }
 
-    // 验证题型
+    // Validate question type
     const validTypes = ['true_false', 'single_choice', 'multiple_choice', 'short_answer', 'open_ended'];
     if (!validTypes.includes(questionType)) {
-      return NextResponse.json({ code: 400, error: `不支持的题型: ${questionType}` }, { status: 400 });
+      return NextResponse.json({ code: 400, error: `Unsupported question type: ${questionType}` }, { status: 400 });
     }
 
-    // 获取文件扩展名
+    // Get file extension
     const fileName = file.name;
     const fileExt = fileName.split('.').pop().toLowerCase();
-    console.log(`[导入] 文件名: ${fileName}, 扩展名: ${fileExt}`);
+    console.log(`[Import] File name: ${fileName}, extension: ${fileExt}`);
 
-    // 验证文件类型
+    // Validate file type
     if (!['json', 'xls', 'xlsx'].includes(fileExt)) {
       return NextResponse.json(
-        { code: 400, error: '不支持的文件格式，请上传 json、xls 或 xlsx 文件' },
+        { code: 400, error: 'Unsupported file format. Please upload a json, xls, or xlsx file' },
         { status: 400 }
       );
     }
 
-    // 读取文件内容
+    // Read file content
     const buffer = await file.arrayBuffer();
     let data = [];
 
-    // 解析文件
-    console.log(`[导入] 开始解析文件...`);
+    // Parse file
+    console.log('[Import] Parsing file...');
     if (fileExt === 'json') {
       const content = new TextDecoder().decode(buffer);
       data = parseJSON(content);
@@ -275,50 +282,50 @@ export async function POST(request, { params }) {
       data = parseExcel(Buffer.from(buffer), questionType);
     }
 
-    console.log(`[导入] 解析完成，共 ${data.length} 条数据`);
+    console.log(`[Import] Parsing completed. Total items: ${data.length}`);
 
     if (!Array.isArray(data) || data.length === 0) {
-      return NextResponse.json({ code: 400, error: '文件内容为空或格式错误' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'File is empty or has an invalid format' }, { status: 400 });
     }
 
-    // 验证数据格式
-    console.log(`[导入] 开始验证数据格式...`);
+    // Validate data
+    console.log('[Import] Validating data...');
     const errors = validateData(data, questionType);
     if (errors.length > 0) {
-      console.log(`[导入] 验证失败，错误数: ${errors.length}`);
+      console.log(`[Import] Validation failed. Error count: ${errors.length}`);
       return NextResponse.json(
         {
           code: 400,
-          error: '数据格式验证失败',
-          details: errors.slice(0, 10), // 最多返回10条错误
+          error: 'Data validation failed',
+          details: errors.slice(0, 10),
           totalErrors: errors.length
         },
         { status: 400 }
       );
     }
 
-    console.log(`[导入] 验证通过，开始写入数据库...`);
+    console.log('[Import] Validation passed. Writing to database...');
 
-    // 准备数据
+    // Prepare data
     const now = new Date();
     const evalDatasets = data.map(item => {
-      // 标准化 options 格式
+      // Normalize options
       let options = item.options;
       if (typeof options === 'string') {
         try {
           options = JSON.parse(options);
         } catch (e) {
-          // 如果解析失败，保持原样
+          // Keep original on parse failure
         }
       }
 
-      // 标准化 correctAnswer 格式
+      // Normalize correctAnswer
       let correctAnswer = item.correctAnswer;
       if (typeof correctAnswer === 'string' && questionType === 'multiple_choice') {
         try {
           correctAnswer = JSON.parse(correctAnswer);
         } catch (e) {
-          // 如果解析失败，保持原样
+          // Keep original on parse failure
         }
       }
 
@@ -328,7 +335,7 @@ export async function POST(request, { params }) {
         question: item.question,
         questionType,
         options: options ? JSON.stringify(options) : '',
-        // 多选题的 correctAnswer 保存为 JSON 数组字符串，其他题型保存为字符串
+        // For multiple_choice, store correctAnswer as JSON array string
         correctAnswer: Array.isArray(correctAnswer) ? JSON.stringify(correctAnswer) : correctAnswer,
         tags: tags || '',
         note: '',
@@ -337,7 +344,7 @@ export async function POST(request, { params }) {
       };
     });
 
-    // 批量插入
+    // Batch insert
     const batchSize = 100;
     let insertedCount = 0;
 
@@ -345,10 +352,10 @@ export async function POST(request, { params }) {
       const batch = evalDatasets.slice(i, i + batchSize);
       await db.evalDatasets.createMany({ data: batch });
       insertedCount += batch.length;
-      console.log(`[导入] 已写入 ${insertedCount}/${evalDatasets.length} 条数据`);
+      console.log(`[Import] Inserted ${insertedCount}/${evalDatasets.length} items`);
     }
 
-    console.log(`[导入] 导入完成，共写入 ${insertedCount} 条数据`);
+    console.log(`[Import] Import completed. Total inserted: ${insertedCount}`);
 
     return NextResponse.json({
       code: 0,
@@ -357,14 +364,14 @@ export async function POST(request, { params }) {
         questionType,
         tags
       },
-      message: `成功导入 ${insertedCount} 条评估数据`
+      message: `Successfully imported ${insertedCount} evaluation items`
     });
   } catch (error) {
-    console.error('[导入] 导入失败:', error);
+    console.error('[Import] Import failed:', error);
     return NextResponse.json(
       {
         code: 500,
-        error: '导入失败',
+        error: 'Import failed',
         message: error.message
       },
       { status: 500 }

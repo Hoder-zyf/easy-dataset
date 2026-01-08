@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/index';
 
 /**
- * 提交评判结果
+ * Submit vote result
  * vote: 'left' | 'right' | 'both_good' | 'both_bad'
  */
 export async function POST(request, { params }) {
@@ -10,10 +10,10 @@ export async function POST(request, { params }) {
     const { projectId, taskId } = params;
     const { vote, questionId, isSwapped, leftAnswer, rightAnswer } = await request.json();
 
-    // 验证投票选项
+    // Validate vote option
     const validVotes = ['left', 'right', 'both_good', 'both_bad'];
     if (!validVotes.includes(vote)) {
-      return NextResponse.json({ code: 400, error: '无效的投票选项' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Invalid vote option' }, { status: 400 });
     }
 
     const task = await db.task.findFirst({
@@ -25,54 +25,54 @@ export async function POST(request, { params }) {
     });
 
     if (!task) {
-      return NextResponse.json({ code: 404, error: '任务不存在' }, { status: 404 });
+      return NextResponse.json({ code: 404, error: 'Task not found' }, { status: 404 });
     }
 
     if (task.status !== 0) {
-      return NextResponse.json({ code: 400, error: '任务已结束' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Task has ended' }, { status: 400 });
     }
 
-    // 解析详情
+    // Parse task details
     let detail = {};
     let modelInfo = {};
     try {
       detail = task.detail ? JSON.parse(task.detail) : {};
       modelInfo = task.modelInfo ? JSON.parse(task.modelInfo) : {};
     } catch (e) {
-      console.error('解析任务详情失败:', e);
+      console.error('Failed to parse task detail:', e);
     }
 
-    // 计算得分
-    // isSwapped: true 表示左边是模型B，右边是模型A
-    // isSwapped: false 表示左边是模型A，右边是模型B
+    // Calculate scores
+    // isSwapped: true means left is model B and right is model A
+    // isSwapped: false means left is model A and right is model B
     let modelAScore = 0;
     let modelBScore = 0;
 
     if (vote === 'left') {
-      // 左边好
+      // Left is better
       if (isSwapped) {
-        modelBScore = 1; // 左边是B
+        modelBScore = 1; // Left is B
       } else {
-        modelAScore = 1; // 左边是A
+        modelAScore = 1; // Left is A
       }
     } else if (vote === 'right') {
-      // 右边好
+      // Right is better
       if (isSwapped) {
-        modelAScore = 1; // 右边是A
+        modelAScore = 1; // Right is A
       } else {
-        modelBScore = 1; // 右边是B
+        modelBScore = 1; // Right is B
       }
     } else if (vote === 'both_good') {
-      // 都好
+      // Both are good
       modelAScore = 0.5;
       modelBScore = 0.5;
     } else if (vote === 'both_bad') {
-      // 都不好
+      // Both are bad
       modelAScore = 0;
       modelBScore = 0;
     }
 
-    // 记录结果
+    // Record result
     const result = {
       questionId,
       vote,
@@ -84,11 +84,11 @@ export async function POST(request, { params }) {
       timestamp: new Date().toISOString()
     };
 
-    // 更新任务详情
+    // Update task details
     const results = detail.results || [];
     results.push(result);
 
-    // 兼容 evalDatasetIds 和 questionIds
+    // Support both evalDatasetIds and questionIds
     const questionIds = detail.questionIds || detail.evalDatasetIds || [];
     const newCurrentIndex = detail.currentIndex + 1;
     const isCompleted = newCurrentIndex >= questionIds.length;
@@ -99,18 +99,18 @@ export async function POST(request, { params }) {
       results
     };
 
-    // 更新任务
+    // Update task
     const updatedTask = await db.task.update({
       where: { id: taskId },
       data: {
         detail: JSON.stringify(updatedDetail),
         completedCount: newCurrentIndex,
-        status: isCompleted ? 1 : 0, // 1-已完成, 0-进行中
+        status: isCompleted ? 1 : 0, // 1-completed, 0-running
         endTime: isCompleted ? new Date() : null
       }
     });
 
-    // 计算当前总分
+    // Calculate current total scores
     const totalModelAScore = results.reduce((sum, r) => sum + (r.modelAScore || 0), 0);
     const totalModelBScore = results.reduce((sum, r) => sum + (r.modelBScore || 0), 0);
 
@@ -126,10 +126,13 @@ export async function POST(request, { params }) {
           modelB: totalModelBScore
         }
       },
-      message: isCompleted ? '盲测任务已完成' : '评判已记录'
+      message: isCompleted ? 'Blind-test task completed' : 'Vote recorded'
     });
   } catch (error) {
-    console.error('提交评判结果失败:', error);
-    return NextResponse.json({ code: 500, error: '提交评判结果失败', message: error.message }, { status: 500 });
+    console.error('Failed to submit vote result:', error);
+    return NextResponse.json(
+      { code: 500, error: 'Failed to submit vote result', message: error.message },
+      { status: 500 }
+    );
   }
 }

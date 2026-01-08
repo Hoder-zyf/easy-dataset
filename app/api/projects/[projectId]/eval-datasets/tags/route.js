@@ -2,23 +2,23 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/index';
 
 /**
- * 获取项目中所有评估数据集的标签
+ * Get all evaluation dataset tags in the project
  */
 export async function GET(request, { params }) {
   try {
     const { projectId } = params;
 
-    // 获取该项目所有评估数据集的标签
+    // Fetch tags for all datasets in the project
     const datasets = await db.evalDatasets.findMany({
       where: { projectId },
       select: { tags: true }
     });
 
-    // 提取并去重所有标签
+    // Extract and de-duplicate tags
     const tagsSet = new Set();
     datasets.forEach(dataset => {
       if (dataset.tags) {
-        // 支持逗号和中文逗号分隔
+        // Support both English and Chinese commas
         const tags = dataset.tags
           .split(/[,，]/)
           .map(t => t.trim())

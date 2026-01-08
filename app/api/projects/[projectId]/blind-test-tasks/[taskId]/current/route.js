@@ -4,7 +4,7 @@ import LLMClient from '@/lib/llm/core/index';
 import { getModelConfigById } from '@/lib/db/model-config';
 
 /**
- * 获取当前题目并调用两个模型生成答案
+ * Get current question and generate answers from two models
  */
 export async function GET(request, { params }) {
   try {
@@ -19,38 +19,38 @@ export async function GET(request, { params }) {
     });
 
     if (!task) {
-      return NextResponse.json({ code: 404, error: '任务不存在' }, { status: 404 });
+      return NextResponse.json({ code: 404, error: 'Task not found' }, { status: 404 });
     }
 
     if (task.status !== 0) {
-      return NextResponse.json({ code: 400, error: '任务已结束' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Task has ended' }, { status: 400 });
     }
 
-    // 解析详情
+    // Parse task detail
     let detail = {};
     let modelInfo = {};
     try {
       detail = task.detail ? JSON.parse(task.detail) : {};
       modelInfo = task.modelInfo ? JSON.parse(task.modelInfo) : {};
     } catch (e) {
-      console.error('解析任务详情失败:', e);
+      console.error('Failed to parse task detail:', e);
     }
 
     const questionIds = detail.questionIds || detail.evalDatasetIds || [];
     const currentIndex = detail.currentIndex || 0;
 
-    // 检查是否已完成所有题目
+    // Check if all questions are completed
     if (questionIds.length === 0 || currentIndex >= questionIds.length) {
       return NextResponse.json({
         code: 0,
         data: {
           completed: true,
-          message: '所有题目已完成'
+          message: 'All questions completed'
         }
       });
     }
 
-    // 获取当前题目
+    // Fetch current question
     const currentQuestionId = questionIds[currentIndex];
     const currentQuestion = await db.evalDatasets.findUnique({
       where: { id: currentQuestionId },
@@ -64,24 +64,24 @@ export async function GET(request, { params }) {
     });
 
     if (!currentQuestion) {
-      return NextResponse.json({ code: 404, error: '题目不存在' }, { status: 404 });
+      return NextResponse.json({ code: 404, error: 'Question not found' }, { status: 404 });
     }
 
-    // 获取两个模型的配置
+    // Fetch both model configs
     const [modelConfigA, modelConfigB] = await Promise.all([
       getModelConfigById(modelInfo.modelA.providerId),
       getModelConfigById(modelInfo.modelB.providerId)
     ]);
 
     if (!modelConfigA || !modelConfigB) {
-      return NextResponse.json({ code: 400, error: '模型配置不存在' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Model configuration not found' }, { status: 400 });
     }
 
-    // 构建提示词
-    const systemPrompt = '你是一个智能助手，请根据用户的问题给出详细、准确的回答。';
+    // Build prompts
+    const systemPrompt = "You are a helpful assistant. Provide detailed and accurate answers to the user's question.";
     const userPrompt = currentQuestion.question;
 
-    // 并行调用两个模型
+    // Call both models in parallel
     const startTimeA = Date.now();
     const startTimeB = Date.now();
 
@@ -93,7 +93,7 @@ export async function GET(request, { params }) {
     let durationB = 0;
 
     try {
-      // 调用模型A
+      // Call model A
       const clientA = new LLMClient({
         providerId: modelConfigA.providerId,
         endpoint: modelConfigA.endpoint,
@@ -113,13 +113,13 @@ export async function GET(request, { params }) {
       answerA = resultA.text || '';
       durationA = Date.now() - startTimeA;
     } catch (err) {
-      console.error('模型A调用失败:', err);
+      console.error('Model A call failed:', err);
       errorA = err.message;
       durationA = Date.now() - startTimeA;
     }
 
     try {
-      // 调用模型B
+      // Call model B
       const clientB = new LLMClient({
         providerId: modelConfigB.providerId,
         endpoint: modelConfigB.endpoint,
@@ -139,12 +139,12 @@ export async function GET(request, { params }) {
       answerB = resultB.text || '';
       durationB = Date.now() - startTimeB;
     } catch (err) {
-      console.error('模型B调用失败:', err);
+      console.error('Model B call failed:', err);
       errorB = err.message;
       durationB = Date.now() - startTimeB;
     }
 
-    // 随机决定左右位置（盲测核心）
+    // Randomly swap positions (core blind-test behavior)
     const isSwapped = Math.random() > 0.5;
 
     return NextResponse.json({
@@ -154,7 +154,7 @@ export async function GET(request, { params }) {
         currentIndex,
         totalCount: evalDatasetIds.length,
         question: currentQuestion,
-        // 盲测：不透露哪个是哪个模型
+        // Blind test: do not reveal which model is which
         leftAnswer: {
           content: isSwapped ? answerB : answerA,
           error: isSwapped ? errorB : errorA,
@@ -165,12 +165,15 @@ export async function GET(request, { params }) {
           error: isSwapped ? errorA : errorB,
           duration: isSwapped ? durationA : durationB
         },
-        // 服务端记录实际位置，用于后续计分
+        // Server stores the actual mapping for scoring
         _swap: isSwapped
       }
     });
   } catch (error) {
-    console.error('获取当前题目失败:', error);
-    return NextResponse.json({ code: 500, error: '获取当前题目失败', message: error.message }, { status: 500 });
+    console.error('Failed to fetch current question:', error);
+    return NextResponse.json(
+      { code: 500, error: 'Failed to fetch current question', message: error.message },
+      { status: 500 }
+    );
   }
 }

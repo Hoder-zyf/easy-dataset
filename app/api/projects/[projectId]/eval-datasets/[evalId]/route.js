@@ -3,8 +3,8 @@ import { getEvalQuestionById, updateEvalQuestion, deleteEvalQuestion } from '@/l
 import { db } from '@/lib/db/index';
 
 /**
- * 获取单个评估数据集详情
- * 支持 operateType=prev|next 获取相邻记录
+ * Get evaluation dataset details by ID
+ * Supports operateType=prev|next to navigate neighbors
  */
 export async function GET(request, { params }) {
   try {
@@ -12,7 +12,7 @@ export async function GET(request, { params }) {
     const { searchParams } = new URL(request.url);
     const operateType = searchParams.get('operateType');
 
-    // 如果是导航请求 (prev/next)
+    // Navigation request (prev/next)
     if (operateType) {
       const current = await db.evalDatasets.findUnique({
         where: { id: evalId },
@@ -26,26 +26,23 @@ export async function GET(request, { params }) {
       let neighbor = null;
 
       if (operateType === 'prev') {
-        // 获取上一条（时间更晚的，因为列表通常是按时间倒序）
-        // 或者按时间正序的话，上一条就是时间更早的。
-        // 这里的列表是 orderBy: { createAt: 'desc' }，所以上一条应该是 createAt > current.createAt
-        // 但是为了符合直觉（列表向下是 next），列表上面的（prev）应该是 createAt 更大的
+        // Get previous item (newer createAt when list is sorted desc)
         neighbor = await db.evalDatasets.findFirst({
           where: {
             projectId,
             createAt: { gt: current.createAt }
           },
-          orderBy: { createAt: 'asc' }, // 离当前最近的一个
+          orderBy: { createAt: 'asc' },
           select: { id: true }
         });
       } else if (operateType === 'next') {
-        // 获取下一条（时间更早的）
+        // Get next item (older createAt)
         neighbor = await db.evalDatasets.findFirst({
           where: {
             projectId,
             createAt: { lt: current.createAt }
           },
-          orderBy: { createAt: 'desc' }, // 离当前最近的一个
+          orderBy: { createAt: 'desc' },
           select: { id: true }
         });
       }
@@ -53,7 +50,7 @@ export async function GET(request, { params }) {
       return NextResponse.json(neighbor || null);
     }
 
-    // 常规详情请求
+    // Regular detail request
     const evalQuestion = await getEvalQuestionById(evalId);
 
     if (!evalQuestion) {
@@ -68,14 +65,14 @@ export async function GET(request, { params }) {
 }
 
 /**
- * 更新评估数据集
+ * Update evaluation dataset
  */
 export async function PUT(request, { params }) {
   try {
     const { evalId } = params;
     const data = await request.json();
 
-    // 只允许更新特定字段
+    // Only allow specific fields
     const allowedFields = ['question', 'options', 'correctAnswer', 'tags', 'note'];
     const updateData = {};
 
@@ -95,7 +92,7 @@ export async function PUT(request, { params }) {
 }
 
 /**
- * 删除评估数据集
+ * Delete evaluation dataset
  */
 export async function DELETE(request, { params }) {
   try {

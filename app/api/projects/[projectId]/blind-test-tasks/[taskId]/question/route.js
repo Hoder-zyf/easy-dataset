@@ -2,32 +2,32 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/index';
 
 /**
- * 获取当前题目信息（包括随机交换信息）
+ * Get current question info (including random swap info)
  */
 export async function GET(request, { params }) {
   const { projectId, taskId } = params;
 
   try {
     if (!projectId || !taskId) {
-      return NextResponse.json({ error: '参数不完整' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    // 获取任务信息
+    // Fetch task
     const task = await db.task.findUnique({
       where: { id: taskId }
     });
 
     if (!task || task.taskType !== 'blind-test') {
-      return NextResponse.json({ error: '任务不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
-    // 解析任务详情
+    // Parse task detail
     const detail = JSON.parse(task.detail || '{}');
-    // 兼容 evalDatasetIds 和 questionIds
+    // Support both evalDatasetIds and questionIds
     const questionIds = detail.questionIds || detail.evalDatasetIds || [];
     const currentIndex = detail.currentIndex || 0;
 
-    // 检查任务是否已完成
+    // Check if task is completed
     if (questionIds.length === 0 || currentIndex >= questionIds.length) {
       return NextResponse.json({
         completed: true,
@@ -36,17 +36,17 @@ export async function GET(request, { params }) {
       });
     }
 
-    // 获取当前题目
+    // Fetch current question
     const currentQuestionId = questionIds[currentIndex];
     const currentQuestion = await db.evalDatasets.findUnique({
       where: { id: currentQuestionId }
     });
 
     if (!currentQuestion) {
-      return NextResponse.json({ error: '题目不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'Question not found' }, { status: 404 });
     }
 
-    // 随机决定是否交换（盲测核心）
+    // Randomly decide whether to swap (core blind-test behavior)
     const isSwapped = Math.random() > 0.5;
 
     return NextResponse.json({
@@ -58,7 +58,7 @@ export async function GET(request, { params }) {
       isSwapped
     });
   } catch (error) {
-    console.error('获取题目信息失败:', error);
+    console.error('Failed to fetch question info:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

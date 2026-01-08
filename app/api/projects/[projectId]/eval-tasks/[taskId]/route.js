@@ -3,7 +3,7 @@ import { db } from '@/lib/db/index';
 import { getEvalResultsByTaskId, getEvalResultsStats } from '@/lib/db/evalResults';
 
 /**
- * 获取单个评估任务详情及其结果
+ * Get evaluation task details and results
  */
 export async function GET(request, { params }) {
   try {
@@ -13,30 +13,30 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Project ID and Task ID are required' }, { status: 400 });
     }
 
-    // 获取任务详情
+    // Fetch task details
     const task = await db.task.findUnique({
       where: { id: taskId }
     });
 
     if (!task) {
-      return NextResponse.json({ error: '任务不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
     if (task.projectId !== projectId) {
-      return NextResponse.json({ error: '任务不属于该项目' }, { status: 403 });
+      return NextResponse.json({ error: 'Task does not belong to this project' }, { status: 403 });
     }
 
-    // 解析任务详情
+    // Parse task detail fields
     let detail = {};
     let modelInfo = {};
     try {
       detail = task.detail ? JSON.parse(task.detail) : {};
       modelInfo = task.modelInfo ? JSON.parse(task.modelInfo) : {};
     } catch (e) {
-      console.error('解析任务详情失败:', e);
+      console.error('Failed to parse task detail:', e);
     }
 
-    // 获取查询参数
+    // Parse query params
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '10');
@@ -44,7 +44,7 @@ export async function GET(request, { params }) {
     const isCorrectStr = searchParams.get('isCorrect');
     const isCorrect = isCorrectStr === 'true' ? true : isCorrectStr === 'false' ? false : null;
 
-    // 获取评估结果（支持分页和筛选）
+    // Fetch results (supports pagination and filters)
     const { items: results, total } = await getEvalResultsByTaskId(taskId, {
       page,
       pageSize,
@@ -52,7 +52,7 @@ export async function GET(request, { params }) {
       isCorrect
     });
 
-    // 获取统计数据
+    // Fetch stats
     const stats = await getEvalResultsStats(taskId);
 
     return NextResponse.json({
@@ -71,13 +71,16 @@ export async function GET(request, { params }) {
       }
     });
   } catch (error) {
-    console.error('获取评估任务详情失败:', error);
-    return NextResponse.json({ code: 500, error: '获取评估任务详情失败', message: error.message }, { status: 500 });
+    console.error('Failed to fetch evaluation task details:', error);
+    return NextResponse.json(
+      { code: 500, error: 'Failed to fetch evaluation task details', message: error.message },
+      { status: 500 }
+    );
   }
 }
 
 /**
- * 删除评估任务
+ * Delete evaluation task
  */
 export async function DELETE(request, { params }) {
   try {
@@ -87,41 +90,44 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: 'Project ID and Task ID are required' }, { status: 400 });
     }
 
-    // 验证任务存在且属于该项目
+    // Validate task exists and belongs to this project
     const task = await db.task.findUnique({
       where: { id: taskId }
     });
 
     if (!task) {
-      return NextResponse.json({ error: '任务不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
     if (task.projectId !== projectId) {
-      return NextResponse.json({ error: '任务不属于该项目' }, { status: 403 });
+      return NextResponse.json({ error: 'Task does not belong to this project' }, { status: 403 });
     }
 
-    // 删除评估结果
+    // Delete evaluation results
     await db.evalResults.deleteMany({
       where: { taskId }
     });
 
-    // 删除任务
+    // Delete task
     await db.task.delete({
       where: { id: taskId }
     });
 
     return NextResponse.json({
       code: 0,
-      message: '删除成功'
+      message: 'Deleted'
     });
   } catch (error) {
-    console.error('删除评估任务失败:', error);
-    return NextResponse.json({ code: 500, error: '删除评估任务失败', message: error.message }, { status: 500 });
+    console.error('Failed to delete evaluation task:', error);
+    return NextResponse.json(
+      { code: 500, error: 'Failed to delete evaluation task', message: error.message },
+      { status: 500 }
+    );
   }
 }
 
 /**
- * 中断评估任务
+ * Interrupt evaluation task
  */
 export async function PUT(request, { params }) {
   try {
@@ -133,38 +139,38 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'Project ID and Task ID are required' }, { status: 400 });
     }
 
-    // 验证任务存在且属于该项目
+    // Validate task exists and belongs to this project
     const task = await db.task.findUnique({
       where: { id: taskId }
     });
 
     if (!task) {
-      return NextResponse.json({ error: '任务不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
     if (task.projectId !== projectId) {
-      return NextResponse.json({ error: '任务不属于该项目' }, { status: 403 });
+      return NextResponse.json({ error: 'Task does not belong to this project' }, { status: 403 });
     }
 
     if (action === 'interrupt') {
-      // 中断任务
+      // Interrupt task
       await db.task.update({
         where: { id: taskId },
         data: {
-          status: 3, // 已中断
+          status: 3, // Interrupted
           endTime: new Date()
         }
       });
 
       return NextResponse.json({
         code: 0,
-        message: '任务已中断'
+        message: 'Task interrupted'
       });
     }
 
-    return NextResponse.json({ error: '未知操作' }, { status: 400 });
+    return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
   } catch (error) {
-    console.error('操作评估任务失败:', error);
-    return NextResponse.json({ code: 500, error: '操作失败', message: error.message }, { status: 500 });
+    console.error('Failed to operate evaluation task:', error);
+    return NextResponse.json({ code: 500, error: 'Operation failed', message: error.message }, { status: 500 });
   }
 }

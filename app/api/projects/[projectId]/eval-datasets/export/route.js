@@ -5,7 +5,7 @@ import { buildEvalQuestionWhere } from '@/lib/db/evalDatasets';
 const BATCH_SIZE = 500;
 
 /**
- * 将评估题目转换为 CSV 行
+ * Convert an evaluation item to a CSV row
  */
 function convertToCSVRow(item, isHeader = false) {
   if (isHeader) {
@@ -31,7 +31,7 @@ function convertToCSVRow(item, isHeader = false) {
 }
 
 /**
- * 将评估题目转换为导出格式
+ * Convert an evaluation item to export format
  */
 function formatExportItem(item) {
   return {
@@ -44,9 +44,9 @@ function formatExportItem(item) {
 }
 
 /**
- * 导出评估数据集
- * 支持 JSON、JSONL、CSV 格式
- * 大数据量采用分批流式导出
+ * Export evaluation datasets
+ * Supports JSON, JSONL, and CSV
+ * Uses batched streaming for large datasets
  */
 export async function POST(request, { params }) {
   try {
@@ -60,26 +60,26 @@ export async function POST(request, { params }) {
       keyword = ''
     } = body;
 
-    // 验证格式
+    // Validate format
     if (!['json', 'jsonl', 'csv'].includes(format)) {
-      return NextResponse.json({ code: 400, error: '不支持的导出格式' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Unsupported export format' }, { status: 400 });
     }
 
-    // 构建查询条件
+    // Build query conditions
     const where = buildEvalQuestionWhere(projectId, {
       questionTypes: questionTypes.length > 0 ? questionTypes : undefined,
       tags: tags.length > 0 ? tags : undefined,
       keyword: keyword || undefined
     });
 
-    // 先获取总数
+    // Fetch total count
     const total = await db.evalDatasets.count({ where });
 
     if (total === 0) {
-      return NextResponse.json({ code: 400, error: '没有符合条件的数据' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'No data matches the criteria' }, { status: 400 });
     }
 
-    // 小数据量直接返回
+    // Return directly for small datasets
     if (total <= 1000) {
       const items = await db.evalDatasets.findMany({
         where,
@@ -118,23 +118,23 @@ export async function POST(request, { params }) {
       }
     }
 
-    // 大数据量采用流式导出
+    // Stream export for large datasets
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
         let isFirst = true;
 
-        // CSV 格式先输出表头
+        // CSV outputs header row first
         if (format === 'csv') {
           controller.enqueue(encoder.encode('\uFEFF' + convertToCSVRow(null, true) + '\n'));
         }
 
-        // JSON 格式输出开始符
+        // JSON outputs opening bracket
         if (format === 'json') {
           controller.enqueue(encoder.encode('[\n'));
         }
 
-        // 分批获取数据
+        // Fetch data in batches
         const totalBatches = Math.ceil(total / BATCH_SIZE);
 
         for (let batch = 0; batch < totalBatches; batch++) {
@@ -160,7 +160,7 @@ export async function POST(request, { params }) {
           }
         }
 
-        // JSON 格式输出结束符
+        // JSON outputs closing bracket
         if (format === 'json') {
           controller.enqueue(encoder.encode('\n]'));
         }
@@ -190,31 +190,31 @@ export async function POST(request, { params }) {
     });
   } catch (error) {
     console.error('Failed to export eval datasets:', error);
-    return NextResponse.json({ code: 500, error: error.message || '导出失败' }, { status: 500 });
+    return NextResponse.json({ code: 500, error: error.message || 'Export failed' }, { status: 500 });
   }
 }
 
 /**
- * 获取导出预览信息（数据量统计）
+ * Get export preview (count only)
  */
 export async function GET(request, { params }) {
   try {
     const { projectId } = params;
     const { searchParams } = new URL(request.url);
 
-    // 解析查询参数
+    // Parse query params
     const questionTypes = searchParams.getAll('questionTypes');
     const tags = searchParams.getAll('tags');
     const keyword = searchParams.get('keyword') || '';
 
-    // 构建查询条件
+    // Build query conditions
     const where = buildEvalQuestionWhere(projectId, {
       questionTypes: questionTypes.length > 0 ? questionTypes : undefined,
       tags: tags.length > 0 ? tags : undefined,
       keyword: keyword || undefined
     });
 
-    // 获取数据量
+    // Count rows
     const total = await db.evalDatasets.count({ where });
 
     return NextResponse.json({
@@ -226,6 +226,6 @@ export async function GET(request, { params }) {
     });
   } catch (error) {
     console.error('Failed to get export preview:', error);
-    return NextResponse.json({ code: 500, error: error.message || '获取导出预览失败' }, { status: 500 });
+    return NextResponse.json({ code: 500, error: error.message || 'Failed to get export preview' }, { status: 500 });
   }
 }

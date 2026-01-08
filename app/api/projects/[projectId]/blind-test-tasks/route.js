@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/index';
 
 /**
- * 获取项目的所有盲测任务
+ * Get all blind-test tasks for a project
  */
 export async function GET(request, { params }) {
   try {
@@ -17,7 +17,7 @@ export async function GET(request, { params }) {
 
     const skip = (page - 1) * pageSize;
 
-    // 获取盲测任务列表和总数
+    // Fetch task list and total count
     const [tasks, total] = await Promise.all([
       db.task.findMany({
         where: {
@@ -36,7 +36,7 @@ export async function GET(request, { params }) {
       })
     ]);
 
-    // 解析任务详情
+    // Parse task detail fields
     const tasksWithDetails = tasks.map(task => {
       let detail = {};
       let modelInfo = {};
@@ -44,7 +44,7 @@ export async function GET(request, { params }) {
         detail = task.detail ? JSON.parse(task.detail) : {};
         modelInfo = task.modelInfo ? JSON.parse(task.modelInfo) : {};
       } catch (e) {
-        console.error('解析任务详情失败:', e);
+        console.error('Failed to parse task detail:', e);
       }
       return {
         ...task,
@@ -64,45 +64,40 @@ export async function GET(request, { params }) {
       }
     });
   } catch (error) {
-    console.error('获取盲测任务列表失败:', error);
-    return NextResponse.json({ code: 500, error: '获取盲测任务列表失败', message: error.message }, { status: 500 });
+    console.error('Failed to fetch blind-test task list:', error);
+    return NextResponse.json(
+      { code: 500, error: 'Failed to fetch blind-test task list', message: error.message },
+      { status: 500 }
+    );
   }
 }
 
 /**
- * 创建盲测任务
+ * Create a blind-test task
  */
 export async function POST(request, { params }) {
   try {
     const { projectId } = params;
     const data = await request.json();
 
-    const {
-      modelA, // 模型A: { modelId, providerId }
-      modelB, // 模型B: { modelId, providerId }
-      evalDatasetIds, // 要评估的题目ID列表（仅限 short_answer 和 open_ended）
-      language = 'zh-CN'
-    } = data;
+    const { modelA, modelB, evalDatasetIds, language = 'zh-CN' } = data;
 
-    // 验证必填字段
     if (!modelA || !modelA.modelId || !modelA.providerId) {
-      return NextResponse.json({ code: 400, error: '请选择模型A' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Please select model A' }, { status: 400 });
     }
 
     if (!modelB || !modelB.modelId || !modelB.providerId) {
-      return NextResponse.json({ code: 400, error: '请选择模型B' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Please select model B' }, { status: 400 });
     }
 
-    // 验证两个模型不能相同
     if (modelA.modelId === modelB.modelId && modelA.providerId === modelB.providerId) {
-      return NextResponse.json({ code: 400, error: '两个模型不能相同' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'The two models must be different' }, { status: 400 });
     }
 
     if (!evalDatasetIds || evalDatasetIds.length === 0) {
-      return NextResponse.json({ code: 400, error: '请选择要评估的题目' }, { status: 400 });
+      return NextResponse.json({ code: 400, error: 'Please select questions to evaluate' }, { status: 400 });
     }
 
-    // 验证所选题目必须是主观题（short_answer 或 open_ended）
     const evalDatasets = await db.evalDatasets.findMany({
       where: {
         id: { in: evalDatasetIds },
@@ -119,13 +114,13 @@ export async function POST(request, { params }) {
       return NextResponse.json(
         {
           code: 400,
-          error: '盲测任务只支持简答题和开放题'
+          error: 'Blind-test tasks only support short-answer and open-ended questions'
         },
         { status: 400 }
       );
     }
 
-    // 获取模型配置信息
+    // Fetch model config info
     const [modelConfigA, modelConfigB] = await Promise.all([
       db.modelConfig.findFirst({
         where: { projectId, providerId: modelA.providerId, modelId: modelA.modelId }
@@ -135,7 +130,7 @@ export async function POST(request, { params }) {
       })
     ]);
 
-    // 构建模型信息（包含两个模型）
+    // Build model info (two models)
     const modelInfo = {
       modelA: {
         modelId: modelA.modelId,
@@ -151,19 +146,19 @@ export async function POST(request, { params }) {
       }
     };
 
-    // 构建任务详情
+    // Build task detail
     const taskDetail = {
       evalDatasetIds,
-      currentIndex: 0, // 当前题目索引
-      results: [] // 存储每道题的评判结果: [{ questionId, vote, modelAScore, modelBScore }]
+      currentIndex: 0, // Current question index
+      results: [] // Per-question votes: [{ questionId, vote, modelAScore, modelBScore }]
     };
 
-    // 创建任务
+    // Create task
     const newTask = await db.task.create({
       data: {
         projectId,
         taskType: 'blind-test',
-        status: 0, // 进行中
+        status: 0, // Running
         modelInfo: JSON.stringify(modelInfo),
         language,
         detail: JSON.stringify(taskDetail),
@@ -180,10 +175,13 @@ export async function POST(request, { params }) {
         detail: taskDetail,
         modelInfo
       },
-      message: '盲测任务创建成功'
+      message: 'Blind-test task created'
     });
   } catch (error) {
-    console.error('创建盲测任务失败:', error);
-    return NextResponse.json({ code: 500, error: '创建盲测任务失败', message: error.message }, { status: 500 });
+    console.error('Failed to create blind-test task:', error);
+    return NextResponse.json(
+      { code: 500, error: 'Failed to create blind-test task', message: error.message },
+      { status: 500 }
+    );
   }
 }

@@ -4,64 +4,64 @@ import LLMClient from '@/lib/llm/core/index';
 import { getModelConfigById } from '@/lib/db/model-config';
 
 /**
- * 流式获取当前题目的两个模型回答
+ * Stream answers from two models for the current question
  */
 export async function GET(request, { params }) {
   const { projectId, taskId } = params;
 
   try {
     if (!projectId || !taskId) {
-      return NextResponse.json({ error: '参数不完整' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    // 获取任务信息
+    // Fetch task
     const task = await db.task.findUnique({
       where: { id: taskId }
     });
 
     if (!task || task.taskType !== 'blind-test') {
-      return NextResponse.json({ error: '任务不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
-    // 解析任务详情
+    // Parse task detail
     const detail = JSON.parse(task.detail || '{}');
     const modelInfo = JSON.parse(task.modelInfo || '{}');
     const { questionIds = [], currentIndex = 0 } = detail;
 
-    // 检查任务是否已完成
+    // Check if task is completed
     if (currentIndex >= questionIds.length) {
       return NextResponse.json({ completed: true });
     }
 
-    // 获取当前题目
+    // Fetch current question
     const currentQuestionId = questionIds[currentIndex];
     const currentQuestion = await db.evalDatasets.findUnique({
       where: { id: currentQuestionId }
     });
 
     if (!currentQuestion) {
-      return NextResponse.json({ error: '题目不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'Question not found' }, { status: 404 });
     }
 
-    // 获取模型配置
+    // Fetch model configs
     const [modelConfigA, modelConfigB] = await Promise.all([
       getModelConfigById(modelInfo.modelA.providerId),
       getModelConfigById(modelInfo.modelB.providerId)
     ]);
 
     if (!modelConfigA || !modelConfigB) {
-      return NextResponse.json({ error: '模型配置不存在' }, { status: 400 });
+      return NextResponse.json({ error: 'Model configuration not found' }, { status: 400 });
     }
 
-    // 随机交换位置（盲测核心）
+    // Randomly swap positions (core blind-test behavior)
     const isSwapped = Math.random() > 0.5;
 
-    // 创建流式响应
+    // Create streaming response
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // 发送初始化消息
+          // Send init message
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
@@ -75,13 +75,16 @@ export async function GET(request, { params }) {
             )
           );
 
-          // 准备消息
+          // Prepare messages
           const messages = [
-            { role: 'system', content: '你是一个智能助手，请根据用户的问题给出详细、准确的回答。' },
+            {
+              role: 'system',
+              content: "You are a helpful assistant. Provide detailed and accurate answers to the user's question."
+            },
             { role: 'user', content: currentQuestion.question }
           ];
 
-          // 创建 LLM 客户端
+          // Create LLM clients
           const clientA = new LLMClient({
             projectId,
             providerId: modelConfigA.providerId,
@@ -110,7 +113,7 @@ export async function GET(request, { params }) {
           let answerB = '';
           const startTime = Date.now();
 
-          // 并行调用两个模型的流式接口
+          // Call both models in parallel (streaming)
           await Promise.all([
             (async () => {
               try {
@@ -125,7 +128,7 @@ export async function GET(request, { params }) {
                   const chunk = decoder.decode(value, { stream: true });
                   answerA += chunk;
 
-                  // 发送流式更新
+                  // Send chunk update
                   controller.enqueue(
                     encoder.encode(
                       JSON.stringify({
@@ -137,7 +140,7 @@ export async function GET(request, { params }) {
                   );
                 }
               } catch (err) {
-                console.error('模型A调用失败:', err);
+                console.error('Model A call failed:', err);
                 controller.enqueue(
                   encoder.encode(
                     JSON.stringify({
@@ -162,7 +165,7 @@ export async function GET(request, { params }) {
                   const chunk = decoder.decode(value, { stream: true });
                   answerB += chunk;
 
-                  // 发送流式更新
+                  // Send chunk update
                   controller.enqueue(
                     encoder.encode(
                       JSON.stringify({
@@ -174,7 +177,7 @@ export async function GET(request, { params }) {
                   );
                 }
               } catch (err) {
-                console.error('模型B调用失败:', err);
+                console.error('Model B call failed:', err);
                 controller.enqueue(
                   encoder.encode(
                     JSON.stringify({
@@ -190,7 +193,7 @@ export async function GET(request, { params }) {
 
           const duration = Date.now() - startTime;
 
-          // 发送完成消息
+          // Send done message
           controller.enqueue(
             encoder.encode(
               JSON.stringify({
@@ -204,7 +207,7 @@ export async function GET(request, { params }) {
 
           controller.close();
         } catch (error) {
-          console.error('流式处理失败:', error);
+          console.error('Streaming handler failed:', error);
           controller.error(error);
         }
       }
@@ -218,7 +221,7 @@ export async function GET(request, { params }) {
       }
     });
   } catch (error) {
-    console.error('API错误:', error);
+    console.error('API error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

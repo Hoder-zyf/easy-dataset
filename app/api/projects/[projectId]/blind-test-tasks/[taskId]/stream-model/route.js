@@ -4,69 +4,72 @@ import LLMClient from '@/lib/llm/core/index';
 import { getModelConfigById } from '@/lib/db/model-config';
 
 /**
- * 流式获取指定模型的回答
- * 查询参数: model=A 或 model=B
+ * Stream answer for a specified model
+ * Query param: model=A or model=B
  */
 export async function GET(request, { params }) {
   const { projectId, taskId } = params;
   const { searchParams } = new URL(request.url);
-  const modelType = searchParams.get('model'); // 'A' 或 'B'
+  const modelType = searchParams.get('model'); // 'A' or 'B'
 
   try {
     if (!projectId || !taskId) {
-      return NextResponse.json({ error: '参数不完整' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
     if (!modelType || !['A', 'B'].includes(modelType)) {
-      return NextResponse.json({ error: '必须指定模型类型(A或B)' }, { status: 400 });
+      return NextResponse.json({ error: 'Model type must be specified (A or B)' }, { status: 400 });
     }
 
-    // 获取任务信息
+    // Fetch task
     const task = await db.task.findUnique({
       where: { id: taskId }
     });
 
     if (!task || task.taskType !== 'blind-test') {
-      return NextResponse.json({ error: '任务不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
-    // 解析任务详情
+    // Parse task detail
     const detail = JSON.parse(task.detail || '{}');
     const modelInfo = JSON.parse(task.modelInfo || '{}');
-    // 兼容 evalDatasetIds 和 questionIds
+    // Support both evalDatasetIds and questionIds
     const questionIds = detail.questionIds || detail.evalDatasetIds || [];
     const currentIndex = detail.currentIndex || 0;
 
-    // 检查任务是否已完成
+    // Check if task is completed
     if (questionIds.length === 0 || currentIndex >= questionIds.length) {
       return NextResponse.json({ completed: true });
     }
 
-    // 获取当前题目
+    // Fetch current question
     const currentQuestionId = questionIds[currentIndex];
     const currentQuestion = await db.evalDatasets.findUnique({
       where: { id: currentQuestionId }
     });
 
     if (!currentQuestion) {
-      return NextResponse.json({ error: '题目不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'Question not found' }, { status: 404 });
     }
 
-    // 根据 modelType 获取对应的模型配置
+    // Resolve model config based on modelType
     const modelConfigKey = modelType === 'A' ? 'modelA' : 'modelB';
     const modelConfig = await getModelConfigById(modelInfo[modelConfigKey].providerId);
 
     if (!modelConfig) {
-      return NextResponse.json({ error: '模型配置不存在' }, { status: 400 });
+      return NextResponse.json({ error: 'Model configuration not found' }, { status: 400 });
     }
 
-    // 准备消息
+    // Prepare messages
     const messages = [
-      { role: 'system', content: '你是一个智能助手，请根据用户的问题给出详细、准确的回答。' },
+      {
+        role: 'system',
+        content: "You are a helpful assistant. Provide detailed and accurate answers to the user's question."
+      },
       { role: 'user', content: currentQuestion.question }
     ];
 
-    // 创建 LLM 客户端
+    // Create LLM client
     const client = new LLMClient({
       projectId,
       providerId: modelConfig.providerId,
@@ -79,7 +82,7 @@ export async function GET(request, { params }) {
       topK: modelConfig.topK
     });
 
-    // 调用流式接口并直接返回
+    // Call streaming API and return response directly
     const response = await client.chatStreamAPI(messages);
 
     return new Response(response.body, {
@@ -90,7 +93,7 @@ export async function GET(request, { params }) {
       }
     });
   } catch (error) {
-    console.error(`模型${modelType}流式调用失败:`, error);
+    console.error(`Model ${modelType} streaming call failed:`, error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
