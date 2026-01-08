@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import {
   Box,
@@ -84,6 +85,7 @@ export default function ChunkCard({
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const router = useRouter();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [chunkForEdit, setChunkForEdit] = useState(null);
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
@@ -263,6 +265,10 @@ export default function ChunkCard({
                           fontWeight: 500,
                           '& .MuiChip-label': { px: 1 }
                         }}
+                        onClick={() => {
+                          if (!projectId) return;
+                          router.push(`/projects/${projectId}/questions`);
+                        }}
                       />
                     </Tooltip>
                   )}
@@ -276,6 +282,10 @@ export default function ChunkCard({
                         borderRadius: 1,
                         fontWeight: 500,
                         '& .MuiChip-label': { px: 1 }
+                      }}
+                      onClick={() => {
+                        if (!projectId) return;
+                        router.push(`/projects/${projectId}/eval-datasets`);
                       }}
                     />
                   )}
@@ -311,7 +321,7 @@ export default function ChunkCard({
             }
           }}
         >
-          <Tooltip title={t('textSplit.viewDetails')}>
+          <Tooltip title={t('datasets.viewDetails')}>
             <IconButton
               size="small"
               color="primary"
