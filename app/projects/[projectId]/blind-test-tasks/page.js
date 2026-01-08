@@ -35,7 +35,6 @@ export default function BlindTestTasksPage() {
     loading,
     error,
     setError,
-    loadTasks,
     deleteTask,
     interruptTask,
     createTask,
@@ -165,7 +164,7 @@ export default function BlindTestTasksPage() {
               onPageChange={handlePageChange}
               rowsPerPage={pageSize}
               onRowsPerPageChange={handlePageSizeChange}
-              rowsPerPageOptions={[12, 24, 48]}
+              rowsPerPageOptions={[6, 12, 24, 48]}
               labelRowsPerPage={t('datasets.rowsPerPage', '每页行数')}
             />
           </Box>

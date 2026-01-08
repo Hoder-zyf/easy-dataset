@@ -10,7 +10,7 @@ export default function useBlindTestTasks(projectId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
+  const [pageSize, setPageSize] = useState(6);
   const [total, setTotal] = useState(0);
 
   // 加载任务列表

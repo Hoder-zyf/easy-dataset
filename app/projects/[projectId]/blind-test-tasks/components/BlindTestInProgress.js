@@ -327,7 +327,7 @@ export default function BlindTestInProgress({
 
       {/* 底部投票区域 */}
       <Paper
-        elevation={8}
+        elevation={10}
         sx={{
           ...styles.voteBar,
           borderRadius: 4,
@@ -336,7 +336,7 @@ export default function BlindTestInProgress({
           bgcolor: alpha(theme.palette.background.paper, 0.9),
           backdropFilter: 'blur(20px)',
           width: 'fit-content',
-          minWidth: 600,
+          minWidth: 800,
           mx: 'auto'
         }}
       >

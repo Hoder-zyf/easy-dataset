@@ -95,7 +95,7 @@ export const blindTestStyles = theme => ({
     borderRadius: 4,
     mx: 'auto',
     width: 'fit-content',
-    minWidth: 600,
+    minWidth: 800,
     mt: 'auto',
     bgcolor: alpha(theme.palette.background.paper, 0.8),
     backdropFilter: 'blur(20px)',
