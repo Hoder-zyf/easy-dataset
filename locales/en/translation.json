@@ -1698,7 +1698,15 @@
     "correctLabel": "Correct",
     "incorrectLabel": "Incorrect",
     "judgeComment": "AI Judge Comment:",
-    "scoreUnit": " pts"
+    "scoreUnit": " pts",
+    "shortAnswer": "Short Answer",
+    "openEnded": "Open-ended",
+    "scoreAnchorsTitle": "{{type}} Scoring Rules",
+    "customizable": "Customizable",
+    "scoreAnchorsHint": "Customize scoring criteria to guide LLM in evaluating model responses",
+    "restoreDefault": "Restore Default",
+    "scoreRange": "Score Range",
+    "scoreDescriptionPlaceholder": "Enter scoring criteria description for this range..."
   },
   "blindTest": {
     "title": "Human Blind Test",

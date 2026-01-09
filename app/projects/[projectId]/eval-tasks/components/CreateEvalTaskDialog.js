@@ -21,10 +21,13 @@ import {
 import { useTranslation } from 'react-i18next';
 import ModelSelector from './ModelSelector';
 import QuestionFilter from './QuestionFilter';
+import ScoreAnchorsForm from './ScoreAnchorsForm';
 import { useEvalTaskForm } from '../hooks/useEvalTaskForm';
 
+import { useEffect } from 'react';
+
 export default function CreateEvalTaskDialog({ open, onClose, projectId, onSuccess }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -46,6 +49,13 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
     filteredTotal,
     sampledIds,
     hasSubjectiveQuestions,
+    hasShortAnswer,
+    hasOpenEnded,
+    shortAnswerScoreAnchors,
+    setShortAnswerScoreAnchors,
+    openEndedScoreAnchors,
+    setOpenEndedScoreAnchors,
+    initScoreAnchors,
     loading,
     error,
     setError,
@@ -53,6 +63,13 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
     resetFilters,
     resetForm
   } = useEvalTaskForm(projectId, open);
+
+  // 当有主观题时，初始化评分规则
+  useEffect(() => {
+    if (hasSubjectiveQuestions && open) {
+      initScoreAnchors(i18n.language === 'zh-CN' ? 'zh-CN' : 'en');
+    }
+  }, [hasSubjectiveQuestions, open, i18n.language]);
 
   // 统计各题型数量
   const typeStats = {};
@@ -140,6 +157,15 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
 
       setSampledIds(ids);
 
+      // 构建自定义评分规则对象
+      const customScoreAnchors = {};
+      if (hasShortAnswer && shortAnswerScoreAnchors.length > 0) {
+        customScoreAnchors.short_answer = shortAnswerScoreAnchors;
+      }
+      if (hasOpenEnded && openEndedScoreAnchors.length > 0) {
+        customScoreAnchors.open_ended = openEndedScoreAnchors;
+      }
+
       // 创建任务
       const response = await fetch(`/api/projects/${projectId}/eval-tasks`, {
         method: 'POST',
@@ -149,7 +175,8 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
           judgeModelId, // 分开传递
           judgeProviderId, // 分开传递
           evalDatasetIds: ids,
-          language: 'zh-CN'
+          language: i18n.language === 'zh-CN' ? 'zh-CN' : 'en',
+          customScoreAnchors: Object.keys(customScoreAnchors).length > 0 ? customScoreAnchors : undefined
         })
       });
 
@@ -232,32 +259,54 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
 
           {/* 选择教师模型（仅当有主观题时显示） */}
           {hasSubjectiveQuestions && (
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>{t('evalTasks.selectJudgeModel')} *</InputLabel>
-              <Select
-                value={judgeModel}
-                onChange={handleJudgeModelChange}
-                label={`${t('evalTasks.selectJudgeModel')} *`}
-              >
-                <MenuItem value="">
-                  <em>{t('evalTasks.selectJudgeModelPlaceholder')}</em>
-                </MenuItem>
-                {models
-                  .filter(m => {
-                    const key = `${m.providerId}::${m.modelId}`;
-                    return !selectedModels.includes(key);
-                  })
-                  .map(model => {
-                    const key = `${model.providerId}::${model.modelId}`;
-                    return (
-                      <MenuItem key={key} value={key}>
-                        {model.providerId} / {model.modelId}
-                      </MenuItem>
-                    );
-                  })}
-              </Select>
-              <FormHelperText>{t('evalTasks.selectJudgeModelHint')}</FormHelperText>
-            </FormControl>
+            <>
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>{t('evalTasks.selectJudgeModel')} *</InputLabel>
+                <Select
+                  value={judgeModel}
+                  onChange={handleJudgeModelChange}
+                  label={`${t('evalTasks.selectJudgeModel')} *`}
+                >
+                  <MenuItem value="">
+                    <em>{t('evalTasks.selectJudgeModelPlaceholder')}</em>
+                  </MenuItem>
+                  {models
+                    .filter(m => {
+                      const key = `${m.providerId}::${m.modelId}`;
+                      return !selectedModels.includes(key);
+                    })
+                    .map(model => {
+                      const key = `${model.providerId}::${model.modelId}`;
+                      return (
+                        <MenuItem key={key} value={key}>
+                          {model.providerId} / {model.modelId}
+                        </MenuItem>
+                      );
+                    })}
+                </Select>
+                <FormHelperText>{t('evalTasks.selectJudgeModelHint')}</FormHelperText>
+              </FormControl>
+
+              {/* 简答题评分规则 */}
+              {hasShortAnswer && (
+                <ScoreAnchorsForm
+                  questionType="short_answer"
+                  scoreAnchors={shortAnswerScoreAnchors}
+                  onChange={setShortAnswerScoreAnchors}
+                  language={i18n.language}
+                />
+              )}
+
+              {/* 开放题评分规则 */}
+              {hasOpenEnded && (
+                <ScoreAnchorsForm
+                  questionType="open_ended"
+                  scoreAnchors={openEndedScoreAnchors}
+                  onChange={setOpenEndedScoreAnchors}
+                  language={i18n.language}
+                />
+              )}
+            </>
           )}
         </Box>
       </DialogContent>

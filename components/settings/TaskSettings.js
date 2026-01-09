@@ -526,7 +526,6 @@ export default function TaskSettings({ projectId }) {
               </Typography>
 
               <Grid container spacing={2}>
-                {/* 是否题 */}
                 <Grid item xs={12} sm={6} md={2.4}>
                   <TextField
                     fullWidth

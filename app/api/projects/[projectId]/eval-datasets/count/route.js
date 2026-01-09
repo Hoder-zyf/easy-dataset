@@ -42,12 +42,14 @@ export async function GET(request, { params }) {
       byType[item.questionType] = item._count.id;
     });
 
-    const hasSubjective = (byType.short_answer || 0) > 0 || (byType.open_ended || 0) > 0;
+    const hasShortAnswer = (byType.short_answer || 0) > 0;
+    const hasOpenEnded = (byType.open_ended || 0) > 0;
+    const hasSubjective = hasShortAnswer || hasOpenEnded;
 
     return NextResponse.json(
       {
         code: 0,
-        data: { total, byType, hasSubjective }
+        data: { total, byType, hasSubjective, hasShortAnswer, hasOpenEnded }
       },
       { status: 200 }
     );

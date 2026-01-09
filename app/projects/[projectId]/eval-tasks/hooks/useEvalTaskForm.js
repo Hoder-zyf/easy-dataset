@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getDefaultScoreAnchors } from '@/lib/llm/prompts/llmJudge';
 
 export function useEvalTaskForm(projectId, open) {
   const [models, setModels] = useState([]);
@@ -19,6 +20,13 @@ export function useEvalTaskForm(projectId, open) {
   const [filteredTotal, setFilteredTotal] = useState(0);
   const [sampledIds, setSampledIds] = useState([]);
   const [hasSubjectiveQuestions, setHasSubjectiveQuestions] = useState(false);
+  // 主观题类型统计（用于确定显示哪个评分规则表单）
+  const [hasShortAnswer, setHasShortAnswer] = useState(false);
+  const [hasOpenEnded, setHasOpenEnded] = useState(false);
+
+  // 自定义评分规则
+  const [shortAnswerScoreAnchors, setShortAnswerScoreAnchors] = useState([]);
+  const [openEndedScoreAnchors, setOpenEndedScoreAnchors] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -57,8 +65,12 @@ export function useEvalTaskForm(projectId, open) {
           const result = await response.json();
           const total = result?.data?.total ?? 0;
           const hasSubjective = result?.data?.hasSubjective ?? false;
+          const hasShort = result?.data?.hasShortAnswer ?? false;
+          const hasOpen = result?.data?.hasOpenEnded ?? false;
           setFilteredTotal(total);
           setHasSubjectiveQuestions(hasSubjective);
+          setHasShortAnswer(hasShort);
+          setHasOpenEnded(hasOpen);
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
@@ -120,6 +132,14 @@ export function useEvalTaskForm(projectId, open) {
     setQuestionCount(0);
     setFilteredTotal(0);
     setSampledIds([]);
+    setHasShortAnswer(false);
+    setHasOpenEnded(false);
+  };
+
+  // 初始化评分规则（根据语言环境）
+  const initScoreAnchors = (language = 'zh-CN') => {
+    setShortAnswerScoreAnchors(getDefaultScoreAnchors('short_answer', language));
+    setOpenEndedScoreAnchors(getDefaultScoreAnchors('open_ended', language));
   };
 
   const resetForm = () => {
@@ -127,6 +147,8 @@ export function useEvalTaskForm(projectId, open) {
     setJudgeModel('');
     resetFilters();
     setError('');
+    setShortAnswerScoreAnchors([]);
+    setOpenEndedScoreAnchors([]);
   };
 
   return {
@@ -148,6 +170,13 @@ export function useEvalTaskForm(projectId, open) {
     filteredTotal,
     sampledIds,
     hasSubjectiveQuestions,
+    hasShortAnswer,
+    hasOpenEnded,
+    shortAnswerScoreAnchors,
+    setShortAnswerScoreAnchors,
+    openEndedScoreAnchors,
+    setOpenEndedScoreAnchors,
+    initScoreAnchors,
     loading,
     error,
     setError,

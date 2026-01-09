@@ -96,7 +96,7 @@
     "multiTurnDescription": "多轮对话配置用于生成连贯的多轮对话数据集，支持自定义角色和场景",
     "evalQuestionSettings": "测试集生成设置",
     "evalQuestionSettingsDescription": "配置生成测试集时各题型的比例，比例为0表示不生成该类型题目",
-    "evalTrueFalseRatio": "是否题比例",
+    "evalTrueFalseRatio": "判断题比例",
     "evalSingleChoiceRatio": "单选题比例",
     "evalMultipleChoiceRatio": "多选题比例",
     "evalShortAnswerRatio": "固定短答案比例",
@@ -1684,7 +1684,15 @@
     "correctLabel": "正确",
     "incorrectLabel": "错误",
     "judgeComment": "AI 教师点评:",
-    "scoreUnit": "分"
+    "scoreUnit": "分",
+    "shortAnswer": "简答题",
+    "openEnded": "开放题",
+    "scoreAnchorsTitle": "{{type}}评分规则",
+    "customizable": "可自定义",
+    "scoreAnchorsHint": "自定义评分标准，用于指导LLM评估模型的回答质量",
+    "restoreDefault": "恢复默认",
+    "scoreRange": "分数区间",
+    "scoreDescriptionPlaceholder": "请输入该分数区间的评分标准描述..."
   },
   "blindTest": {
     "title": "人工盲测任务",

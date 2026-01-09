@@ -88,7 +88,8 @@ export async function POST(request, { params }) {
       judgeModelId, // Judge model ID (for subjective grading)
       judgeProviderId, // Judge provider ID
       language = 'zh-CN',
-      filterOptions = {} // Filter options (for display)
+      filterOptions = {}, // Filter options (for display)
+      customScoreAnchors = null // Custom score anchors for subjective grading
     } = data;
 
     // Validate required fields
@@ -164,7 +165,8 @@ export async function POST(request, { params }) {
         judgeModelId: judgeModelId || null,
         judgeProviderId: judgeProviderId || null,
         filterOptions,
-        hasSubjectiveQuestions
+        hasSubjectiveQuestions,
+        customScoreAnchors: customScoreAnchors || null // Store custom score anchors
       };
 
       // Create task
