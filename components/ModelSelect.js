@@ -104,7 +104,7 @@ export default function ModelSelect({
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Box
           component="img"
-          src={getModelIcon(selectedModelObj.modelName)}
+          src={getModelIcon(selectedModelObj.modelName || selectedModelObj.modelId)}
           alt={selectedModelObj.modelName}
           sx={{
             width: 20,
@@ -127,7 +127,7 @@ export default function ModelSelect({
   // 获取当前选中模型的图标
   const currentModelIcon = useMemo(() => {
     const selectedModelObj = models.find(model => model.id === selectedModel);
-    return selectedModelObj ? getModelIcon(selectedModelObj.modelName) : null;
+    return selectedModelObj ? getModelIcon(selectedModelObj.modelName, selectedModelObj.modelId) : null;
   }, [selectedModel, models]);
 
   // 判断是否应该显示完整的 Select
@@ -321,7 +321,7 @@ export default function ModelSelect({
                   >
                     <Box
                       component="img"
-                      src={getModelIcon(model.modelName)}
+                      src={getModelIcon(model.modelName || model.modelId)}
                       alt={model.modelName}
                       sx={{
                         width: 20,

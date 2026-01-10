@@ -75,7 +75,7 @@ export default function EvalTaskCard({ task, onView, onDelete, onInterrupt }) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, overflow: 'hidden' }}>
             <Avatar sx={{ bgcolor: 'transparent', width: 40, height: 40, border: '1px solid', borderColor: 'divider' }}>
               <img
-                src={getModelIcon(modelInfo?.modelId)}
+                src={getModelIcon(modelInfo?.modelName || modelInfo?.modelId)}
                 alt={modelInfo?.modelId || 'model'}
                 style={{ width: 28, height: 28, objectFit: 'contain' }}
               />

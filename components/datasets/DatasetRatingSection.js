@@ -283,29 +283,28 @@ export default function DatasetRatingSection({ dataset, projectId, onUpdate, cur
         readOnly={loading}
         placeholder={t('datasets.addNote', '添加备注...')}
       />
-
-      <Box sx={{ mt: 2, display: 'flex', gap: 1.5 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<PlaylistAddIcon />}
-          onClick={handleAddToEval}
-          disabled={addingToEval}
-          sx={{ py: 1, flex: 1 }}
-        >
-          {addingToEval ? t('common.processing') : t('datasets.addToEval')}
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
-          startIcon={<AutoFixHighIcon />}
-          onClick={() => setVariantDialog({ open: true, data: null })}
-          disabled={loading}
-          sx={{ py: 1, flex: 1 }}
-        >
-          {t('datasets.generateEvalVariant')}
-        </Button>
-      </Box>
+      <Divider sx={{ my: 2 }} />
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<PlaylistAddIcon />}
+        onClick={handleAddToEval}
+        disabled={addingToEval}
+        sx={{ py: 1, flex: 1 }}
+      >
+        {addingToEval ? t('common.processing') : t('datasets.addToEval')}
+      </Button>
+      <Divider sx={{ my: 2 }} />
+      <Button
+        variant="outlined"
+        color="secondary"
+        startIcon={<AutoFixHighIcon />}
+        onClick={() => setVariantDialog({ open: true, data: null })}
+        disabled={loading}
+        sx={{ py: 1, flex: 1 }}
+      >
+        {t('datasets.generateEvalVariant')}
+      </Button>
 
       <Divider sx={{ my: 2 }} />
 

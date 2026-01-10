@@ -204,21 +204,36 @@ export default function ModelSettings({ projectId }) {
   const handleOpenModelDialog = (model = null) => {
     if (model) {
       console.log('handleOpenModelDialog', model);
+      // 兼容逻辑：如果 modelId 为空，则取 modelName 作为 modelId
+      const initialForm = { ...model };
+      if (!initialForm.modelId && initialForm.modelName) {
+        initialForm.modelId = initialForm.modelName;
+      }
+
       // 编辑现有模型时，为未设置的参数应用默认值
       setModelConfigForm({
-        ...model,
+        ...initialForm,
         temperature: model.temperature !== undefined ? model.temperature : DEFAULT_MODEL_SETTINGS.temperature,
         maxTokens: model.maxTokens !== undefined ? model.maxTokens : DEFAULT_MODEL_SETTINGS.maxTokens,
         topP: model.topP !== undefined && model.topP !== 0 ? model.topP : DEFAULT_MODEL_SETTINGS.topP
       });
       getProviderModels(model.providerId);
     } else {
+      // 添加新模型时，完全重置表单
       setModelConfigForm({
-        ...modelConfigForm,
+        providerId: selectedProvider?.id || '',
+        providerName: selectedProvider?.name || '',
+        endpoint: selectedProvider?.apiUrl || '',
         apiKey: '',
+        modelId: '',
+        modelName: '',
+        type: 'text',
         ...DEFAULT_MODEL_SETTINGS,
         id: ''
       });
+      if (selectedProvider?.id) {
+        getProviderModels(selectedProvider.id);
+      }
     }
     setOpenModelDialog(true);
   };
@@ -240,8 +255,20 @@ export default function ModelSettings({ projectId }) {
 
   // 保存模型
   const handleSaveModel = () => {
+    // 确保有模型 ID
+    if (!modelConfigForm.modelId) {
+      toast.error(t('models.modelIdPlaceholder'));
+      return;
+    }
+
+    // 如果模型名称为空，则默认为模型 ID
+    const dataToSave = {
+      ...modelConfigForm,
+      modelName: modelConfigForm.modelName || modelConfigForm.modelId
+    };
+
     axios
-      .post(`/api/projects/${projectId}/model-config`, { ...modelConfigForm, modelId: modelConfigForm.modelName })
+      .post(`/api/projects/${projectId}/model-config`, dataToSave)
       .then(response => {
         if (selectedModelInfo && selectedModelInfo.id === response.data.id) {
           setSelectedModelInfo(response.data);
@@ -489,36 +516,40 @@ export default function ModelSettings({ projectId }) {
                 placeholder="例如: sk-..."
               />
             </Grid>
-            {/*模型列表*/}
+            {/*模型 ID*/}
             <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
               <FormControl style={{ width: '70%' }}>
                 <Autocomplete
                   freeSolo
                   options={models
-                    .filter(model => model && model.modelName)
+                    .filter(model => model && model.modelId)
                     .map(model => ({
-                      label: model.modelName,
-                      id: model.id,
+                      label: `${model.modelName} (${model.modelId})`,
+                      modelName: model.modelName,
                       modelId: model.modelId,
                       providerId: model.providerId
                     }))}
-                  value={modelConfigForm.modelName}
+                  value={modelConfigForm.modelId}
                   onChange={(event, newValue) => {
                     console.log('newValue', newValue);
+                    const newId = newValue?.modelId || newValue || '';
+                    const newName = newValue?.modelName || newValue?.modelId || newValue || '';
                     setModelConfigForm(prev => ({
                       ...prev,
-                      modelName: newValue?.label,
-                      modelId: newValue?.modelId ? newValue?.modelId : newValue?.label
+                      modelId: newId,
+                      // 如果当前名称为空或者和旧 ID 一致，则同步更新名称
+                      modelName: !prev.modelName || prev.modelName === prev.modelId ? newName : prev.modelName
                     }));
                   }}
                   renderInput={params => (
                     <TextField
                       {...params}
-                      label={t('models.modelName')}
+                      label={t('models.modelId')}
+                      placeholder={t('models.modelIdPlaceholder')}
                       onChange={e => {
                         setModelConfigForm(prev => ({
                           ...prev,
-                          modelName: e.target.value
+                          modelId: e.target.value
                         }));
                       }}
                     />
@@ -528,6 +559,17 @@ export default function ModelSettings({ projectId }) {
               <Button variant="contained" onClick={() => refreshProviderModels()} sx={{ ml: 2 }}>
                 {t('models.refresh')}
               </Button>
+            </Grid>
+            {/*模型名称*/}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label={t('models.modelName')}
+                name="modelName"
+                value={modelConfigForm.modelName}
+                onChange={handleModelFormChange}
+                placeholder={t('models.modelNamePlaceholder')}
+              />
             </Grid>
             {/* 新增：视觉模型选择项 */}
             <Grid item xs={12}>

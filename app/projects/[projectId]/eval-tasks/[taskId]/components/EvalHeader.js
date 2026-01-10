@@ -43,7 +43,7 @@ export default function EvalHeader({ task, stats, filterCorrect, onFilterCorrect
             }}
           >
             <img
-              src={getModelIcon(modelInfo?.modelId)}
+              src={getModelIcon(modelInfo?.modelName || modelInfo?.modelId)}
               alt={modelInfo?.modelId || 'model'}
               style={{ width: 44, height: 44, objectFit: 'contain' }}
             />
