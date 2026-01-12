@@ -36,7 +36,32 @@ export async function GET(request, { params }) {
       })
     ]);
 
-    // Parse task detail fields
+    // Fetch evaluation results for all tasks to calculate scores
+    const taskIds = tasks.map(t => t.id);
+    const allEvalResults = await db.evalResults.findMany({
+      where: { taskId: { in: taskIds } },
+      select: {
+        taskId: true,
+        judgeResponse: true
+      }
+    });
+
+    // Group results by taskId and calculate scores
+    const taskScores = {};
+    for (const result of allEvalResults) {
+      if (!taskScores[result.taskId]) {
+        taskScores[result.taskId] = { modelAScore: 0, modelBScore: 0 };
+      }
+      try {
+        const judge = JSON.parse(result.judgeResponse || '{}');
+        taskScores[result.taskId].modelAScore += judge.modelAScore || 0;
+        taskScores[result.taskId].modelBScore += judge.modelBScore || 0;
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+
+    // Parse task detail fields and attach scores
     const tasksWithDetails = tasks.map(task => {
       let detail = {};
       let modelInfo = {};
@@ -46,9 +71,22 @@ export async function GET(request, { params }) {
       } catch (e) {
         console.error('Failed to parse task detail:', e);
       }
+
+      // Attach calculated scores as results array
+      const scores = taskScores[task.id] || { modelAScore: 0, modelBScore: 0 };
+      const results = [
+        {
+          modelAScore: scores.modelAScore,
+          modelBScore: scores.modelBScore
+        }
+      ];
+
       return {
         ...task,
-        detail,
+        detail: {
+          ...detail,
+          results // Attach results for display in task card
+        },
         modelInfo
       };
     });

@@ -279,7 +279,7 @@ export default function CreateEvalTaskDialog({ open, onClose, projectId, onSucce
                       const key = `${model.providerId}::${model.modelId}`;
                       return (
                         <MenuItem key={key} value={key}>
-                          {model.providerId} / {model.modelId}
+                          {model.providerName} / {model.modelName}
                         </MenuItem>
                       );
                     })}
