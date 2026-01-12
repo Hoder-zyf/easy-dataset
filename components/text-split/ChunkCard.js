@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import {
   Box,
@@ -24,6 +25,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import QuizIcon from '@mui/icons-material/Quiz';
 import EditIcon from '@mui/icons-material/Edit';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
@@ -77,14 +79,17 @@ export default function ChunkCard({
   onGenerateQuestions,
   onDataCleaning,
   onEdit,
+  onGenerateEvalQuestions, // 新增：生成测评题目的回调
   projectId,
   selectedModel // 添加selectedModel参数
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const router = useRouter();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [chunkForEdit, setChunkForEdit] = useState(null);
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
+  const [generatingEval, setGeneratingEval] = useState(false);
 
   // 获取文本预览
   const getTextPreview = (content, maxLength = 150) => {
@@ -147,6 +152,21 @@ export default function ChunkCard({
       return () => clearTimeout(timer);
     }
   }, [chunk.Questions, generatingQuestions]);
+
+  // 处理生成测评题目
+  const handleGenerateEvalQuestionsClick = async () => {
+    if (!onGenerateEvalQuestions) return;
+
+    setGeneratingEval(true);
+    try {
+      await onGenerateEvalQuestions(chunk.id);
+    } finally {
+      // 延迟关闭加载状态
+      setTimeout(() => {
+        setGeneratingEval(false);
+      }, 500);
+    }
+  };
 
   return (
     <>
@@ -245,8 +265,29 @@ export default function ChunkCard({
                           fontWeight: 500,
                           '& .MuiChip-label': { px: 1 }
                         }}
+                        onClick={() => {
+                          if (!projectId) return;
+                          router.push(`/projects/${projectId}/questions`);
+                        }}
                       />
                     </Tooltip>
+                  )}
+                  {chunk.EvalDatasets && chunk.EvalDatasets.length > 0 && (
+                    <Chip
+                      label={`${t('textSplit.generatedEvalQuestions', { count: chunk.EvalDatasets.length })}`}
+                      size="small"
+                      color="secondary"
+                      variant="outlined"
+                      sx={{
+                        borderRadius: 1,
+                        fontWeight: 500,
+                        '& .MuiChip-label': { px: 1 }
+                      }}
+                      onClick={() => {
+                        if (!projectId) return;
+                        router.push(`/projects/${projectId}/eval-datasets`);
+                      }}
+                    />
                   )}
                 </Box>
               </Box>
@@ -255,7 +296,7 @@ export default function ChunkCard({
                 variant="body2"
                 color="textSecondary"
                 sx={{
-                  mb: 2,
+                  mb: 1,
                   lineHeight: 1.6,
                   opacity: 0.85
                 }}
@@ -280,7 +321,7 @@ export default function ChunkCard({
             }
           }}
         >
-          <Tooltip title={t('textSplit.viewDetails')}>
+          <Tooltip title={t('datasets.viewDetails')}>
             <IconButton
               size="small"
               color="primary"
@@ -315,6 +356,32 @@ export default function ChunkCard({
                 }}
               >
                 {generatingQuestions ? <CircularProgress size={20} color="inherit" /> : <QuizIcon fontSize="small" />}
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Tooltip
+            title={
+              selectedModel?.id
+                ? t('textSplit.generateEvalQuestions', { defaultValue: '生成测试集' })
+                : t('textSplit.selectModelFirst', { defaultValue: '请先在右上角选择模型' })
+            }
+          >
+            <span>
+              <IconButton
+                size="small"
+                color="secondary"
+                onClick={handleGenerateEvalQuestionsClick}
+                disabled={!selectedModel?.id || generatingEval}
+                sx={{
+                  bgcolor: theme.palette.mode === 'dark' ? 'rgba(156, 39, 176, 0.08)' : 'rgba(123, 31, 162, 0.08)',
+                  '&.Mui-disabled': {
+                    opacity: 0.6,
+                    pointerEvents: 'auto'
+                  }
+                }}
+              >
+                {generatingEval ? <CircularProgress size={20} color="inherit" /> : <AssignmentIcon fontSize="small" />}
               </IconButton>
             </span>
           </Tooltip>

@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server';
 import { main } from '@/lib/db/fileToDb';
 
-// 存储迁移任务状态
+// Store migration task states
 const migrationTasks = new Map();
 
 /**
- * 开始迁移任务
+ * Start a migration task
  */
 export async function POST() {
   try {
-    // 生成唯一的任务ID
+    // Generate a unique task ID
     const taskId = Date.now().toString();
 
-    // 初始化任务状态
+    // Initialize task state
     migrationTasks.set(taskId, {
       status: 'running',
       progress: 0,
@@ -22,16 +22,16 @@ export async function POST() {
       startTime: Date.now()
     });
 
-    // 异步执行迁移任务
+    // Execute migration asynchronously
     executeMigration(taskId);
 
-    // 返回任务ID
+    // Return task ID
     return NextResponse.json({
       success: true,
       taskId
     });
   } catch (error) {
-    console.error('启动迁移任务失败:', String(error));
+    console.error('Failed to start migration task:', String(error));
     return NextResponse.json(
       {
         success: false,
@@ -43,11 +43,11 @@ export async function POST() {
 }
 
 /**
- * 获取迁移任务状态
+ * Get migration task status
  */
 export async function GET(request) {
   try {
-    // 从URL获取任务ID
+    // Get task ID from URL
     const { searchParams } = new URL(request.url);
     const taskId = searchParams.get('taskId');
 
@@ -55,32 +55,32 @@ export async function GET(request) {
       return NextResponse.json(
         {
           success: false,
-          error: '缺少任务ID'
+          error: 'Missing taskId'
         },
         { status: 400 }
       );
     }
 
-    // 获取任务状态
+    // Read task state
     const task = migrationTasks.get(taskId);
 
     if (!task) {
       return NextResponse.json(
         {
           success: false,
-          error: '任务不存在'
+          error: 'Task not found'
         },
         { status: 404 }
       );
     }
 
-    // 返回任务状态
+    // Return task state
     return NextResponse.json({
       success: true,
       task
     });
   } catch (error) {
-    console.error('获取迁移任务状态失败:', String(error));
+    console.error('Failed to get migration task status:', String(error));
     return NextResponse.json(
       {
         success: false,
@@ -92,76 +92,77 @@ export async function GET(request) {
 }
 
 /**
- * 异步执行迁移任务
- * @param {string} taskId 任务ID
+ * Execute migration task asynchronously
+ * @param {string} taskId Task ID
  */
 async function executeMigration(taskId) {
   try {
-    // 获取任务状态
+    // Read task state
     const task = migrationTasks.get(taskId);
 
     if (!task) {
-      console.error(`任务 ${taskId} 不存在`);
+      console.error(`Task not found: ${taskId}`);
       return;
     }
 
-    // 更新任务状态为运行中
+    // Reset task state to running
     task.status = 'running';
     task.progress = 0;
     task.completed = 0;
     task.total = 0;
     task.startTime = Date.now();
 
-    // 每秒更新一次任务状态到存储中，以便前端能获取最新进度
+    // Persist task state once per second so clients can poll progress
     const statusUpdateInterval = setInterval(() => {
-      // 只在任务还在运行时更新
+      // Only update while still running
       if (task.status === 'running') {
         migrationTasks.set(taskId, { ...task });
-        console.log(`更新任务状态: ${taskId}, 进度: ${task.progress}%, 完成: ${task.completed}/${task.total}`);
+        console.log(
+          `Migration task status updated: ${taskId}, progress: ${task.progress}%, completed: ${task.completed}/${task.total}`
+        );
       } else {
-        // 如果任务已经结束，停止定时更新
+        // Stop updating when task ends
         clearInterval(statusUpdateInterval);
       }
     }, 1000);
 
-    // 执行迁移操作
-    // 将任务状态对象传递给main函数，以便实时更新进度
+    // Run migration and let main(task) mutate progress fields
     const count = await main(task);
 
-    // 清除状态更新定时器
+    // Clear status update timer
     clearInterval(statusUpdateInterval);
 
-    // 再次确保任务状态为完成
+    // Mark as completed
     task.status = 'completed';
     task.progress = 100;
     task.completed = count;
-    if (task.total === 0) task.total = count; // 确保总数不为零
+    if (task.total === 0) task.total = count;
     task.endTime = Date.now();
 
-    // 更新最终任务状态
+    // Persist final task state
     migrationTasks.set(taskId, { ...task });
 
-    // 任务完成后，设置一个定时器清理任务状态（例如30分钟后）
+    // Clean up task state after 30 minutes
     setTimeout(
       () => {
         migrationTasks.delete(taskId);
-        console.log(`清理任务状态: ${taskId}`);
+        console.log(`Migration task state cleaned up: ${taskId}`);
       },
       30 * 60 * 1000
     );
   } catch (error) {
-    console.error(`执行迁移任务 ${taskId} 失败:`, String(error));
+    console.error(`Failed to execute migration task: ${taskId}`, String(error));
 
-    // 获取任务状态
+    // Read task state
     const task = migrationTasks.get(taskId);
 
     if (task) {
-      // 更新任务状态为失败
+      // Mark as failed
       task.status = 'failed';
       task.error = error.message;
       task.endTime = Date.now();
 
-      // 更新任务状态
+      // Persist task state
       migrationTasks.set(taskId, task);
     }
   }

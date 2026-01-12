@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -9,8 +11,6 @@ export async function GET(request) {
     const provider = searchParams.get('provider');
     const status = searchParams.get('status');
 
-    // 计算时间范围
-    const now = new Date();
     let startDate = new Date();
 
     if (timeRange === '24h') {
@@ -18,11 +18,9 @@ export async function GET(request) {
     } else if (timeRange === '30d') {
       startDate.setDate(startDate.getDate() - 30);
     } else {
-      // 默认 7d
       startDate.setDate(startDate.getDate() - 7);
     }
 
-    // 构建查询条件
     const where = {
       createAt: {
         gte: startDate
@@ -39,9 +37,8 @@ export async function GET(request) {
       where.status = status;
     }
 
-    // 1. 获取汇总数据
-    // 注意：Prisma 的 aggregate 对于大量数据可能较慢，但对于监控看板通常还可以接受
-    // 如果数据量巨大，建议后续优化为定期聚合表
+    // 1. Fetch data for aggregation
+    // Note: Prisma aggregation can be slow on very large datasets. If needed, optimize with pre-aggregated tables.
     const logs = await db.llmUsageLogs.findMany({
       where,
       select: {
@@ -63,7 +60,7 @@ export async function GET(request) {
       }
     });
 
-    // 获取项目信息映射
+    // Build project name map
     const projects = await db.projects.findMany({
       select: { id: true, name: true }
     });
@@ -72,7 +69,7 @@ export async function GET(request) {
       return acc;
     }, {});
 
-    // 2. 数据处理与聚合
+    // 2. Process and aggregate
     const summary = {
       totalTokens: 0,
       inputTokens: 0,
@@ -101,7 +98,7 @@ export async function GET(request) {
         summary.failedCalls++;
       }
 
-      // Trend (按天或按小时)
+      // Trend (by day or hour)
       let timeKey;
       if (timeRange === '24h') {
         const date = new Date(log.createAt);
@@ -153,29 +150,29 @@ export async function GET(request) {
       }
     });
 
-    // 计算平均值
+    // Calculate averages
     if (summary.successCalls > 0) {
       summary.avgLatency = Math.round(summary.totalLatency / summary.successCalls);
     }
     summary.avgTokensPerCall = summary.totalCalls > 0 ? Math.round(summary.totalTokens / summary.totalCalls) : 0;
     summary.failureRate = summary.totalCalls > 0 ? summary.failedCalls / summary.totalCalls : 0;
 
-    // 格式化图表数据
+    // Format chart data
     const trend = Object.values(trendMap).sort((a, b) => {
-      // 简单排序，实际可能需要更严谨的时间排序
+      // Simple sorting; for production use, consider stricter time ordering.
       return a.name.localeCompare(b.name);
     });
 
     const modelDistribution = Object.values(modelStats).sort((a, b) => b.value - a.value);
 
-    // 格式化详细表格数据
+    // Format detailed table data
     const details = Object.values(detailedStatsMap)
       .map(item => ({
         ...item,
         avgLatency:
           item.status === 'SUCCESS' && item.calls > 0 ? (item.totalLatency / item.calls / 1000).toFixed(2) + 's' : '-'
       }))
-      .sort((a, b) => b.totalTokens - a.totalTokens); // 默认按 token 消耗排序
+      .sort((a, b) => b.totalTokens - a.totalTokens); // Default sorting by token usage
 
     return NextResponse.json({
       summary,

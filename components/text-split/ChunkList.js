@@ -29,6 +29,7 @@ export default function ChunkList({
   onDelete,
   onEdit,
   onGenerateQuestions,
+  onGenerateEvalQuestions,
   onDataCleaning,
   loading = false,
   questionFilter,
@@ -293,6 +294,7 @@ export default function ChunkList({
               onDelete={() => handleOpenDeleteDialog(chunk.id)}
               onEdit={handleEditChunk}
               onGenerateQuestions={() => onGenerateQuestions && onGenerateQuestions([chunk.id])}
+              onGenerateEvalQuestions={() => onGenerateEvalQuestions && onGenerateEvalQuestions(chunk.id)}
               onDataCleaning={() => onDataCleaning && onDataCleaning([chunk.id])}
               projectId={projectId}
               selectedModel={selectedModel}

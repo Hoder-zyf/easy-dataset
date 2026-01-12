@@ -31,6 +31,9 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import UpdateChecker from '../UpdateChecker';
 import * as styles from './styles';
 
@@ -226,6 +229,63 @@ export default function MobileDrawer({
                 primary={t('datasets.imageQA', '图片问答数据集')}
                 primaryTypographyProps={styles.smallListItemTextStyles}
               />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
+        {/* 评估菜单 */}
+        <ListItem disablePadding sx={{ mb: 0.5 }}>
+          <ListItemButton
+            onClick={() => toggleMobileSubmenu('eval')}
+            role="menuitem"
+            aria-expanded={expandedMenu === 'eval'}
+            aria-controls="eval-submenu"
+            sx={styles.getDrawerListItemButtonStyles(theme)}
+          >
+            <ListItemIcon sx={styles.listItemIconStyles}>
+              <AssessmentOutlinedIcon sx={styles.getIconColorStyles(theme)} />
+            </ListItemIcon>
+            <ListItemText primary={t('eval.title')} primaryTypographyProps={styles.listItemTextStyles} />
+            {expandedMenu === 'eval' ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </ListItemButton>
+        </ListItem>
+        <Collapse in={expandedMenu === 'eval'} timeout="auto" unmountOnExit id="eval-submenu">
+          <List component="div" disablePadding sx={styles.getDrawerSubmenuContainerStyles(theme)}>
+            <ListItemButton
+              role="menuitem"
+              sx={styles.getDrawerSubmenuItemStyles(theme)}
+              component={Link}
+              href={`/projects/${currentProject}/eval-datasets`}
+              onClick={toggleDrawer}
+            >
+              <ListItemIcon sx={styles.smallListItemIconStyles}>
+                <AssessmentOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary={t('eval.datasets')} primaryTypographyProps={styles.smallListItemTextStyles} />
+            </ListItemButton>
+            <ListItemButton
+              role="menuitem"
+              sx={styles.getDrawerSubmenuItemStyles(theme)}
+              component={Link}
+              href={`/projects/${currentProject}/eval-tasks`}
+              onClick={toggleDrawer}
+            >
+              <ListItemIcon sx={styles.smallListItemIconStyles}>
+                <PlaylistPlayIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary={t('eval.tasks')} primaryTypographyProps={styles.smallListItemTextStyles} />
+            </ListItemButton>
+            <ListItemButton
+              role="menuitem"
+              sx={styles.getDrawerSubmenuItemStyles(theme)}
+              component={Link}
+              href={`/projects/${currentProject}/blind-test-tasks`}
+              onClick={toggleDrawer}
+            >
+              <ListItemIcon sx={styles.smallListItemIconStyles}>
+                <VisibilityIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary={t('blindTest.title')} primaryTypographyProps={styles.smallListItemTextStyles} />
             </ListItemButton>
           </List>
         </Collapse>

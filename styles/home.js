@@ -1,4 +1,6 @@
 // styles/home.js
+import { alpha } from '@mui/material/styles';
+
 export const styles = {
   heroSection: {
     pt: { xs: 6, md: 10 },
@@ -83,26 +85,81 @@ export const styles = {
     background: theme.palette.mode === 'dark' ? 'rgba(30, 30, 30, 0.6)' : 'rgba(255, 255, 255, 0.8)',
     backdropFilter: 'blur(8px)'
   }),
-  projectCard: {
+  projectCard: theme => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'visible',
-    position: 'relative'
+    position: 'relative',
+    transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+    borderRadius: '16px',
+    overflow: 'visible', // 允许内容溢出（如下拉菜单）
+    '&:hover': {
+      transform: 'translateY(-4px)',
+      boxShadow: theme.palette.mode === 'dark' ? '0 12px 24px rgba(0,0,0,0.3)' : '0 12px 24px rgba(0,0,0,0.1)'
+    }
+  }),
+  projectCardContent: {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    p: 2
   },
-  projectAvatar: {
-    position: 'absolute',
-    top: -16,
-    left: 24,
-    zIndex: 1
+  projectTitle: {
+    fontWeight: 700,
+    fontSize: '1rem',
+    lineHeight: 1.2,
+    mb: 0.25,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
   },
   projectDescription: {
-    mb: 2,
+    mb: 1.5,
     display: '-webkit-box',
     WebkitBoxOrient: 'vertical',
     WebkitLineClamp: 2,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    height: '40px'
+    height: '32px',
+    color: 'text.secondary',
+    fontSize: '0.75rem',
+    lineHeight: 1.4
+  },
+  statsContainer: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: 1,
+    mt: 'auto'
+  },
+  statItem: theme => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+    p: 0.75,
+    borderRadius: '8px',
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+    transition: 'background-color 0.2s',
+    '&:hover': {
+      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'
+    }
+  }),
+  statIconBox: (theme, color) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 24,
+    height: 24,
+    borderRadius: '6px',
+    backgroundColor: alpha(theme.palette[color].main, 0.1),
+    color: theme.palette[color].main
+  }),
+  cardFooter: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    mt: 2,
+    pt: 2,
+    borderTop: '1px solid',
+    borderColor: 'divider'
   }
 };

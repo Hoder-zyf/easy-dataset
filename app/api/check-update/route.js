@@ -2,19 +2,19 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
 
-// 获取当前版本
+// Get current version
 function getCurrentVersion() {
   try {
     const packageJsonPath = path.join(process.cwd(), 'package.json');
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     return packageJson.version;
   } catch (error) {
-    console.error('读取版本信息失败:', String(error));
+    console.error('Failed to read version from package.json:', String(error));
     return '1.0.0';
   }
 }
 
-// 从 GitHub 获取最新版本
+// Get latest version from GitHub
 async function getLatestVersion() {
   try {
     const owner = 'ConardLi';
@@ -22,18 +22,18 @@ async function getLatestVersion() {
     const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
 
     if (!response.ok) {
-      throw new Error(`GitHub API 请求失败: ${response.status}`);
+      throw new Error(`GitHub API request failed: ${response.status}`);
     }
 
     const data = await response.json();
     return data.tag_name.replace('v', '');
   } catch (error) {
-    console.error('获取最新版本失败:', String(error));
+    console.error('Failed to fetch latest version:', String(error));
     return null;
   }
 }
 
-// 检查是否有更新
+// Check for updates
 export async function GET() {
   try {
     const currentVersion = getCurrentVersion();
@@ -44,11 +44,11 @@ export async function GET() {
         hasUpdate: false,
         currentVersion,
         latestVersion: null,
-        error: '获取最新版本失败'
+        error: 'Failed to fetch latest version'
       });
     }
 
-    // 简单的版本比较
+    // Simple semver-like comparison
     const hasUpdate = compareVersions(latestVersion, currentVersion) > 0;
 
     return NextResponse.json({
@@ -58,11 +58,18 @@ export async function GET() {
       releaseUrl: hasUpdate ? `https://github.com/ConardLi/easy-dataset/releases/tag/v${latestVersion}` : null
     });
   } catch (error) {
-    console.error('检查更新失败:', String(error));
+    console.error('Failed to check for updates:', String(error));
+    return NextResponse.json(
+      {
+        hasUpdate: false,
+        error: 'Failed to check for updates'
+      },
+      { status: 500 }
+    );
   }
 }
 
-// 简单的版本比较函数
+// Simple version comparison
 function compareVersions(a, b) {
   const partsA = a.split('.').map(Number);
   const partsB = b.split('.').map(Number);

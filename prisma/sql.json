@@ -74,5 +74,15 @@
     "version": "1.6.2",
     "description": "为 Tags 和 Questions 表添加索引",
     "sql": "CREATE INDEX idx_tags_project_label ON Tags(projectId, label);\nCREATE INDEX idx_tags_project_parentId ON Tags(projectId, parentId);\nCREATE INDEX idx_questions_project_label ON Questions(projectId, label);"
+  },
+  {
+    "version": "1.7.0",
+    "description": "创建 EvalDatasets 表",
+    "sql": "CREATE TABLE IF NOT EXISTS EvalDatasets (\n  id VARCHAR(255) NOT NULL,\n  projectId VARCHAR(255) NOT NULL,\n  question TEXT NOT NULL,\n  questionType VARCHAR(50) NOT NULL,\n  chunkId VARCHAR(255) NULL,\n  options TEXT DEFAULT '' NOT NULL,\n  correctAnswer TEXT NOT NULL,\n  tags TEXT DEFAULT '' NOT NULL,\n  note TEXT DEFAULT '' NOT NULL,\n  createAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updateAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (id),\n  FOREIGN KEY (projectId) REFERENCES Projects(id) ON DELETE CASCADE,\n  FOREIGN KEY (chunkId) REFERENCES Chunks(id) ON DELETE SET NULL\n);\n\nCREATE INDEX idx_evaldatasets_projectId ON EvalDatasets(projectId);\nCREATE INDEX idx_evaldatasets_project_type ON EvalDatasets(projectId, questionType);\nCREATE INDEX idx_evaldatasets_chunkId ON EvalDatasets(chunkId);"
+  },
+  {
+    "version": "1.7.0",
+    "description": "创建 EvalResults 表",
+    "sql": "CREATE TABLE IF NOT EXISTS EvalResults (\n  id VARCHAR(255) NOT NULL,\n  projectId VARCHAR(255) NOT NULL,\n  taskId VARCHAR(255) NOT NULL,\n  evalDatasetId VARCHAR(255) NOT NULL,\n  modelAnswer TEXT NOT NULL,\n  score REAL DEFAULT 0 NOT NULL,\n  isCorrect BOOLEAN DEFAULT 0 NOT NULL,\n  judgeResponse TEXT DEFAULT '' NOT NULL,\n  duration INT DEFAULT 0 NOT NULL,\n  status INT DEFAULT 0 NOT NULL,\n  errorMessage TEXT DEFAULT '' NOT NULL,\n  createAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updateAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (id),\n  FOREIGN KEY (projectId) REFERENCES Projects(id) ON DELETE CASCADE,\n  FOREIGN KEY (evalDatasetId) REFERENCES EvalDatasets(id) ON DELETE CASCADE,\n  UNIQUE (taskId, evalDatasetId)\n);\n\nCREATE INDEX idx_evalresults_projectId ON EvalResults(projectId);\nCREATE INDEX idx_evalresults_taskId ON EvalResults(taskId);\nCREATE INDEX idx_evalresults_evalDatasetId ON EvalResults(evalDatasetId);"
   }
 ]

@@ -3,10 +3,8 @@ import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 
-// 执行更新脚本
 export async function POST() {
   try {
-    // 检查是否在客户端环境中运行
     const desktopDir = path.join(process.cwd(), 'desktop');
     const updaterPath = path.join(desktopDir, 'scripts', 'updater.js');
 
@@ -14,13 +12,13 @@ export async function POST() {
       return NextResponse.json(
         {
           success: false,
-          message: '更新功能仅在客户端环境中可用'
+          message: 'The update feature is only available in the client environment'
         },
         { status: 400 }
       );
     }
 
-    // 执行更新脚本
+    // Run update script
     return new Promise(resolve => {
       const updaterProcess = exec(`node "${updaterPath}"`, { cwd: process.cwd() });
 

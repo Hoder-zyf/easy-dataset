@@ -4,18 +4,14 @@ import { createInitModelConfig, getModelConfigByProjectId } from '@/lib/db/model
 export async function POST(request) {
   try {
     const projectData = await request.json();
-    // 验证必要的字段
     if (!projectData.name) {
-      return Response.json({ error: '项目名称不能为空' }, { status: 400 });
+      return Response.json({ error: 'Project name is required' }, { status: 400 });
     }
 
-    // 验证项目名称是否已存在
     if (await isExistByName(projectData.name)) {
-      return Response.json({ error: '项目名称已存在' }, { status: 400 });
+      return Response.json({ error: 'Project name already exists' }, { status: 400 });
     }
-    // 创建项目
     const newProject = await createProject(projectData);
-    // 如果指定了要复用的项目配置
     if (projectData.reuseConfigFrom) {
       let data = await getModelConfigByProjectId(projectData.reuseConfigFrom);
 
@@ -30,18 +26,17 @@ export async function POST(request) {
     }
     return Response.json(newProject, { status: 201 });
   } catch (error) {
-    console.error('创建项目出错:', String(error));
+    console.error('Failed to create project:', String(error));
     return Response.json({ error: String(error) }, { status: 500 });
   }
 }
 
 export async function GET(request) {
   try {
-    // 获取所有项目
     const projects = await getProjects();
     return Response.json(projects);
   } catch (error) {
-    console.error('获取项目列表出错:', String(error));
+    console.error('Failed to get project list:', String(error));
     return Response.json({ error: String(error) }, { status: 500 });
   }
 }

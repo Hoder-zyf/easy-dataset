@@ -33,6 +33,7 @@ import { selectedModelInfoAtom } from '@/lib/store';
 import useChunks from './useChunks';
 import useQuestionGeneration from './useQuestionGeneration';
 import useDataCleaning from './useDataCleaning';
+import useEvalGeneration from './useEvalGeneration';
 import useFileProcessing from './useFileProcessing';
 import useFileProcessingStatus from '@/hooks/useFileProcessingStatus';
 import { toast } from 'sonner';
@@ -137,6 +138,8 @@ export default function TextSplitPage({ params }) {
     handleDataCleaning
   } = useDataCleaning(projectId, taskSettings);
 
+  const { generating: generatingEval, handleGenerateEvalQuestions } = useEvalGeneration(projectId);
+
   const { fileProcessing, progress: pdfProgress, handleFileProcessing } = useFileProcessing(projectId);
 
   // 当前页面使用的进度状态
@@ -168,6 +171,14 @@ export default function TextSplitPage({ params }) {
   // 包装数据清洗的处理函数
   const onDataCleaning = async chunkIds => {
     await handleDataCleaning(chunkIds, selectedModelInfo, fetchChunks);
+  };
+
+  // 包装生成测评题目的处理函数
+  const onGenerateEvalQuestions = async chunkId => {
+    await handleGenerateEvalQuestions(chunkId, selectedModelInfo, () => {
+      // 成功后刷新列表
+      fetchChunks();
+    });
   };
 
   useEffect(() => {
@@ -271,6 +282,7 @@ export default function TextSplitPage({ params }) {
             onDelete={handleDeleteChunk}
             onEdit={handleEditChunk}
             onGenerateQuestions={onGenerateQuestions}
+            onGenerateEvalQuestions={onGenerateEvalQuestions}
             onDataCleaning={onDataCleaning}
             loading={loading}
             questionFilter={questionFilter}

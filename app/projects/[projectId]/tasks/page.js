@@ -105,7 +105,6 @@ export default function TasksPage({ params }) {
     try {
       const response = await axios.patch(`/api/projects/${projectId}/tasks/${taskId}`, {
         status: 3, // 3 表示已中断
-        detail: t('tasks.status.aborted'),
         note: t('tasks.status.aborted')
       });
 

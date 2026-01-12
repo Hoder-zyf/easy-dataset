@@ -7,8 +7,8 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 
 /**
- * 打开项目目录
- * @returns {Promise<Response>} 操作结果响应
+ * Open project directory
+ * @returns {Promise<Response>} Operation result response
  */
 export async function POST(request) {
   try {
@@ -18,17 +18,17 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
-          error: '项目ID不能为空'
+          error: 'Project ID is required'
         },
         { status: 400 }
       );
     }
 
-    // 获取项目根目录
+    // Get project root directory
     const projectRoot = await getProjectRoot();
     const projectPath = path.join(projectRoot, projectId);
 
-    // 根据操作系统打开目录
+    // Open directory based on OS
     const platform = process.platform;
     let command;
 
@@ -39,7 +39,7 @@ export async function POST(request) {
       // macOS
       command = `open "${projectPath}"`;
     } else {
-      // Linux 和其他系统
+      // Linux and others
       command = `xdg-open "${projectPath}"`;
     }
 
@@ -47,10 +47,10 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      message: '已打开项目目录'
+      message: 'Project directory opened'
     });
   } catch (error) {
-    console.error('打开项目目录出错:', String(error));
+    console.error('Failed to open project directory:', String(error));
     return NextResponse.json(
       {
         success: false,

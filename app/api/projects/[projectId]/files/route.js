@@ -59,21 +59,9 @@ export async function DELETE(request, { params }) {
     const domainTreeAction = searchParams.get('domainTreeAction') || 'keep';
 
     // 从请求体中获取模型信息和语言环境
-    let model, language;
-    try {
-      const requestData = await request.json();
-      model = requestData.model;
-      language = requestData.language || '中文';
-    } catch (error) {
-      console.warn('解析请求体失败，使用默认值:', error);
-      // 如果无法解析请求体，使用默认值
-      model = {
-        providerId: 'openai',
-        modelName: 'gpt-3.5-turbo',
-        apiKey: process.env.OPENAI_API_KEY || ''
-      };
-      language = '中文';
-    }
+    const requestData = await request.json();
+    const model = requestData.model;
+    const language = requestData.language || 'en';
 
     // 验证项目ID和文件名
     if (!projectId) {

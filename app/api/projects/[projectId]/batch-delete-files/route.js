@@ -167,11 +167,7 @@ export async function POST(request, { params }) {
         projectId,
         action: domainTreeAction,
         allToc: toc,
-        model: model || {
-          providerId: 'openai',
-          modelName: 'gpt-3.5-turbo',
-          apiKey: process.env.OPENAI_API_KEY || ''
-        },
+        model: model,
         language,
         deleteToc: deletedTocs.length > 0 ? deletedTocs : undefined,
         project

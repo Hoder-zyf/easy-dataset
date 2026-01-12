@@ -59,8 +59,19 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'The model configuration cannot be empty ' }, { status: 400 });
     }
     modelConfig.projectId = projectId;
-    if (!modelConfig.modelId) {
+    // 如果没有 modelId，使用 modelName 补齐（兼容旧逻辑）
+    if (!modelConfig.modelId && modelConfig.modelName) {
       modelConfig.modelId = modelConfig.modelName;
+    }
+    // 如果没有 modelName，使用 modelId 补齐
+    if (!modelConfig.modelName && modelConfig.modelId) {
+      modelConfig.modelName = modelConfig.modelId;
+    }
+    if (!modelConfig.topK) {
+      modelConfig.topK = 0;
+    }
+    if (!modelConfig.status) {
+      modelConfig.status = 1;
     }
     const res = await saveModelConfig(modelConfig);
 

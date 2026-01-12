@@ -12,5 +12,13 @@ export const DEFAULT_SETTINGS = {
   multiTurnScenario: '',
   multiTurnRounds: 3,
   multiTurnRoleA: '',
-  multiTurnRoleB: ''
+  multiTurnRoleB: '',
+  // 测试集生成配置
+  evalQuestionTypeRatios: {
+    true_false: 1,
+    single_choice: 1,
+    multiple_choice: 1,
+    short_answer: 1,
+    open_ended: 1
+  }
 };

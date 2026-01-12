@@ -11,6 +11,9 @@ import ChatIcon from '@mui/icons-material/Chat';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import StorageIcon from '@mui/icons-material/Storage';
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import * as styles from './styles';
 
 /**
@@ -131,6 +134,61 @@ export default function DesktopMenus({ theme, menuState, isMenuOpen, handleMenuC
             primary={t('datasets.imageQA', '图片问答数据集')}
             primaryTypographyProps={styles.smallListItemTextStyles}
           />
+        </MenuItem>
+      </Menu>
+
+      {/* 评估菜单 */}
+      <Menu
+        anchorEl={menuState.anchorEl}
+        open={isMenuOpen('eval')}
+        onClose={handleMenuClose}
+        PaperProps={{
+          elevation: 8,
+          sx: styles.getSimpleMenuPaperStyles(theme),
+          onMouseLeave: handleMenuClose
+        }}
+        transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'center', vertical: 'bottom' }}
+        MenuListProps={{
+          dense: true,
+          onMouseLeave: handleMenuClose,
+          sx: styles.simpleMenuListStyles
+        }}
+      >
+        <MenuItem
+          component={Link}
+          href={`/projects/${currentProject}/eval-datasets`}
+          onClick={handleMenuClose}
+          sx={styles.getSimpleMenuItemStyles(theme)}
+        >
+          <ListItemIcon sx={styles.smallListItemIconStyles}>
+            <AssessmentOutlinedIcon fontSize="small" sx={styles.getPrimaryIconColorStyles(theme)} />
+          </ListItemIcon>
+          <ListItemText primary={t('eval.datasets')} primaryTypographyProps={styles.smallListItemTextStyles} />
+        </MenuItem>
+        <Divider sx={{ my: 0.5, mx: 1 }} />
+        <MenuItem
+          component={Link}
+          href={`/projects/${currentProject}/eval-tasks`}
+          onClick={handleMenuClose}
+          sx={styles.getSimpleMenuItemStyles(theme)}
+        >
+          <ListItemIcon sx={styles.smallListItemIconStyles}>
+            <PlaylistPlayIcon fontSize="small" sx={styles.getPrimaryIconColorStyles(theme)} />
+          </ListItemIcon>
+          <ListItemText primary={t('eval.tasks')} primaryTypographyProps={styles.smallListItemTextStyles} />
+        </MenuItem>
+        <Divider sx={{ my: 0.5, mx: 1 }} />
+        <MenuItem
+          component={Link}
+          href={`/projects/${currentProject}/blind-test-tasks`}
+          onClick={handleMenuClose}
+          sx={styles.getSimpleMenuItemStyles(theme)}
+        >
+          <ListItemIcon sx={styles.smallListItemIconStyles}>
+            <VisibilityIcon fontSize="small" sx={styles.getPrimaryIconColorStyles(theme)} />
+          </ListItemIcon>
+          <ListItemText primary={t('blindTest.title')} primaryTypographyProps={styles.smallListItemTextStyles} />
         </MenuItem>
       </Menu>
 
