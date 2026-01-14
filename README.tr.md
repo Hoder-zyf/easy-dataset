@@ -30,7 +30,7 @@ Easy Dataset, Büyük Dil Modelleri (LLM'ler) için özel olarak tasarlanmış i
 
 Easy Dataset ile alan bilgisini yapılandırılmış veri setlerine dönüştürebilir, OpenAI formatını takip eden tüm LLM API'leriyle uyumlu çalışabilir ve ince ayar sürecini basit ve verimli hale getirebilirsiniz.
 
-![](./public/imgs/en-arc.png)
+![](./public/imgs/arc3.png)
 
 ## Özellikler
 

@@ -26,24 +26,66 @@
 
 ## 概述
 
-Easy Dataset 是一个专为创建大型语言模型（LLM）微调数据集而设计的应用程序。它提供了直观的界面，用于上传特定领域的文件，智能分割内容，生成问题，并为模型微调生成高质量的训练数据。
+Easy Dataset 是一个专为创建大型语言模型数据集而设计的应用程序。它提供了直观的界面，内置了强大的文档解析工具、智能分割算法、数据清洗和数据增强能力，可以将各种格式的领域文献转化为高质量结构化数据集，可用于模型微调、RAG、模型效果评估等场景。
 
-通过 Easy Dataset，您可以将领域知识转化为结构化数据集，兼容所有遵循 OpenAI 格式的 LLM API，使微调过程变得简单高效。
+![Easy Dataset 产品架构图](./public/imgs/arc3.png)
 
-![](./public/imgs/cn-arc.png)
+## 新闻
+
+🎉🎉 Easy Dataset 1.7.0 版本上线全新的评估能力，你可以轻松将领域文献转换为评估数据集（测试集），并且可以自动执行多维度评估任务，另外还配备人工盲测系统，可以轻松助你完成垂直领域模型评估、模型微调后效果评估、RAG 召回率评估等需求，使用教程： [https://www.bilibili.com/video/BV1CRrVB7Eb4/](https://www.bilibili.com/video/BV1CRrVB7Eb4/)
 
 ## 功能特点
 
-- **智能文档处理**：支持 PDF、Markdown、DOCX 等多种格式智能识别和处理
-- **智能文本分割**：支持多种智能文本分割算法、支持自定义可视化分段
-- **智能问题生成**：从每个文本片段中提取相关问题
-- **领域标签**：为数据集智能构建全局领域标签，具备全局理解能力
-- **答案生成**：使用 LLM API 为每个问题生成全面的答案、思维链（COT）
-- **灵活编辑**：在流程的任何阶段编辑问题、答案和数据集
-- **多种导出格式**：以各种格式（Alpaca、ShareGPT）和文件类型（JSON、JSONL）导出数据集
-- **广泛的模型支持**：兼容所有遵循 OpenAI 格式的 LLM API
-- **用户友好界面**：为技术和非技术用户设计的直观 UI
-- **自定义系统提示**：添加自定义系统提示以引导模型响应
+### 📄 文档处理与数据生成
+
+- **智能文档处理**：支持 PDF、Markdown、DOCX、TXT、EPUB 等多种格式智能识别和处理
+- **智能文本分割**：支持多种智能文本分割算法（Markdown 结构、递归分隔符、固定长度、代码智能分块等），支持自定义可视化分段
+- **智能问题生成**：从每个文本片段中自动提取相关问题，支持问题模板和批量生成
+- **领域标签树**：基于文档目录智能构建全局领域标签树，具备全局理解和自动打标能力
+- **答案生成**：使用 LLM API 为每个问题生成全面的答案和思维链（COT），支持 AI 智能优化
+- **数据清洗**：智能清洗文本块内容，去除噪音数据，提升数据质量
+
+### 🔄 多种数据集类型
+
+- **单轮问答数据集**：标准的问答对格式，适合基础微调
+- **多轮对话数据集**：支持自定义角色和场景的多轮对话格式
+- **图片问答数据集**：基于图片生成视觉问答数据，支持多种导入方式（目录、PDF、压缩包）
+- **数据蒸馏**：无需上传文档，直接从领域主题自动生成标签树和问题
+
+### 📊 模型评估体系
+
+- **评估数据集**：支持生成判断题、单选题、多选题、简答题、开放题等多种题型的评估测试集
+- **模型自动评估**：使用教师模型（Judge Model）自动评估模型回答质量，支持自定义评分规则
+- **人工盲测 (Arena)**：双盲对比两个模型的回答质量，消除偏见进行公正评判
+- **AI 质量评估**：对生成的数据集进行自动质量评分和筛选
+
+### 🛠️ 高级功能
+
+- **自定义提示词**：项目级自定义各类提示词模板（问题生成、答案生成、数据清洗等）
+- **GA 组合生成**：文体-受众对生成，丰富数据多样性
+- **任务管理中心**：后台批量任务处理，支持任务监控和中断
+- **资源监控看板**：Token 消耗统计、调用次数追踪、模型性能分析
+- **模型测试 Playground**：支持最多 3 个模型同时对比测试
+
+### 📤 导出与集成
+
+- **多种导出格式**：支持 Alpaca、ShareGPT、Multilingual-Thinking 等格式，JSON/JSONL 文件类型
+- **平衡导出**：按标签配置导出数量，实现数据集均衡
+- **LLaMA Factory 集成**：一键生成 LLaMA Factory 配置文件
+- **Hugging Face 上传**：直接将数据集上传至 Hugging Face Hub
+
+### 🤖 模型支持
+
+- **广泛的模型兼容**：兼容所有遵循 OpenAI 格式的 LLM API
+- **多提供商支持**：OpenAI、Ollama（本地模型）、智谱 AI、阿里百炼、OpenRouter 等
+- **视觉模型**：支持 Gemini、Claude 等视觉模型用于 PDF 解析和图片问答
+
+### 🌐 用户体验
+
+- **用户友好界面**：为技术和非技术用户设计的现代化直观 UI
+- **多语言支持**：完整的中英文界面支持
+- **数据集广场**：发现和探索各种公开数据集资源
+- **桌面客户端**：提供 Windows、macOS、Linux 桌面应用
 
 ## 快速演示
 
@@ -192,75 +234,6 @@ docker run -d \
 
 4. 打开浏览器，访问 `http://localhost:1717`
 
-## 使用方法
-
-### 创建项目
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/1.png"></td>
-        <td><img src="./public/imgs/2.png"></td>
-    </tr>
-</table>
-
-1. 在首页点击"创建项目"按钮；
-2. 输入项目名称和描述；
-3. 配置您首选的 LLM API 设置
-
-### 处理文档
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/3.png"></td>
-        <td><img src="./public/imgs/4.png"></td>
-    </tr>
-</table>
-
-1. 在"文本分割"部分上传您的文件（支持 PDF、Markdwon、txt、DOCX）；
-2. 查看和调整自动分割的文本片段；
-3. 查看和调整全局领域树
-
-### 生成问题
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/5.png"></td>
-        <td><img src="./public/imgs/6.png"></td>
-    </tr>
-</table>
-
-2. 基于文本块批量构造问题；
-3. 查看并编辑生成的问题；
-4. 使用标签树组织问题
-
-### 创建数据集
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/7.png"></td>
-        <td><img src="./public/imgs/8.png"></td>
-    </tr>
-</table>
-
-1. 基于问题批量构造数据集；
-2. 使用配置的 LLM 生成答案；
-3. 查看、编辑并优化生成的答案
-
-### 导出数据集
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/9.png"></td>
-        <td><img src="./public/imgs/10.png"></td>
-    </tr>
-</table>
-
-1. 在数据集部分点击"导出"按钮；
-2. 选择您喜欢的格式（Alpaca 或 ShareGPT 或 multilingual-thinking）；
-3. 选择文件格式（JSON 或 JSONL）；
-4. 根据需要添加自定义系统提示；
-5. 导出您的数据集
-
 ## 文档
 
 - 有关所有功能和 API 的详细文档，请访问我们的 [文档站点](https://docs.easy-dataset.com/)
@@ -269,6 +242,7 @@ docker run -d \
 
 ## 社区教程
 
+- [使用 Easy Dataset 完成测试集生成和模型评估](https://www.bilibili.com/video/BV1CRrVB7Eb4/)
 - [Easy Dataset × LLaMA Factory: 让大模型高效学习领域知识](https://buaa-act.feishu.cn/wiki/KY9xwTGs1iqHrRkjXBwcZP9WnL9)
 - [Easy Dataset 使用实战: 如何构建高质量数据集？](https://www.bilibili.com/video/BV1MRMnz1EGW)
 - [Easy Dataset 1.4 重点功能更新解读](https://www.bilibili.com/video/BV1fyJhzHEb7/)

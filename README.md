@@ -26,25 +26,66 @@ If you like this project, please give it a Star⭐️, or buy the author a coffe
 
 ## Overview
 
-Easy Dataset is an application specifically designed for creating fine-tuning datasets for Large Language Models (LLMs). It provides an intuitive interface for uploading domain-specific files, intelligently splitting content, generating questions, and producing high-quality training data for model fine-tuning.
+Easy Dataset is an application specifically designed for building large language model (LLM) datasets. It features an intuitive interface, along with built-in powerful document parsing tools, intelligent segmentation algorithms, data cleaning and augmentation capabilities. The application can convert domain-specific documents in various formats into high-quality structured datasets, which are applicable to scenarios such as model fine-tuning, retrieval-augmented generation (RAG), and model performance evaluation.
 
-With Easy Dataset, you can transform domain knowledge into structured datasets, compatible with all LLM APIs that follow the OpenAI format, making the fine-tuning process simple and efficient.
+![](./public/imgs/arc3.png)
 
-![](./public/imgs/en-arc.png)
+## News
+
+🎉🎉 Easy Dataset Version 1.7.0 launches brand-new evaluation capabilities! You can effortlessly convert domain-specific documents into evaluation datasets (test sets) and automatically run multi-dimensional evaluation tasks. Additionally, it comes with a human blind test system, enabling you to easily meet needs such as vertical domain model evaluation, post-fine-tuning model performance assessment, and RAG recall rate evaluation. Tutorial: [https://www.bilibili.com/video/BV1CRrVB7Eb4/](https://www.bilibili.com/video/BV1CRrVB7Eb4/)
 
 ## Features
 
-- **Intelligent Document Processing**: Supports intelligent recognition and processing of multiple formats including PDF, Markdown, DOCX, etc.
-- **Intelligent Text Splitting**: Supports multiple intelligent text splitting algorithms and customizable visual segmentation
-- **Intelligent Question Generation**: Extracts relevant questions from each text segment
-- **Domain Labels**: Intelligently builds global domain labels for datasets, with global understanding capabilities
-- **Answer Generation**: Uses LLM API to generate comprehensive answers and Chain of Thought (COT)
-- **Flexible Editing**: Edit questions, answers, and datasets at any stage of the process
-- **Multiple Export Formats**: Export datasets in various formats (Alpaca, ShareGPT, multilingual-thinking) and file types (JSON, JSONL)
-- **Wide Model Support**: Compatible with all LLM APIs that follow the OpenAI format
-- **Multi-Language Support**: Complete Turkish language support for UI and all AI operations 🇹🇷
-- **User-Friendly Interface**: Intuitive UI designed for both technical and non-technical users
-- **Custom System Prompts**: Add custom system prompts to guide model responses
+### 📄 Document Processing & Data Generation
+
+- **Intelligent Document Processing**: Supports PDF, Markdown, DOCX, TXT, EPUB and more formats with intelligent recognition
+- **Intelligent Text Splitting**: Multiple splitting algorithms (Markdown structure, recursive separators, fixed length, code-aware chunking), with customizable visual segmentation
+- **Intelligent Question Generation**: Auto-extract relevant questions from text segments, with question templates and batch generation
+- **Domain Label Tree**: Intelligently builds global domain label trees based on document structure, with auto-tagging capabilities
+- **Answer Generation**: Uses LLM API to generate comprehensive answers and Chain of Thought (COT), with AI optimization
+- **Data Cleaning**: Intelligent text cleaning to remove noise and improve data quality
+
+### 🔄 Multiple Dataset Types
+
+- **Single-Turn QA Datasets**: Standard question-answer pairs for basic fine-tuning
+- **Multi-Turn Dialogue Datasets**: Customizable roles and scenarios for conversational format
+- **Image QA Datasets**: Generate visual QA data from images, with multiple import methods (directory, PDF, ZIP)
+- **Data Distillation**: Generate label trees and questions directly from domain topics without uploading documents
+
+### 📊 Model Evaluation System
+
+- **Evaluation Datasets**: Generate true/false, single-choice, multiple-choice, short-answer, and open-ended questions
+- **Automated Model Evaluation**: Use Judge Model to automatically evaluate model answer quality with customizable scoring rules
+- **Human Blind Test (Arena)**: Double-blind comparison of two models' answers for unbiased evaluation
+- **AI Quality Assessment**: Automatic quality scoring and filtering of generated datasets
+
+### 🛠️ Advanced Features
+
+- **Custom Prompts**: Project-level customization of all prompt templates (question generation, answer generation, data cleaning, etc.)
+- **GA Pair Generation**: Genre-Audience pair generation to enrich data diversity
+- **Task Management Center**: Background batch task processing with monitoring and interruption support
+- **Resource Monitoring Dashboard**: Token consumption statistics, API call tracking, model performance analysis
+- **Model Testing Playground**: Compare up to 3 models simultaneously
+
+### 📤 Export & Integration
+
+- **Multiple Export Formats**: Alpaca, ShareGPT, Multilingual-Thinking formats with JSON/JSONL file types
+- **Balanced Export**: Configure export counts per tag for dataset balancing
+- **LLaMA Factory Integration**: One-click LLaMA Factory configuration file generation
+- **Hugging Face Upload**: Direct upload datasets to Hugging Face Hub
+
+### 🤖 Model Support
+
+- **Wide Model Compatibility**: Compatible with all LLM APIs that follow the OpenAI format
+- **Multi-Provider Support**: OpenAI, Ollama (local models), Zhipu AI, Alibaba Bailian, OpenRouter, and more
+- **Vision Models**: Support Gemini, Claude, etc. for PDF parsing and image QA
+
+### 🌐 User Experience
+
+- **User-Friendly Interface**: Modern, intuitive UI designed for both technical and non-technical users
+- **Multi-Language Support**: Complete Chinese, English, and Turkish language support 🇹🇷
+- **Dataset Square**: Discover and explore public dataset resources
+- **Desktop Clients**: Available for Windows, macOS, and Linux
 
 ## Quick Demo
 
@@ -193,75 +234,6 @@ docker run -d \
 
 4. Open a browser and visit `http://localhost:1717`
 
-## How to Use
-
-### Create a Project
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/1.png"></td>
-        <td><img src="./public/imgs/2.png"></td>
-    </tr>
-</table>
-
-1. Click the "Create Project" button on the homepage;
-2. Enter a project name and description;
-3. Configure your preferred LLM API settings
-
-### Process Documents
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/3.png"></td>
-        <td><img src="./public/imgs/4.png"></td>
-    </tr>
-</table>
-
-1. Upload your files in the "Text Split" section (supports PDF, Markdown, txt, DOCX);
-2. View and adjust the automatically split text segments;
-3. View and adjust the global domain tree
-
-### Generate Questions
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/5.png"></td>
-        <td><img src="./public/imgs/6.png"></td>
-    </tr>
-</table>
-
-2. Batch construct questions based on text blocks;
-3. View and edit the generated questions;
-4. Organize questions using the label tree
-
-### Create Datasets
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/7.png"></td>
-        <td><img src="./public/imgs/8.png"></td>
-    </tr>
-</table>
-
-1. Batch construct datasets based on questions;
-2. Generate answers using the configured LLM;
-3. View, edit, and optimize the generated answers
-
-### Export Datasets
-
-<table>
-    <tr>
-        <td><img src="./public/imgs/9.png"></td>
-        <td><img src="./public/imgs/10.png"></td>
-    </tr>
-</table>
-
-1. Click the "Export" button in the Datasets section;
-2. Choose your preferred format (Alpaca or ShareGPT or multilingual-thinking);
-3. Select the file format (JSON or JSONL);
-4. Add custom system prompts as needed;
-5. Export your dataset
-
 ## Documentation
 
 - View the demo video of this project: [Easy Dataset Demo Video](https://www.bilibili.com/video/BV1y8QpYGE57/)
@@ -270,6 +242,7 @@ docker run -d \
 
 ## Community Practice
 
+- [Complete test set generation and model evaluation with Easy Dataset](https://www.bilibili.com/video/BV1CRrVB7Eb4/)
 - [Easy Dataset × LLaMA Factory: Enabling LLMs to Efficiently Learn Domain Knowledge](https://buaa-act.feishu.cn/wiki/GVzlwYcRFiR8OLkHbL6cQpYin7g)
 - [Easy Dataset Practical Guide: How to Build High-Quality Datasets?](https://www.bilibili.com/video/BV1MRMnz1EGW)
 - [Interpretation of Key Feature Updates in Easy Dataset](https://www.bilibili.com/video/BV1fyJhzHEb7/)
