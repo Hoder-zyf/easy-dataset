@@ -102,10 +102,11 @@ const FilterDialog = ({
           <Box sx={{ px: 1, mt: 2 }}>
             <Slider
               value={filterScoreRange}
-              onChange={(event, newValue) => onFilterScoreRangeChange(newValue)}
+              onChange={(_, newValue) => onFilterScoreRangeChange(newValue)}
               valueLabelDisplay="auto"
               min={0}
               max={5}
+              step={0.5}
               marks={[
                 { value: 0, label: '0' },
                 { value: 2.5, label: '2.5' },

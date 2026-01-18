@@ -42,7 +42,8 @@ const DatasetList = ({
   selectedIds,
   onSelectAll,
   onSelectItem,
-  evaluatingIds = []
+  evaluatingIds = [],
+  loading = false
 }) => {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -74,187 +75,171 @@ const DatasetList = ({
 
   return (
     <Card elevation={2}>
-      <TableContainer sx={{ overflowX: 'auto' }}>
-        <Table sx={{ minWidth: 900 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell
-                padding="checkbox"
-                sx={{
-                  backgroundColor: bgColor,
-                  color: color,
-                  borderBottom: `2px solid ${theme.palette.divider}`
-                }}
-              >
-                <Checkbox
-                  color="primary"
-                  indeterminate={selectedIds.length > 0 && selectedIds.length < total}
-                  checked={total > 0 && selectedIds.length === total}
-                  onChange={onSelectAll}
-                />
-              </TableCell>
-              <TableCell
-                sx={{
-                  backgroundColor: bgColor,
-                  color: color,
-                  fontWeight: 'bold',
-                  padding: '16px 8px',
-                  borderBottom: `2px solid ${theme.palette.divider}`,
-                  minWidth: 200
-                }}
-              >
-                {t('datasets.question')}
-              </TableCell>
-              <TableCell
-                sx={{
-                  backgroundColor: bgColor,
-                  color: color,
-                  fontWeight: 'bold',
-                  padding: '16px 8px',
-                  borderBottom: `2px solid ${theme.palette.divider}`,
-                  width: 120
-                }}
-              >
-                {t('datasets.rating', '评分')}
-              </TableCell>
-              <TableCell
-                sx={{
-                  backgroundColor: bgColor,
-                  color: color,
-                  fontWeight: 'bold',
-                  padding: '16px 8px',
-                  borderBottom: `2px solid ${theme.palette.divider}`,
-                  width: 100
-                }}
-              >
-                {t('datasets.model')}
-              </TableCell>
-              <TableCell
-                sx={{
-                  backgroundColor: bgColor,
-                  color: color,
-                  fontWeight: 'bold',
-                  padding: '16px 8px',
-                  borderBottom: `2px solid ${theme.palette.divider}`,
-                  width: 100
-                }}
-              >
-                {t('datasets.domainTag')}
-              </TableCell>
-              <TableCell
-                sx={{
-                  backgroundColor: bgColor,
-                  color: color,
-                  fontWeight: 'bold',
-                  padding: '16px 8px',
-                  borderBottom: `2px solid ${theme.palette.divider}`,
-                  width: 120
-                }}
-              >
-                {t('datasets.createdAt')}
-              </TableCell>
-              <TableCell
-                sx={{
-                  backgroundColor: bgColor,
-                  color: color,
-                  fontWeight: 'bold',
-                  padding: '16px 8px',
-                  borderBottom: `2px solid ${theme.palette.divider}`,
-                  width: 120
-                }}
-              >
-                {t('common.actions')}
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {datasets.map((dataset, index) => (
-              <>
-                <TableRow
-                  key={dataset.id}
+      <Box sx={{ position: 'relative' }}>
+        <TableContainer sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: 900 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  padding="checkbox"
                   sx={{
-                    '&:nth-of-type(odd)': { backgroundColor: alpha(theme.palette.primary.light, 0.05) },
-                    '&:hover': { backgroundColor: alpha(theme.palette.primary.light, 0.1) },
-                    cursor: 'pointer'
+                    backgroundColor: bgColor,
+                    color: color,
+                    borderBottom: `2px solid ${theme.palette.divider}`
                   }}
-                  onClick={() => onViewDetails(dataset.id)}
                 >
-                  <TableCell
-                    padding="checkbox"
+                  <Checkbox
+                    color="primary"
+                    indeterminate={selectedIds.length > 0 && selectedIds.length < total}
+                    checked={total > 0 && selectedIds.length === total}
+                    onChange={onSelectAll}
+                  />
+                </TableCell>
+                <TableCell
+                  sx={{
+                    backgroundColor: bgColor,
+                    color: color,
+                    fontWeight: 'bold',
+                    padding: '16px 8px',
+                    borderBottom: `2px solid ${theme.palette.divider}`,
+                    minWidth: 200
+                  }}
+                >
+                  {t('datasets.question')}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    backgroundColor: bgColor,
+                    color: color,
+                    fontWeight: 'bold',
+                    padding: '16px 8px',
+                    borderBottom: `2px solid ${theme.palette.divider}`,
+                    width: 120
+                  }}
+                >
+                  {t('datasets.rating', '评分')}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    backgroundColor: bgColor,
+                    color: color,
+                    fontWeight: 'bold',
+                    padding: '16px 8px',
+                    borderBottom: `2px solid ${theme.palette.divider}`,
+                    width: 100
+                  }}
+                >
+                  {t('datasets.model')}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    backgroundColor: bgColor,
+                    color: color,
+                    fontWeight: 'bold',
+                    padding: '16px 8px',
+                    borderBottom: `2px solid ${theme.palette.divider}`,
+                    width: 100
+                  }}
+                >
+                  {t('datasets.domainTag')}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    backgroundColor: bgColor,
+                    color: color,
+                    fontWeight: 'bold',
+                    padding: '16px 8px',
+                    borderBottom: `2px solid ${theme.palette.divider}`,
+                    width: 120
+                  }}
+                >
+                  {t('datasets.createdAt')}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    backgroundColor: bgColor,
+                    color: color,
+                    fontWeight: 'bold',
+                    padding: '16px 8px',
+                    borderBottom: `2px solid ${theme.palette.divider}`,
+                    width: 120
+                  }}
+                >
+                  {t('common.actions')}
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {datasets.map((dataset, index) => (
+                <>
+                  <TableRow
+                    key={dataset.id}
                     sx={{
-                      borderLeft: `4px solid ${theme.palette.primary.main}`
+                      '&:nth-of-type(odd)': { backgroundColor: alpha(theme.palette.primary.light, 0.05) },
+                      '&:hover': { backgroundColor: alpha(theme.palette.primary.light, 0.1) },
+                      cursor: 'pointer'
                     }}
+                    onClick={() => onViewDetails(dataset.id)}
                   >
-                    <Checkbox
-                      color="primary"
-                      checked={selectedIds.includes(dataset.id)}
-                      onChange={e => {
-                        e.stopPropagation();
-                        onSelectItem(dataset.id);
-                      }}
-                      onClick={e => e.stopPropagation()}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ py: 2 }}>
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        fontWeight="medium"
-                        sx={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          lineHeight: 1.4,
-                          mb: 0.5
-                        }}
-                      >
-                        {dataset.question}
-                      </Typography>
-                      {dataset.confirmed && (
-                        <Chip
-                          label={t('datasets.confirmed')}
-                          size="small"
-                          sx={{
-                            backgroundColor: alpha(theme.palette.success.main, 0.1),
-                            color: theme.palette.success.dark,
-                            fontWeight: 'medium',
-                            height: 20,
-                            fontSize: '0.7rem',
-                            mt: 1
-                          }}
-                        />
-                      )}
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <RatingChip score={dataset.score || 0} />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={dataset.model}
-                      size="small"
+                    <TableCell
+                      padding="checkbox"
                       sx={{
-                        backgroundColor: alpha(theme.palette.info.main, 0.1),
-                        color: theme.palette.info.dark,
-                        fontWeight: 'medium',
-                        maxWidth: '100%',
-                        '& .MuiChip-label': {
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }
+                        borderLeft: `4px solid ${theme.palette.primary.main}`
                       }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {dataset.questionLabel ? (
+                    >
+                      <Checkbox
+                        color="primary"
+                        checked={selectedIds.includes(dataset.id)}
+                        onChange={e => {
+                          e.stopPropagation();
+                          onSelectItem(dataset.id);
+                        }}
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ py: 2 }}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          fontWeight="medium"
+                          sx={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            lineHeight: 1.4,
+                            mb: 0.5
+                          }}
+                        >
+                          {dataset.question}
+                        </Typography>
+                        {dataset.confirmed && (
+                          <Chip
+                            label={t('datasets.confirmed')}
+                            size="small"
+                            sx={{
+                              backgroundColor: alpha(theme.palette.success.main, 0.1),
+                              color: theme.palette.success.dark,
+                              fontWeight: 'medium',
+                              height: 20,
+                              fontSize: '0.7rem',
+                              mt: 1
+                            }}
+                          />
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <RatingChip score={dataset.score || 0} />
+                    </TableCell>
+                    <TableCell>
                       <Chip
-                        label={dataset.questionLabel}
+                        label={dataset.model}
                         size="small"
                         sx={{
-                          backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                          color: theme.palette.primary.dark,
+                          backgroundColor: alpha(theme.palette.info.main, 0.1),
+                          color: theme.palette.info.dark,
                           fontWeight: 'medium',
                           maxWidth: '100%',
                           '& .MuiChip-label': {
@@ -263,86 +248,124 @@ const DatasetList = ({
                           }
                         }}
                       />
-                    ) : (
-                      <Typography variant="body2" color="text.disabled" fontSize="0.75rem">
-                        {t('datasets.noTag')}
+                    </TableCell>
+                    <TableCell>
+                      {dataset.questionLabel ? (
+                        <Chip
+                          label={dataset.questionLabel}
+                          size="small"
+                          sx={{
+                            backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                            color: theme.palette.primary.dark,
+                            fontWeight: 'medium',
+                            maxWidth: '100%',
+                            '& .MuiChip-label': {
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }
+                          }}
+                        />
+                      ) : (
+                        <Typography variant="body2" color="text.disabled" fontSize="0.75rem">
+                          {t('datasets.noTag')}
+                        </Typography>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary" fontSize="0.75rem">
+                        {new Date(dataset.createAt).toLocaleDateString('zh-CN')}
                       </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="text.secondary" fontSize="0.75rem">
-                      {new Date(dataset.createAt).toLocaleDateString('zh-CN')}
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <Tooltip title={t('datasets.viewDetails')}>
+                          <IconButton
+                            size="small"
+                            onClick={e => {
+                              e.stopPropagation();
+                              onViewDetails(dataset.id);
+                            }}
+                            sx={{
+                              color: theme.palette.primary.main,
+                              '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.1) }
+                            }}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t('datasets.evaluate')}>
+                          <IconButton
+                            size="small"
+                            disabled={evaluatingIds.includes(dataset.id)}
+                            onClick={e => {
+                              e.stopPropagation();
+                              onEvaluate && onEvaluate(dataset);
+                            }}
+                            sx={{
+                              color: theme.palette.secondary.main,
+                              '&:hover': { backgroundColor: alpha(theme.palette.secondary.main, 0.1) }
+                            }}
+                          >
+                            {evaluatingIds.includes(dataset.id) ? (
+                              <CircularProgress size={20} sx={{ color: theme.palette.secondary.main }} />
+                            ) : (
+                              <AssessmentIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t('common.delete')}>
+                          <IconButton
+                            size="small"
+                            onClick={e => {
+                              e.stopPropagation();
+                              onDelete(dataset);
+                            }}
+                            sx={{
+                              color: theme.palette.error.main,
+                              '&:hover': { backgroundColor: alpha(theme.palette.error.main, 0.1) }
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                </>
+              ))}
+              {datasets.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                    <Typography variant="body1" color="text.secondary">
+                      {t('datasets.noData')}
                     </Typography>
                   </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <Tooltip title={t('datasets.viewDetails')}>
-                        <IconButton
-                          size="small"
-                          onClick={e => {
-                            e.stopPropagation();
-                            onViewDetails(dataset.id);
-                          }}
-                          sx={{
-                            color: theme.palette.primary.main,
-                            '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.1) }
-                          }}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t('datasets.evaluate')}>
-                        <IconButton
-                          size="small"
-                          disabled={evaluatingIds.includes(dataset.id)}
-                          onClick={e => {
-                            e.stopPropagation();
-                            onEvaluate && onEvaluate(dataset);
-                          }}
-                          sx={{
-                            color: theme.palette.secondary.main,
-                            '&:hover': { backgroundColor: alpha(theme.palette.secondary.main, 0.1) }
-                          }}
-                        >
-                          {evaluatingIds.includes(dataset.id) ? (
-                            <CircularProgress size={20} sx={{ color: theme.palette.secondary.main }} />
-                          ) : (
-                            <AssessmentIcon fontSize="small" />
-                          )}
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t('common.delete')}>
-                        <IconButton
-                          size="small"
-                          onClick={e => {
-                            e.stopPropagation();
-                            onDelete(dataset);
-                          }}
-                          sx={{
-                            color: theme.palette.error.main,
-                            '&:hover': { backgroundColor: alpha(theme.palette.error.main, 0.1) }
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
                 </TableRow>
-              </>
-            ))}
-            {datasets.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
-                  <Typography variant="body1" color="text.secondary">
-                    {t('datasets.noData')}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        {loading && (
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: alpha(theme.palette.background.paper, 0.6),
+              backdropFilter: 'blur(2px)',
+              zIndex: 1
+            }}
+          >
+            <CircularProgress size={32} />
+            <Typography variant="body2" sx={{ mt: 1 }} color="text.secondary">
+              {t('datasets.loading')}
+            </Typography>
+          </Box>
+        )}
+      </Box>
       <Divider />
       <Box
         sx={{
