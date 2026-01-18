@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Paper, Typography, CircularProgress, Pagination, Grid } from '@mui/material';
 import ChunkListHeader from './ChunkListHeader';
 import ChunkCard from './ChunkCard';
@@ -117,6 +117,12 @@ export default function ChunkList({
   // 应用高级筛选
   const filteredChunks = applyFilters(sortedChunks);
 
+  // 当筛选条件变化时，清除不在筛选结果中的选中项
+  useEffect(() => {
+    const filteredChunkIds = filteredChunks.map(chunk => chunk.id);
+    setSelectedChunks(prev => prev.filter(id => filteredChunkIds.includes(id)));
+  }, [advancedFilters.contentKeyword, advancedFilters.sizeRange, advancedFilters.hasQuestions, chunks]);
+
   const itemsPerPage = 5;
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -184,10 +190,10 @@ export default function ChunkList({
   };
 
   const handleSelectAll = () => {
-    if (selectedChunks.length === chunks.length) {
+    if (selectedChunks.length === filteredChunks.length) {
       setSelectedChunks([]);
     } else {
-      setSelectedChunks(chunks.map(chunk => chunk.id));
+      setSelectedChunks(filteredChunks.map(chunk => chunk.id));
     }
   };
 
