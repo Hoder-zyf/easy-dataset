@@ -12,7 +12,8 @@ import {
   Typography,
   CircularProgress,
   Box,
-  TablePagination
+  TablePagination,
+  Tooltip
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { formatDistanceToNow } from 'date-fns';
@@ -94,6 +95,13 @@ export default function TasksTable({
     return t(`tasks.types.${taskType}`, { defaultValue: taskType });
   };
 
+  // 截断 note 内容，只显示前面部分
+  const truncateNote = (note, maxLength = 30) => {
+    if (!note) return '-';
+    if (note.length <= maxLength) return note;
+    return note.substring(0, maxLength) + '...';
+  };
+
   return (
     <React.Fragment>
       <TableContainer component={Paper} elevation={1} sx={{ borderRadius: 2, mb: 2 }}>
@@ -103,18 +111,17 @@ export default function TasksTable({
               <TableCell>{t('tasks.table.type')}</TableCell>
               <TableCell>{t('tasks.table.status')}</TableCell>
               <TableCell>{t('tasks.table.progress')}</TableCell>
-              <TableCell>{t('tasks.table.success')}</TableCell>
-              <TableCell>{t('tasks.table.failed')}</TableCell>
               <TableCell>{t('tasks.table.createTime')}</TableCell>
               <TableCell>{t('tasks.table.duration')}</TableCell>
               <TableCell>{t('tasks.table.model')}</TableCell>
+              <TableCell>{t('tasks.table.note')}</TableCell>
               <TableCell align="right">{t('tasks.table.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading && tasks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} align="center" sx={{ py: 6 }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <CircularProgress size={40} />
                     <Typography variant="body2" sx={{ mt: 2 }}>
@@ -125,7 +132,7 @@ export default function TasksTable({
               </TableRow>
             ) : tasks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} align="center" sx={{ py: 6 }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
                   <Typography variant="body1">{t('tasks.empty')}</Typography>
                 </TableCell>
               </TableRow>
@@ -139,11 +146,27 @@ export default function TasksTable({
                   <TableCell>
                     <TaskProgress task={task} />
                   </TableCell>
-                  <TableCell>{task.completedCount ? task.completedCount - (task.errorCount || 0) : 0}</TableCell>
-                  <TableCell>{task.errorCount || 0}</TableCell>
+
                   <TableCell>{formatDate(task.createAt)}</TableCell>
                   <TableCell>{task.endTime ? calculateDuration(task.startTime, task.endTime) : '-'}</TableCell>
                   <TableCell>{parseModelInfo(task.modelInfo)}</TableCell>
+                  <TableCell>
+                    {task.note ? (
+                      <Tooltip title={task.note} arrow placement="top">
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            cursor: 'pointer',
+                            '&:hover': { color: 'primary.main' }
+                          }}
+                        >
+                          {truncateNote(task.note)}
+                        </Typography>
+                      </Tooltip>
+                    ) : (
+                      '-'
+                    )}
+                  </TableCell>
                   <TableCell align="right">
                     <TaskActions task={task} onAbort={handleAbortTask} onDelete={handleDeleteTask} />
                   </TableCell>
