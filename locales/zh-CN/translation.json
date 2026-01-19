@@ -454,7 +454,7 @@
     "dataCleaningPartialSuccess": "部分文本块数据清洗成功 ({{successCount}}/{{total}})，{{errorCount}} 个文本块失败",
     "dataCleaningAllSuccess": "成功为 {{successCount}} 个文本块完成数据清洗",
     "charsCount": "字符",
-    "pdfProcess": "[beta]检测到PDF文件，请选择 PDF 文件处理方式！",
+    "pdfProcess": "检测到PDF文件，请选择 PDF 文件处理方式！",
     "pdfProcessStatus": "共 {{total}} 个文件，{{completed}} 个已处理完成",
     "pdfPageProcessStatus": "正在处理 {{fileName}} 共{{total}}页，{{completed}}页已完成转换",
     "pdfProcessing": "正在转换文件...",
