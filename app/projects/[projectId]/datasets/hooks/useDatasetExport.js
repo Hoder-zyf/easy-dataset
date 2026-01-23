@@ -66,9 +66,9 @@ const useDatasetExport = projectId => {
       // 写入文件头（JSON数组开始或CSV表头）
       if (fileFormat === 'json') {
         if (fileStream) {
-          await fileStream.write('[');
+          await fileStream.write('[\n');
         } else {
-          chunks.push('[');
+          chunks.push('[\n');
         }
       } else if (fileFormat === 'csv') {
         // 写入CSV表头
@@ -133,7 +133,16 @@ const useDatasetExport = projectId => {
 
         // 写入当前批次
         if (fileFormat === 'json') {
-          const batchContent = formattedBatch.map(item => JSON.stringify(item)).join(',\n');
+          // 保持与原逻辑一致：JSON 导出为“格式化后的 JSON 数组”（2空格缩进）
+          // 每条记录单独 stringify + 缩进，并在数组级别拼接，避免一次性 stringify 全量数据导致内存暴涨
+          const batchContent = formattedBatch
+            .map(item => {
+              const pretty = JSON.stringify(item, null, 2);
+              // 将对象的每一行整体再缩进 2 个空格，以符合数组元素缩进
+              return '  ' + pretty.replace(/\n/g, '\n  ');
+            })
+            .join(',\n');
+
           const content = isFirstBatch ? batchContent : ',\n' + batchContent;
 
           if (fileStream) {
@@ -191,10 +200,10 @@ const useDatasetExport = projectId => {
       // 写入文件尾
       if (fileFormat === 'json') {
         if (fileStream) {
-          await fileStream.write(']');
+          await fileStream.write('\n]\n');
           await fileStream.close();
         } else {
-          chunks.push(']');
+          chunks.push('\n]\n');
         }
       } else {
         if (fileStream) {
@@ -280,9 +289,15 @@ const useDatasetExport = projectId => {
       return dataBatch.map(({ question, answer, cot }) => {
         const messages = [];
         if (exportOptions.systemPrompt) {
-          messages.push({ role: 'system', content: exportOptions.systemPrompt });
+          messages.push(
+              { role: 'system',
+                content: exportOptions.systemPrompt
+              });
         }
-        messages.push({ role: 'user', content: question });
+        messages.push({
+          role: 'user',
+          content: question
+        });
         messages.push({
           role: 'assistant',
           content: cot && exportOptions.includeCOT ? `<think>${cot}</think>\n${answer}` : answer
@@ -297,9 +312,20 @@ const useDatasetExport = projectId => {
         analysis: exportOptions.includeCOT && cot ? cot : null,
         final: answer,
         messages: [
-          { content: exportOptions.systemPrompt || '', role: 'system', thinking: null },
-          { content: question, role: 'user', thinking: null },
-          { content: answer, role: 'assistant', thinking: exportOptions.includeCOT && cot ? cot : null }
+          {
+            content: exportOptions.systemPrompt || '',
+            role: 'system', thinking: null
+          },
+          {
+            content: question,
+            role: 'user',
+            thinking: null
+          },
+          {
+            content: answer,
+            role: 'assistant',
+            thinking: exportOptions.includeCOT && cot ? cot : null
+          }
         ]
       }));
     } else if (formatType === 'custom') {
