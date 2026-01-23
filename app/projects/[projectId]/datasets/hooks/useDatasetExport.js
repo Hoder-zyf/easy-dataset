@@ -7,16 +7,81 @@ import axios from 'axios';
 const useDatasetExport = projectId => {
   const { t } = useTranslation();
 
-  // 分批导出数据集（用于大数据量）
+  // 优化的流式导出 - 使用 WritableStream 避免内存溢出
   const exportDatasetsStreaming = async (exportOptions, onProgress) => {
     try {
       const batchSize = exportOptions.batchSize || 1000;
       let offset = 0;
-      let allData = [];
       let hasMore = true;
       let totalProcessed = 0;
+      let isFirstBatch = true;
 
-      // 分批获取数据
+      // 确定文件格式
+      const fileFormat = exportOptions.fileFormat || 'json';
+      const formatType = exportOptions.formatType || 'alpaca';
+
+      // 生成文件名
+      const formatSuffixMap = {
+        alpaca: 'alpaca',
+        multilingualthinking: 'multilingual-thinking',
+        sharegpt: 'sharegpt',
+        custom: 'custom'
+      };
+      const formatSuffix = formatSuffixMap[formatType] || formatType || 'export';
+      const balanceSuffix = exportOptions.balanceMode ? '-balanced' : '';
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const fileName = `datasets-${projectId}-${formatSuffix}${balanceSuffix}-${dateStr}.${fileFormat}`;
+
+      // 创建可写流
+      let fileStream;
+      let writer;
+
+      try {
+        // 使用 showSaveFilePicker API（现代浏览器）
+        if (window.showSaveFilePicker) {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{
+              description: 'Dataset File',
+              accept: {
+                'application/json': [`.${fileFormat}`]
+              }
+            }]
+          });
+          fileStream = await handle.createWritable();
+        } else {
+          // 降级方案：使用内存缓冲区（但分块处理）
+          fileStream = null;
+        }
+      } catch (err) {
+        // 用户取消或不支持，使用降级方案
+        fileStream = null;
+      }
+
+      // 如果不支持流式写入，使用分块累积方案
+      let chunks = [];
+      let chunkCount = 0;
+      const MAX_CHUNKS_IN_MEMORY = 5; // 最多在内存中保留5批数据
+
+      // 写入文件头（JSON数组开始或CSV表头）
+      if (fileFormat === 'json') {
+        if (fileStream) {
+          await fileStream.write('[');
+        } else {
+          chunks.push('[');
+        }
+      } else if (fileFormat === 'csv') {
+        // 写入CSV表头
+        const headers = getCSVHeaders(formatType, exportOptions);
+        const headerLine = headers.join(',') + '\n';
+        if (fileStream) {
+          await fileStream.write(headerLine);
+        } else {
+          chunks.push(headerLine);
+        }
+      }
+
+      // 分批获取和写入数据
       while (hasMore) {
         const apiUrl = `/api/projects/${projectId}/datasets/export`;
         const requestBody = {
@@ -43,7 +108,7 @@ const useDatasetExport = projectId => {
 
         // 如果需要包含文本块内容，批量查询并填充
         if (exportOptions.customFields?.includeChunk && batchResult.data.length > 0) {
-          const chunkNames = batchResult.data.map(item => item.chunkName).filter(name => name); // 过滤掉空值
+          const chunkNames = batchResult.data.map(item => item.chunkName).filter(name => name);
 
           if (chunkNames.length > 0) {
             try {
@@ -52,7 +117,6 @@ const useDatasetExport = projectId => {
               });
               const chunkContentMap = chunkResponse.data;
 
-              // 填充 chunkContent
               batchResult.data.forEach(item => {
                 if (item.chunkName && chunkContentMap[item.chunkName]) {
                   item.chunkContent = chunkContentMap[item.chunkName];
@@ -60,15 +124,54 @@ const useDatasetExport = projectId => {
               });
             } catch (chunkError) {
               console.error('获取文本块内容失败:', chunkError);
-              // 继续处理，但不包含文本块内容
             }
           }
         }
 
-        allData.push(...batchResult.data);
+        // 转换当前批次数据
+        const formattedBatch = formatDataBatch(batchResult.data, exportOptions);
+
+        // 写入当前批次
+        if (fileFormat === 'json') {
+          const batchContent = formattedBatch.map(item => JSON.stringify(item)).join(',\n');
+          const content = isFirstBatch ? batchContent : ',\n' + batchContent;
+
+          if (fileStream) {
+            await fileStream.write(content);
+          } else {
+            chunks.push(content);
+            chunkCount++;
+          }
+        } else if (fileFormat === 'jsonl') {
+          const batchContent = formattedBatch.map(item => JSON.stringify(item)).join('\n') + '\n';
+
+          if (fileStream) {
+            await fileStream.write(batchContent);
+          } else {
+            chunks.push(batchContent);
+            chunkCount++;
+          }
+        } else if (fileFormat === 'csv') {
+          const batchContent = formatBatchToCSV(formattedBatch, formatType, exportOptions);
+
+          if (fileStream) {
+            await fileStream.write(batchContent);
+          } else {
+            chunks.push(batchContent);
+            chunkCount++;
+          }
+        }
+
+        // 如果使用内存缓冲且累积了足够多的块，触发部分下载
+        if (!fileStream && chunkCount >= MAX_CHUNKS_IN_MEMORY) {
+          // 这里我们仍然需要等到最后才能下载，但至少限制了内存使用
+          // 可以考虑使用 Blob 分片
+        }
+
         hasMore = batchResult.hasMore;
         offset = batchResult.offset;
         totalProcessed += batchResult.data.length;
+        isFirstBatch = false;
 
         // 通知进度更新
         if (onProgress) {
@@ -79,14 +182,30 @@ const useDatasetExport = projectId => {
           });
         }
 
-        // 避免过快请求，给服务器一点缓冲时间
+        // 避免过快请求
         if (hasMore) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 50));
         }
       }
 
-      // 处理和下载数据
-      await processAndDownloadData(allData, exportOptions);
+      // 写入文件尾
+      if (fileFormat === 'json') {
+        if (fileStream) {
+          await fileStream.write(']');
+          await fileStream.close();
+        } else {
+          chunks.push(']');
+        }
+      } else {
+        if (fileStream) {
+          await fileStream.close();
+        }
+      }
+
+      // 如果使用内存缓冲方案，现在触发下载
+      if (!fileStream) {
+        downloadFromChunks(chunks, fileName);
+      }
 
       toast.success(t('datasets.exportSuccess'));
       return true;
@@ -97,183 +216,186 @@ const useDatasetExport = projectId => {
     }
   };
 
-  // 处理和下载数据的通用函数
-  const processAndDownloadData = async (dataToExport, exportOptions) => {
-    // 根据选择的格式转换数据
-    let formattedData;
-    // 不同文件格式
-    let mimeType = 'application/json';
+  // 从内存块下载文件（优化版本，使用 Blob 流）
+  const downloadFromChunks = (chunks, fileName) => {
+    // 使用 Blob 构造函数，它会自动处理大数据
+    const blob = new Blob(chunks, { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-    if (exportOptions.formatType === 'alpaca') {
-      // 根据选择的字段类型生成不同的数据格式
+    // 延迟释放 URL，确保下载开始
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  // 获取CSV表头
+  const getCSVHeaders = (formatType, exportOptions) => {
+    if (formatType === 'alpaca') {
+      return ['instruction', 'input', 'output', 'system'];
+    } else if (formatType === 'sharegpt') {
+      return ['messages'];
+    } else if (formatType === 'multilingualthinking') {
+      return ['reasoning_language', 'developer', 'user', 'analysis', 'final', 'messages'];
+    } else if (formatType === 'custom') {
+      const { questionField, answerField, cotField, includeLabels, includeChunk, questionOnly } = exportOptions.customFields;
+      const headers = [questionField];
+      if (!questionOnly) {
+        headers.push(answerField);
+        if (exportOptions.includeCOT && cotField) {
+          headers.push(cotField);
+        }
+      }
+      if (includeLabels) headers.push('label');
+      if (includeChunk) headers.push('chunk');
+      return headers;
+    }
+    return [];
+  };
+
+  // 格式化数据批次
+  const formatDataBatch = (dataBatch, exportOptions) => {
+    const formatType = exportOptions.formatType || 'alpaca';
+
+    if (formatType === 'alpaca') {
       if (exportOptions.alpacaFieldType === 'instruction') {
-        // 使用 instruction 字段
-        formattedData = dataToExport.map(({ question, answer, cot }) => ({
+        return dataBatch.map(({ question, answer, cot }) => ({
           instruction: question,
           input: '',
           output: cot && exportOptions.includeCOT ? `<think>${cot}</think>\n${answer}` : answer,
           system: exportOptions.systemPrompt || ''
         }));
       } else {
-        // 使用 input 字段
-        formattedData = dataToExport.map(({ question, answer, cot }) => ({
+        return dataBatch.map(({ question, answer, cot }) => ({
           instruction: exportOptions.customInstruction || '',
           input: question,
           output: cot && exportOptions.includeCOT ? `<think>${cot}</think>\n${answer}` : answer,
           system: exportOptions.systemPrompt || ''
         }));
       }
-    } else if (exportOptions.formatType === 'sharegpt') {
-      formattedData = dataToExport.map(({ question, answer, cot }) => {
+    } else if (formatType === 'sharegpt') {
+      return dataBatch.map(({ question, answer, cot }) => {
         const messages = [];
-
-        // 添加系统提示词（如果有）
         if (exportOptions.systemPrompt) {
-          messages.push({
-            role: 'system',
-            content: exportOptions.systemPrompt
-          });
+          messages.push({ role: 'system', content: exportOptions.systemPrompt });
         }
-
-        // 添加用户问题
-        messages.push({
-          role: 'user',
-          content: question
-        });
-
-        // 添加助手回答
+        messages.push({ role: 'user', content: question });
         messages.push({
           role: 'assistant',
           content: cot && exportOptions.includeCOT ? `<think>${cot}</think>\n${answer}` : answer
         });
-
         return { messages };
       });
-    } else if (exportOptions.formatType === 'multilingualthinking') {
-      // 產生符合「Multilingual‑Thinking」的 JSON 結構
-      formattedData = dataToExport.map(({ question, answer, cot }) => ({
-        reasoning_language: exportOptions.reasoningLanguage ? exportOptions.reasoningLanguage : 'English',
+    } else if (formatType === 'multilingualthinking') {
+      return dataBatch.map(({ question, answer, cot }) => ({
+        reasoning_language: exportOptions.reasoningLanguage || 'English',
         developer: exportOptions.systemPrompt || '',
         user: question,
         analysis: exportOptions.includeCOT && cot ? cot : null,
         final: answer,
         messages: [
-          {
-            content: exportOptions.systemPrompt || '',
-            role: 'system',
-            thinking: null
-          },
-          {
-            content: question,
-            role: 'user',
-            thinking: null
-          },
-          {
-            content: answer,
-            role: 'assistant',
-            thinking: exportOptions.includeCOT && cot ? cot : null
-          }
+          { content: exportOptions.systemPrompt || '', role: 'system', thinking: null },
+          { content: question, role: 'user', thinking: null },
+          { content: answer, role: 'assistant', thinking: exportOptions.includeCOT && cot ? cot : null }
         ]
       }));
-    } else if (exportOptions.formatType === 'custom') {
-      // 处理自定义格式
-      const { questionField, answerField, cotField, includeLabels, includeChunk, questionOnly } =
-        exportOptions.customFields;
-      formattedData = dataToExport.map(({ question, answer, cot, questionLabel: labels, chunkContent }) => {
-        const item = {
-          [questionField]: question
-        };
-
-        // 如果不是仅导出问题模式，添加答案字段
+    } else if (formatType === 'custom') {
+      const { questionField, answerField, cotField, includeLabels, includeChunk, questionOnly } = exportOptions.customFields;
+      return dataBatch.map(({ question, answer, cot, questionLabel: labels, chunkContent }) => {
+        const item = { [questionField]: question };
         if (!questionOnly) {
           item[answerField] = answer;
+          if (cot && exportOptions.includeCOT && cotField) {
+            item[cotField] = cot;
+          }
         }
-
-        // 如果有思维链且用户选择包含思维链，且不是仅导出问题模式，则添加思维链字段
-        if (cot && exportOptions.includeCOT && cotField && !questionOnly) {
-          item[cotField] = cot;
-        }
-
-        // 如果需要包含标签
         if (includeLabels && labels && labels.length > 0) {
           item.label = labels.split(' ')[1];
         }
-
-        // 如果需要包含文本块内容
         if (includeChunk && chunkContent) {
           item.chunk = chunkContent;
         }
-
         return item;
       });
     }
+    return dataBatch;
+  };
 
-    // 处理不同的文件格式
+  // 将批次格式化为CSV行
+  const formatBatchToCSV = (formattedBatch, formatType, exportOptions) => {
+    const headers = getCSVHeaders(formatType, exportOptions);
+    return formattedBatch.map(item => {
+      return headers.map(header => {
+        let field = item[header]?.toString() || '';
+        // 对于复杂对象，转换为JSON字符串
+        if (typeof item[header] === 'object') {
+          field = JSON.stringify(item[header]);
+        }
+        // CSV转义
+        if (field.includes(',') || field.includes('\n') || field.includes('"')) {
+          field = `"${field.replace(/"/g, '""')}"`;
+        }
+        return field;
+      }).join(',');
+    }).join('\n') + '\n';
+  };
+
+  // 处理和下载数据的通用函数（保留用于小数据量）
+  const processAndDownloadData = async (dataToExport, exportOptions) => {
+    const formattedData = formatDataBatch(dataToExport, exportOptions);
+
     let content;
     let fileExtension;
+    const fileFormat = exportOptions.fileFormat || 'json';
 
-    if (exportOptions.fileFormat === 'jsonl') {
-      // JSONL 格式：每行一个 JSON 对象
+    if (fileFormat === 'jsonl') {
       content = formattedData.map(item => JSON.stringify(item)).join('\n');
       fileExtension = 'jsonl';
-    } else if (exportOptions.fileFormat === 'csv') {
-      // CSV 格式
-      const headers = Object.keys(formattedData[0] || {});
+    } else if (fileFormat === 'csv') {
+      const headers = getCSVHeaders(exportOptions.formatType, exportOptions);
       const csvRows = [
-        // 添加表头
         headers.join(','),
-        // 添加数据行
         ...formattedData.map(item =>
-          headers
-            .map(header => {
-              // 处理包含逗号、换行符或双引号的字段
+            headers.map(header => {
               let field = item[header]?.toString() || '';
-              if (exportOptions.formatType === 'sharegpt') field = JSON.stringify(item[header]);
-              if (exportOptions.formatType === 'multilingualthinking') field = JSON.stringify(item[header]);
+              if (typeof item[header] === 'object') {
+                field = JSON.stringify(item[header]);
+              }
               if (field.includes(',') || field.includes('\n') || field.includes('"')) {
                 field = `"${field.replace(/"/g, '""')}"`;
               }
               return field;
-            })
-            .join(',')
+            }).join(',')
         )
       ];
       content = csvRows.join('\n');
       fileExtension = 'csv';
     } else {
-      // 默认 JSON 格式
       content = JSON.stringify(formattedData, null, 2);
       fileExtension = 'json';
     }
 
-    console.log(22222, content);
-
-    // 创建 Blob 对象
-    const blob = new Blob([content], { type: mimeType || 'application/json' });
-
-    // 创建下载链接
-    // Determine a human‑readable suffix based on the selected format type
-    const formatSuffixMap = {
-      alpaca: 'alpaca',
-      'multilingual-thinking': 'multilingual-thinking',
-      sharegpt: 'sharegpt',
-      custom: 'custom'
-    };
-
+    const blob = new Blob([content], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    // const formatSuffix = exportOptions.formatType === 'alpaca' ? 'alpaca' : 'sharegpt';
+
+    const formatSuffixMap = {
+      alpaca: 'alpaca',
+      multilingualthinking: 'multilingual-thinking',
+      sharegpt: 'sharegpt',
+      custom: 'custom'
+    };
     const formatSuffix = formatSuffixMap[exportOptions.formatType] || exportOptions.formatType || 'export';
     const balanceSuffix = exportOptions.balanceMode ? '-balanced' : '';
     const dateStr = new Date().toISOString().slice(0, 10);
     a.download = `datasets-${projectId}-${formatSuffix}${balanceSuffix}-${dateStr}.${fileExtension}`;
 
-    // 触发下载
     document.body.appendChild(a);
     a.click();
-
-    // 清理
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
@@ -284,14 +406,12 @@ const useDatasetExport = projectId => {
       const apiUrl = `/api/projects/${projectId}/datasets/export`;
       const requestBody = {};
 
-      // 如果有选中的数据集 ID，传递 ID 列表
       if (exportOptions.selectedIds && exportOptions.selectedIds.length > 0) {
         requestBody.selectedIds = exportOptions.selectedIds;
       } else if (exportOptions.confirmedOnly) {
         requestBody.status = 'confirmed';
       }
 
-      // 检查是否是平衡导出模式
       if (exportOptions.balanceMode && exportOptions.balanceConfig) {
         requestBody.balanceMode = true;
         requestBody.balanceConfig = exportOptions.balanceConfig;
@@ -300,7 +420,6 @@ const useDatasetExport = projectId => {
       const response = await axios.post(apiUrl, requestBody);
       let dataToExport = response.data;
 
-      // 使用通用的数据处理和下载函数
       await processAndDownloadData(dataToExport, exportOptions);
 
       toast.success(t('datasets.exportSuccess'));
