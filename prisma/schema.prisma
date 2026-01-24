@@ -129,6 +129,8 @@ model Datasets {
   updateAt      DateTime @updatedAt
 
   @@index([projectId])
+  @@index([projectId, confirmed, createAt, id], name: "idx_export_confirmed")
+  @@index([projectId, createAt], name: "idx_project_createAt")
 }
 
 model DatasetConversations {
