@@ -15,7 +15,8 @@ import {
   InputAdornment,
   TablePagination,
   useTheme,
-  alpha
+  alpha,
+  Tooltip
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
@@ -159,19 +160,22 @@ export default function UsageTable({
                   </TableCell>
                   <TableCell>
                     {row.failureReason ? (
-                      <Chip
-                        label={
-                          row.failureReason.length > 20 ? row.failureReason.slice(0, 20) + '...' : row.failureReason
-                        }
-                        size="small"
-                        color="error"
-                        variant="soft"
-                        sx={{
-                          maxWidth: 200,
-                          bgcolor: alpha(theme.palette.error.main, 0.1),
-                          color: theme.palette.error.dark
-                        }}
-                      />
+                      <Tooltip title={row.failureReason} arrow placement="top">
+                        <Chip
+                          label={
+                            row.failureReason.length > 20 ? row.failureReason.slice(0, 20) + '...' : row.failureReason
+                          }
+                          size="small"
+                          color="error"
+                          variant="soft"
+                          sx={{
+                            maxWidth: 200,
+                            bgcolor: alpha(theme.palette.error.main, 0.1),
+                            color: theme.palette.error.dark,
+                            cursor: 'pointer'
+                          }}
+                        />
+                      </Tooltip>
                     ) : (
                       '-'
                     )}

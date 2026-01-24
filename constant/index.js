@@ -3,7 +3,7 @@
  */
 
 export const FILE = {
-  MAX_FILE_SIZE: 50 * 1024 * 1024 // 50MB in bytes
+  MAX_FILE_SIZE: 300 * 1024 * 1024 // 300MB in bytes
 };
 
 export const TASK = {

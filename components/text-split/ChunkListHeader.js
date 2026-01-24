@@ -8,6 +8,7 @@ import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import axios from 'axios';
@@ -23,6 +24,7 @@ export default function ChunkListHeader({
   onSelectAll,
   onBatchGenerateQuestions,
   onBatchEditChunks,
+  onBatchDeleteChunks,
   questionFilter,
   setQuestionFilter,
   chunks = [], // 添加chunks参数，用于导出文本块
@@ -65,6 +67,12 @@ export default function ChunkListHeader({
   const handleBatchEdit = () => {
     handleMoreMenuClose();
     onBatchEditChunks();
+  };
+
+  // 处理批量删除，关闭菜单并调用原有函数
+  const handleBatchDelete = () => {
+    handleMoreMenuClose();
+    onBatchDeleteChunks();
   };
 
   // 处理导出文本块，关闭菜单并调用原有函数
@@ -372,6 +380,10 @@ export default function ChunkListHeader({
             <MenuItem onClick={handleBatchEdit} disabled={selectedChunks.length === 0}>
               <EditIcon fontSize="small" sx={{ mr: 1 }} />
               {t('batchEdit.batchEdit', { defaultValue: '批量编辑' })}
+            </MenuItem>
+            <MenuItem onClick={handleBatchDelete} disabled={selectedChunks.length === 0}>
+              <DeleteIcon fontSize="small" sx={{ mr: 1, color: 'error.main' }} />
+              {t('textSplit.batchDeleteChunks', { defaultValue: '批量删除' })}
             </MenuItem>
             <MenuItem onClick={handleExport} disabled={chunks.length === 0}>
               <DownloadIcon fontSize="small" sx={{ mr: 1 }} />

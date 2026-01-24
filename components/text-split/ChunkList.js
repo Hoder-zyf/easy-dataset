@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Paper, Typography, CircularProgress, Pagination, Grid } from '@mui/material';
 import ChunkListHeader from './ChunkListHeader';
 import ChunkCard from './ChunkCard';
 import ChunkViewDialog from './ChunkViewDialog';
 import ChunkDeleteDialog from './ChunkDeleteDialog';
 import BatchEditChunksDialog from './BatchEditChunkDialog';
+import ChunkBatchDeleteDialog from './ChunkBatchDeleteDialog';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
@@ -46,6 +47,8 @@ export default function ChunkList({
   const [chunkToDelete, setChunkToDelete] = useState(null);
   const [batchEditDialogOpen, setBatchEditDialogOpen] = useState(false);
   const [batchEditLoading, setBatchEditLoading] = useState(false);
+  const [batchDeleteDialogOpen, setBatchDeleteDialogOpen] = useState(false);
+  const [batchDeleteLoading, setBatchDeleteLoading] = useState(false);
 
   // 添加高级筛选状态
   const [advancedFilters, setAdvancedFilters] = useState({
@@ -114,6 +117,12 @@ export default function ChunkList({
   // 应用高级筛选
   const filteredChunks = applyFilters(sortedChunks);
 
+  // 当筛选条件变化时，清除不在筛选结果中的选中项
+  useEffect(() => {
+    const filteredChunkIds = filteredChunks.map(chunk => chunk.id);
+    setSelectedChunks(prev => prev.filter(id => filteredChunkIds.includes(id)));
+  }, [advancedFilters.contentKeyword, advancedFilters.sizeRange, advancedFilters.hasQuestions, chunks]);
+
   const itemsPerPage = 5;
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -181,10 +190,10 @@ export default function ChunkList({
   };
 
   const handleSelectAll = () => {
-    if (selectedChunks.length === chunks.length) {
+    if (selectedChunks.length === filteredChunks.length) {
       setSelectedChunks([]);
     } else {
-      setSelectedChunks(chunks.map(chunk => chunk.id));
+      setSelectedChunks(filteredChunks.map(chunk => chunk.id));
     }
   };
 
@@ -266,6 +275,61 @@ export default function ChunkList({
     setPage(1); // 重置到第一页
   };
 
+  // 打开批量删除对话框
+  const handleOpenBatchDelete = () => {
+    setBatchDeleteDialogOpen(true);
+  };
+
+  // 关闭批量删除对话框
+  const handleCloseBatchDelete = () => {
+    setBatchDeleteDialogOpen(false);
+  };
+
+  // 确认批量删除
+  const handleConfirmBatchDelete = async () => {
+    if (selectedChunks.length === 0) return;
+
+    try {
+      setBatchDeleteLoading(true);
+
+      let successCount = 0;
+      let failCount = 0;
+
+      // 循环调用单个删除接口
+      for (const chunkId of selectedChunks) {
+        try {
+          await onDelete(chunkId);
+          successCount++;
+        } catch (error) {
+          console.error(`删除文本块 ${chunkId} 失败:`, error);
+          failCount++;
+        }
+      }
+
+      // 显示删除结果
+      if (failCount === 0) {
+        console.log(`成功删除 ${successCount} 个文本块`);
+      } else {
+        console.log(`删除完成：成功 ${successCount} 个，失败 ${failCount} 个`);
+      }
+
+      // 清空选中状态
+      setSelectedChunks([]);
+
+      // 刷新数据
+      if (onChunksUpdate) {
+        onChunksUpdate();
+      }
+
+      // 关闭对话框
+      setBatchDeleteDialogOpen(false);
+    } catch (error) {
+      console.error('批量删除失败:', error);
+    } finally {
+      setBatchDeleteLoading(false);
+    }
+  };
+
   return (
     <Box>
       <ChunkListHeader
@@ -275,6 +339,7 @@ export default function ChunkList({
         onSelectAll={handleSelectAll}
         onBatchGenerateQuestions={handleBatchGenerateQuestions}
         onBatchEditChunks={handleOpenBatchEdit}
+        onBatchDeleteChunks={handleOpenBatchDelete}
         questionFilter={questionFilter}
         setQuestionFilter={event => setQuestionFilter(event.target.value)}
         chunks={chunks}
@@ -338,6 +403,15 @@ export default function ChunkList({
         selectedChunks={selectedChunks}
         totalChunks={chunks.length}
         loading={batchEditLoading}
+      />
+
+      {/* 批量删除确认对话框 */}
+      <ChunkBatchDeleteDialog
+        open={batchDeleteDialogOpen}
+        onClose={handleCloseBatchDelete}
+        onConfirm={handleConfirmBatchDelete}
+        loading={batchDeleteLoading}
+        count={selectedChunks.length}
       />
     </Box>
   );

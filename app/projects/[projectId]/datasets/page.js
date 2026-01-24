@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Container, Box, Typography, Button, CircularProgress, Card, useTheme, alpha } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import { Container, Box, Typography, Button, Card, useTheme, alpha } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useRouter } from 'next/navigation';
 import ExportDatasetDialog from '@/components/ExportDatasetDialog';
@@ -26,7 +26,7 @@ export default function DatasetsPage({ params }) {
   const { projectId } = params;
   const router = useRouter();
   const theme = useTheme();
-  const [datasets, setDatasets] = useState([]);
+  const [datasets, setDatasets] = useState({ data: [], total: 0, confirmedCount: 0 });
   const [loading, setLoading] = useState(true);
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
@@ -112,51 +112,68 @@ export default function DatasetsPage({ params }) {
   };
 
   // 获取数据集列表
-  const getDatasetsList = async () => {
-    try {
-      setLoading(true);
-      let url = `/api/projects/${projectId}/datasets?page=${page}&size=${rowsPerPage}`;
+  const getDatasetsList = useCallback(
+    async ({ pageOverride } = {}) => {
+      const effectivePage = pageOverride ?? page;
+      try {
+        setLoading(true);
+        let url = `/api/projects/${projectId}/datasets?page=${effectivePage}&size=${rowsPerPage}`;
 
-      if (filterConfirmed !== 'all') {
-        url += `&status=${filterConfirmed}`;
+        if (filterConfirmed !== 'all') {
+          url += `&status=${filterConfirmed}`;
+        }
+
+        if (debouncedSearchQuery) {
+          url += `&input=${encodeURIComponent(debouncedSearchQuery)}&field=${searchField}`;
+        }
+
+        if (filterHasCot !== 'all') {
+          url += `&hasCot=${filterHasCot}`;
+        }
+
+        if (filterIsDistill !== 'all') {
+          url += `&isDistill=${filterIsDistill}`;
+        }
+
+        if (filterScoreRange[0] > 0 || filterScoreRange[1] < 5) {
+          url += `&scoreRange=${filterScoreRange[0]}-${filterScoreRange[1]}`;
+        }
+
+        if (filterCustomTag) {
+          url += `&customTag=${encodeURIComponent(filterCustomTag)}`;
+        }
+
+        if (filterNoteKeyword) {
+          url += `&noteKeyword=${encodeURIComponent(filterNoteKeyword)}`;
+        }
+
+        if (filterChunkName) {
+          url += `&chunkName=${encodeURIComponent(filterChunkName)}`;
+        }
+
+        const response = await axios.get(url);
+        setDatasets(response.data || { data: [], total: 0, confirmedCount: 0 });
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setLoading(false);
       }
-
-      if (searchQuery) {
-        url += `&input=${encodeURIComponent(searchQuery)}&field=${searchField}`;
-      }
-
-      if (filterHasCot !== 'all') {
-        url += `&hasCot=${filterHasCot}`;
-      }
-
-      if (filterIsDistill !== 'all') {
-        url += `&isDistill=${filterIsDistill}`;
-      }
-
-      if (filterScoreRange[0] > 0 || filterScoreRange[1] < 5) {
-        url += `&scoreRange=${filterScoreRange[0]}-${filterScoreRange[1]}`;
-      }
-
-      if (filterCustomTag) {
-        url += `&customTag=${encodeURIComponent(filterCustomTag)}`;
-      }
-
-      if (filterNoteKeyword) {
-        url += `&noteKeyword=${encodeURIComponent(filterNoteKeyword)}`;
-      }
-
-      if (filterChunkName) {
-        url += `&chunkName=${encodeURIComponent(filterChunkName)}`;
-      }
-
-      const response = await axios.get(url);
-      setDatasets(response.data);
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [
+      debouncedSearchQuery,
+      filterConfirmed,
+      filterCustomTag,
+      filterHasCot,
+      filterIsDistill,
+      filterNoteKeyword,
+      filterChunkName,
+      filterScoreRange,
+      page,
+      projectId,
+      rowsPerPage,
+      searchField
+    ]
+  );
 
   useEffect(() => {
     if (!isInitialized) return;
@@ -408,26 +425,34 @@ export default function DatasetsPage({ params }) {
     });
   };
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '70vh'
-          }}
-        >
-          <CircularProgress size={60} thickness={4} />
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            {t('datasets.loading')}
-          </Typography>
-        </Box>
-      </Container>
-    );
-  }
+  const handleResetFilters = useCallback(() => {
+    setFilterConfirmed('all');
+    setFilterHasCot('all');
+    setFilterIsDistill('all');
+    setFilterScoreRange([0, 5]);
+    setFilterCustomTag('');
+    setFilterNoteKeyword('');
+    setFilterChunkName('');
+    setPage(1);
+    getDatasetsList({ pageOverride: 1 });
+  }, [
+    getDatasetsList,
+    setFilterConfirmed,
+    setFilterHasCot,
+    setFilterIsDistill,
+    setFilterScoreRange,
+    setFilterCustomTag,
+    setFilterNoteKeyword,
+    setFilterChunkName,
+    setPage
+  ]);
+
+  const handleApplyFilters = useCallback(() => {
+    setFilterDialogOpen(false);
+    setPage(1);
+    getDatasetsList({ pageOverride: 1 });
+  }, [getDatasetsList, setFilterDialogOpen, setPage]);
+  const handleCloseFilterDialog = useCallback(() => setFilterDialogOpen(false), [setFilterDialogOpen]);
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
@@ -502,7 +527,7 @@ export default function DatasetsPage({ params }) {
       )}
 
       <DatasetList
-        datasets={datasets.data}
+        datasets={datasets.data || []}
         onViewDetails={handleViewDetails}
         onDelete={handleOpenDeleteDialog}
         onEvaluate={handleEvaluateDataset}
@@ -510,11 +535,12 @@ export default function DatasetsPage({ params }) {
         rowsPerPage={rowsPerPage}
         onPageChange={handlePageChange}
         onRowsPerPageChange={handleRowsPerPageChange}
-        total={datasets.total}
+        total={datasets.total || 0}
         selectedIds={selectedIds}
         onSelectAll={handleSelectAll}
         onSelectItem={handleSelectItem}
         evaluatingIds={evaluatingIds}
+        loading={loading}
       />
 
       <DeleteConfirmDialog
@@ -529,7 +555,7 @@ export default function DatasetsPage({ params }) {
 
       <FilterDialog
         open={filterDialogOpen}
-        onClose={() => setFilterDialogOpen(false)}
+        onClose={handleCloseFilterDialog}
         filterConfirmed={filterConfirmed}
         filterHasCot={filterHasCot}
         filterIsDistill={filterIsDistill}
@@ -545,21 +571,8 @@ export default function DatasetsPage({ params }) {
         onFilterCustomTagChange={setFilterCustomTag}
         onFilterNoteKeywordChange={setFilterNoteKeyword}
         onFilterChunkNameChange={setFilterChunkName}
-        onResetFilters={() => {
-          setFilterConfirmed('all');
-          setFilterHasCot('all');
-          setFilterIsDistill('all');
-          setFilterScoreRange([0, 5]);
-          setFilterCustomTag('');
-          setFilterNoteKeyword('');
-          setFilterChunkName('');
-          getDatasetsList();
-        }}
-        onApplyFilters={() => {
-          setFilterDialogOpen(false);
-          setPage(1);
-          getDatasetsList();
-        }}
+        onResetFilters={handleResetFilters}
+        onApplyFilters={handleApplyFilters}
       />
 
       <ExportDatasetDialog
