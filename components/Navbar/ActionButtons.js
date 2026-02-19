@@ -18,11 +18,18 @@ import * as styles from './styles';
  * ActionButtons 组件
  * 右侧操作区按钮：语言切换、主题切换、文档、GitHub、更新检查
  */
-export default function ActionButtons({ theme, resolvedTheme, toggleTheme, isProjectDetail, currentProject }) {
+export default function ActionButtons({
+  theme,
+  resolvedTheme,
+  toggleTheme,
+  isProjectDetail,
+  currentProject,
+  onActionAreaEnter
+}) {
   const { t, i18n } = useTranslation();
 
   return (
-    <Box sx={styles.actionAreaStyles}>
+    <Box sx={styles.actionAreaStyles} onMouseEnter={onActionAreaEnter}>
       {isProjectDetail && <ModelSelect projectId={currentProject} />}
       {isProjectDetail && <TaskIcon theme={theme} projectId={currentProject} />}
 

@@ -1,0 +1,124 @@
+
+> easy-dataset@1.7.1 dev
+> prisma db push && next dev -p 1717 --hostname 0.0.0.0
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": SQLite database "db.sqlite" at "file:./db.sqlite"
+
+The database is already in sync with the Prisma schema.
+
+Running generate... (Use --skip-generate to skip the generators)
+[2K[1A[2K[GRunning generate... - Prisma Client
+[2K[1A[2K[G✔ Generated Prisma Client (v6.9.0) to .\node_modules\@prisma\client in 129ms
+
+  ▲ Next.js 14.2.29
+  - Local:        http://localhost:1717
+  - Network:      http://0.0.0.0:1717
+  - Environments: .env
+  - Experiments (use with caution):
+    · esmExternals
+
+ ✓ Starting...
+ ✓ Ready in 1902ms
+ ○ Compiling / ...
+ ✓ Compiled / in 4s (2966 modules)
+ GET / 200 in 4285ms
+ GET / 200 in 66ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 966ms (2995 modules)
+ GET /imgs/grid-pattern.png 404 in 938ms
+ GET /api/projects 200 in 1163ms
+ GET /api/projects 200 in 13ms
+ ✓ Compiled /api/projects/unmigrated in 209ms (1599 modules)
+ GET /api/projects 200 in 400ms
+ GET /api/projects/unmigrated 200 in 411ms
+ GET /api/projects 200 in 24ms
+ GET /api/projects/unmigrated 200 in 10ms
+ ○ Compiling /projects/[projectId] ...
+ ✓ Compiled /projects/[projectId] in 883ms (3036 modules)
+ GET /api/projects 200 in 18ms
+ GET /api/projects 200 in 21ms
+ ✓ Compiled /api/projects/[projectId] in 167ms (1609 modules)
+ GET /api/projects/npd_lILK4Wvo 200 in 451ms
+ GET /api/projects/npd_lILK4Wvo 200 in 17ms
+ ✓ Compiled /projects/[projectId]/text-split in 166ms (1613 modules)
+ ✓ Compiled in 2.6s (2033 modules)
+ GET /api/projects/npd_lILK4Wvo/model-config 200 in 3082ms
+ GET /api/projects/npd_lILK4Wvo/model-config 200 in 18ms
+ ○ Compiling /api/projects/[projectId]/files ...
+ ✓ Compiled /api/projects/[projectId]/files in 1288ms (2346 modules)
+ ✓ Compiled (2954 modules)
+Checking unfinished tasks...
+No tasks to recover
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 4024ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 20ms
+ GET /api/projects/npd_lILK4Wvo/files?page=1&pageSize=10 200 in 4192ms
+ GET /api/projects/npd_lILK4Wvo/files?page=1&size=10 200 in 4192ms
+ GET /api/projects/npd_lILK4Wvo/split?filter=all 200 in 4204ms
+ GET /api/projects/npd_lILK4Wvo/files?page=1&size=10 200 in 38ms
+ GET /api/projects/npd_lILK4Wvo/files?page=1&pageSize=10 200 in 41ms
+ GET /api/projects/npd_lILK4Wvo/split?filter=all 200 in 41ms
+ GET /api/projects/npd_lILK4Wvo/split?filter=all 200 in 13ms
+ GET /api/projects/npd_lILK4Wvo/tasks 200 in 4283ms
+ GET /api/projects/npd_lILK4Wvo/split?filter=all 200 in 19ms
+ GET /api/projects/npd_lILK4Wvo/tasks 200 in 15ms
+ GET /api/projects/npd_lILK4Wvo/tasks 200 in 13ms
+ GET /api/projects/npd_lILK4Wvo/tasks 200 in 10ms
+ ✓ Compiled /api/projects/[projectId]/files/[fileId]/ga-pairs in 361ms (2959 modules)
+ GET /api/projects/npd_lILK4Wvo/files/MOAk_tBGqcT2G711DZzDJ/ga-pairs 200 in 788ms
+ GET /api/projects/npd_lILK4Wvo/files/MOAk_tBGqcT2G711DZzDJ/ga-pairs 200 in 15ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 21ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 23ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 23ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 21ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 21ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 18ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 14ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 21ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 22ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 22ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 20ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 21ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 21ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 20ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 20ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 20ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 20ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 22ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 19ms
+ ✓ Compiled /api/projects/[projectId]/chunks/[chunkId]/questions in 503ms (2507 modules)
+检查到 0 个激活的GA pairs，不启用GA扩展生成
+标准模式：生成 8 个问题
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 25ms
+ POST /api/projects/npd_lILK4Wvo/chunks/PXqGD6aR2w-n2FW1fhaZG/questions 500 in 7341ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 15ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 12ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 15ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 15ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 16ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 14ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 14ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 26ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 21ms
+ ○ Compiling /projects/[projectId]/settings ...
+ ✓ Compiled /projects/[projectId]/settings in 2s (4415 modules)
+ ✓ Compiled /api/projects/[projectId] in 213ms (2370 modules)
+ GET /api/projects/npd_lILK4Wvo 200 in 281ms
+ GET /api/projects/npd_lILK4Wvo 200 in 11ms
+ GET /api/projects/npd_lILK4Wvo 200 in 12ms
+ GET /api/projects/npd_lILK4Wvo 200 in 10ms
+ ✓ Compiled /api/projects/[projectId]/model-config in 363ms (2374 modules)
+ ✓ Compiled (2378 modules)
+ GET /api/llm/providers 200 in 667ms
+ GET /api/projects/npd_lILK4Wvo/model-config 200 in 665ms
+ ✓ Compiled /api/llm/model in 245ms (2381 modules)
+ GET /api/llm/providers 200 in 527ms
+ GET /api/projects/npd_lILK4Wvo/model-config 200 in 527ms
+ GET /api/llm/model?providerId=openRouter 200 in 538ms
+ GET /api/llm/model?providerId=openRouter 200 in 10ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 22ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 60ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 18ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 17ms
+ GET /api/projects/npd_lILK4Wvo/tasks/list?status=0 200 in 17ms

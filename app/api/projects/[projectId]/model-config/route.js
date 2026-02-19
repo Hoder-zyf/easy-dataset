@@ -4,6 +4,20 @@ import { DEFAULT_MODEL_SETTINGS, MODEL_PROVIDERS } from '@/constant/model';
 import { getProject } from '@/lib/db/projects';
 import { sortProvidersByPriority } from '@/lib/util/providerLogo';
 
+function normalizeModelEndpoint(endpoint = '') {
+  let normalizedEndpoint = String(endpoint).trim();
+  if (!normalizedEndpoint) {
+    return '';
+  }
+  if (normalizedEndpoint.includes('/api/coding/paas/v4')) {
+    normalizedEndpoint = normalizedEndpoint.replace('/api/coding/paas/v4', '/api/paas/v4');
+  }
+  if (normalizedEndpoint.includes('/chat/completions')) {
+    normalizedEndpoint = normalizedEndpoint.replace('/chat/completions', '');
+  }
+  return normalizedEndpoint;
+}
+
 // 获取模型配置列表
 export async function GET(request, { params }) {
   try {
@@ -62,6 +76,7 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'The model configuration cannot be empty ' }, { status: 400 });
     }
     modelConfig.projectId = projectId;
+    modelConfig.endpoint = normalizeModelEndpoint(modelConfig.endpoint);
     // 如果没有 modelId，使用 modelName 补齐（兼容旧逻辑）
     if (!modelConfig.modelId && modelConfig.modelName) {
       modelConfig.modelId = modelConfig.modelName;

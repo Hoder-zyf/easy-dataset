@@ -30,10 +30,16 @@ export default function DesktopMenus({ theme, menuState, isMenuOpen, handleMenuC
         anchorEl={menuState.anchorEl}
         open={isMenuOpen('source')}
         onClose={handleMenuClose}
+        hideBackdrop
+        disableScrollLock
+        sx={{ pointerEvents: 'none' }}
         aria-label={t('common.dataSource', 'Data source menu')}
         PaperProps={{
           elevation: 8,
-          sx: styles.getMenuPaperStyles(theme),
+          sx: {
+            ...styles.getMenuPaperStyles(theme),
+            pointerEvents: 'auto'
+          },
           onMouseLeave: handleMenuClose
         }}
         transformOrigin={{ horizontal: 'center', vertical: 'top' }}
@@ -78,9 +84,15 @@ export default function DesktopMenus({ theme, menuState, isMenuOpen, handleMenuC
         anchorEl={menuState.anchorEl}
         open={isMenuOpen('dataset')}
         onClose={handleMenuClose}
+        hideBackdrop
+        disableScrollLock
+        sx={{ pointerEvents: 'none' }}
         PaperProps={{
           elevation: 8,
-          sx: styles.getSimpleMenuPaperStyles(theme),
+          sx: {
+            ...styles.getSimpleMenuPaperStyles(theme),
+            pointerEvents: 'auto'
+          },
           onMouseLeave: handleMenuClose
         }}
         transformOrigin={{ horizontal: 'center', vertical: 'top' }}
@@ -142,9 +154,15 @@ export default function DesktopMenus({ theme, menuState, isMenuOpen, handleMenuC
         anchorEl={menuState.anchorEl}
         open={isMenuOpen('eval')}
         onClose={handleMenuClose}
+        hideBackdrop
+        disableScrollLock
+        sx={{ pointerEvents: 'none' }}
         PaperProps={{
           elevation: 8,
-          sx: styles.getSimpleMenuPaperStyles(theme),
+          sx: {
+            ...styles.getSimpleMenuPaperStyles(theme),
+            pointerEvents: 'auto'
+          },
           onMouseLeave: handleMenuClose
         }}
         transformOrigin={{ horizontal: 'center', vertical: 'top' }}
@@ -197,9 +215,15 @@ export default function DesktopMenus({ theme, menuState, isMenuOpen, handleMenuC
         anchorEl={menuState.anchorEl}
         open={isMenuOpen('more')}
         onClose={handleMenuClose}
+        hideBackdrop
+        disableScrollLock
+        sx={{ pointerEvents: 'none' }}
         PaperProps={{
           elevation: 8,
-          sx: styles.getSimpleMenuPaperStyles(theme),
+          sx: {
+            ...styles.getSimpleMenuPaperStyles(theme),
+            pointerEvents: 'auto'
+          },
           onMouseLeave: handleMenuClose
         }}
         transformOrigin={{ horizontal: 'center', vertical: 'top' }}

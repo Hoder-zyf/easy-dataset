@@ -1,0 +1,726 @@
+openRouter API 调用出错: RetryError [AI_RetryError]: Failed after 3 attempts. Last error: Too Many Requests
+    at _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:369:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+    at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+    at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+    at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+    at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+    at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+    at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+    at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+    at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+    at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+    at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+    at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+    at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+    at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+    at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+  cause: undefined,
+  reason: 'maxRetriesExceeded',
+  errors: [
+    APICallError [AI_APICallError]: Too Many Requests
+        at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+        at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+        at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+        at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+        at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+        at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+        at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+        at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+        at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+        at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+        at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+        at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+        at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+        at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+        at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+        at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+        at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+        at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+        at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+        at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+        at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+        at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+      cause: undefined,
+      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      requestBodyValues: [Object],
+      statusCode: 429,
+      responseHeaders: [Object],
+      responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+      isRetryable: true,
+      data: undefined,
+      [Symbol(vercel.ai.error)]: true,
+      [Symbol(vercel.ai.error.AI_APICallError)]: true
+    },
+    APICallError [AI_APICallError]: Too Many Requests
+        at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+        at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+        at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+        at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+        at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+        at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+        at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+        at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+        at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+        at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+        at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+        at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+        at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+        at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+        at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+        at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+        at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+        at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+        at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+        at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+        at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+        at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+      cause: undefined,
+      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      requestBodyValues: [Object],
+      statusCode: 429,
+      responseHeaders: [Object],
+      responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+      isRetryable: true,
+      data: undefined,
+      [Symbol(vercel.ai.error)]: true,
+      [Symbol(vercel.ai.error.AI_APICallError)]: true
+    },
+    APICallError [AI_APICallError]: Too Many Requests
+        at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+        at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+        at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+        at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+        at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+        at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+        at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+        at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+        at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+        at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+        at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+        at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+        at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+        at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+        at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+        at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+        at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+        at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+        at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+        at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+        at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+        at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+      cause: undefined,
+      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      requestBodyValues: [Object],
+      statusCode: 429,
+      responseHeaders: [Object],
+      responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+      isRetryable: true,
+      data: undefined,
+      [Symbol(vercel.ai.error)]: true,
+      [Symbol(vercel.ai.error.AI_APICallError)]: true
+    }
+  ],
+  lastError: APICallError [AI_APICallError]: Too Many Requests
+      at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+      at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+      at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+      at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+      at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+      at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+      at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+      at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+      at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+      at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+      at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+      at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+      at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+      at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+      at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+      at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+      at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+      at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+      at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+      at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+      at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+      at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+      at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+      at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+      at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+      at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+      at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+      at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+      at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+      at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+    cause: undefined,
+    url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+    requestBodyValues: {
+      model: 'glm-5',
+      models: undefined,
+      logit_bias: undefined,
+      logprobs: undefined,
+      top_logprobs: undefined,
+      user: undefined,
+      parallel_tool_calls: undefined,
+      max_tokens: 131072,
+      temperature: 0.7,
+      top_p: 0.9,
+      frequency_penalty: undefined,
+      presence_penalty: undefined,
+      seed: undefined,
+      stop: undefined,
+      response_format: undefined,
+      top_k: undefined,
+      messages: [Array],
+      include_reasoning: undefined,
+      reasoning: undefined,
+      tools: undefined,
+      tool_choice: undefined
+    },
+    statusCode: 429,
+    responseHeaders: {
+      connection: 'keep-alive',
+      'content-type': 'application/json; charset=UTF-8',
+      date: 'Thu, 19 Feb 2026 16:55:05 GMT',
+      'set-cookie': 'acw_tc=3ccdc16c17715201050217743e8d9b1cc31e4d1dbda6774346df0647fd7397;path=/;HttpOnly;Max-Age=1800',
+      'strict-transport-security': 'max-age=31536000; includeSubDomains',
+      'transfer-encoding': 'chunked',
+      vary: 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
+      'x-log-id': '20260220005505e821779151fc4d22'
+    },
+    responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+    isRetryable: true,
+    data: undefined,
+    [Symbol(vercel.ai.error)]: true,
+    [Symbol(vercel.ai.error.AI_APICallError)]: true
+  },
+  [Symbol(vercel.ai.error)]: true,
+  [Symbol(vercel.ai.error.AI_RetryError)]: true
+}
+GA增强问题生成时出错: RetryError [AI_RetryError]: Failed after 3 attempts. Last error: Too Many Requests
+    at _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:369:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+    at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+    at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+    at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+    at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+    at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+    at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+    at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+    at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+    at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+    at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+    at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+    at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+    at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+    at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+  cause: undefined,
+  reason: 'maxRetriesExceeded',
+  errors: [
+    APICallError [AI_APICallError]: Too Many Requests
+        at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+        at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+        at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+        at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+        at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+        at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+        at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+        at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+        at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+        at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+        at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+        at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+        at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+        at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+        at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+        at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+        at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+        at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+        at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+        at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+        at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+        at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+      cause: undefined,
+      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      requestBodyValues: [Object],
+      statusCode: 429,
+      responseHeaders: [Object],
+      responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+      isRetryable: true,
+      data: undefined,
+      [Symbol(vercel.ai.error)]: true,
+      [Symbol(vercel.ai.error.AI_APICallError)]: true
+    },
+    APICallError [AI_APICallError]: Too Many Requests
+        at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+        at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+        at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+        at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+        at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+        at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+        at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+        at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+        at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+        at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+        at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+        at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+        at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+        at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+        at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+        at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+        at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+        at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+        at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+        at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+        at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+        at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+      cause: undefined,
+      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      requestBodyValues: [Object],
+      statusCode: 429,
+      responseHeaders: [Object],
+      responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+      isRetryable: true,
+      data: undefined,
+      [Symbol(vercel.ai.error)]: true,
+      [Symbol(vercel.ai.error.AI_APICallError)]: true
+    },
+    APICallError [AI_APICallError]: Too Many Requests
+        at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+        at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+        at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+        at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+        at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+        at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+        at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+        at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+        at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+        at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+        at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+        at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+        at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+        at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+        at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+        at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+        at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+        at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+        at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+        at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+        at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+        at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+      cause: undefined,
+      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      requestBodyValues: [Object],
+      statusCode: 429,
+      responseHeaders: [Object],
+      responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+      isRetryable: true,
+      data: undefined,
+      [Symbol(vercel.ai.error)]: true,
+      [Symbol(vercel.ai.error.AI_APICallError)]: true
+    }
+  ],
+  lastError: APICallError [AI_APICallError]: Too Many Requests
+      at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+      at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+      at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+      at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+      at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+      at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+      at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+      at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+      at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+      at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+      at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+      at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+      at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+      at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+      at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+      at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+      at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+      at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+      at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+      at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+      at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+      at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+      at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+      at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+      at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+      at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+      at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+      at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+      at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+      at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+    cause: undefined,
+    url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+    requestBodyValues: {
+      model: 'glm-5',
+      models: undefined,
+      logit_bias: undefined,
+      logprobs: undefined,
+      top_logprobs: undefined,
+      user: undefined,
+      parallel_tool_calls: undefined,
+      max_tokens: 131072,
+      temperature: 0.7,
+      top_p: 0.9,
+      frequency_penalty: undefined,
+      presence_penalty: undefined,
+      seed: undefined,
+      stop: undefined,
+      response_format: undefined,
+      top_k: undefined,
+      messages: [Array],
+      include_reasoning: undefined,
+      reasoning: undefined,
+      tools: undefined,
+      tool_choice: undefined
+    },
+    statusCode: 429,
+    responseHeaders: {
+      connection: 'keep-alive',
+      'content-type': 'application/json; charset=UTF-8',
+      date: 'Thu, 19 Feb 2026 16:55:05 GMT',
+      'set-cookie': 'acw_tc=3ccdc16c17715201050217743e8d9b1cc31e4d1dbda6774346df0647fd7397;path=/;HttpOnly;Max-Age=1800',
+      'strict-transport-security': 'max-age=31536000; includeSubDomains',
+      'transfer-encoding': 'chunked',
+      vary: 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
+      'x-log-id': '20260220005505e821779151fc4d22'
+    },
+    responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+    isRetryable: true,
+    data: undefined,
+    [Symbol(vercel.ai.error)]: true,
+    [Symbol(vercel.ai.error.AI_APICallError)]: true
+  },
+  [Symbol(vercel.ai.error)]: true,
+  [Symbol(vercel.ai.error.AI_RetryError)]: true
+}
+Error generating questions: RetryError [AI_RetryError]: Failed after 3 attempts. Last error: Too Many Requests
+    at _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:369:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+    at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+    at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+    at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+    at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+    at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+    at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+    at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+    at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+    at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+    at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+    at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+    at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+    at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+    at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+  cause: undefined,
+  reason: 'maxRetriesExceeded',
+  errors: [
+    APICallError [AI_APICallError]: Too Many Requests
+        at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+        at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+        at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+        at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+        at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+        at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+        at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+        at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+        at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+        at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+        at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+        at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+        at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+        at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+        at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+        at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+        at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+        at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+        at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+        at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+        at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+        at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+      cause: undefined,
+      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      requestBodyValues: [Object],
+      statusCode: 429,
+      responseHeaders: [Object],
+      responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+      isRetryable: true,
+      data: undefined,
+      [Symbol(vercel.ai.error)]: true,
+      [Symbol(vercel.ai.error.AI_APICallError)]: true
+    },
+    APICallError [AI_APICallError]: Too Many Requests
+        at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+        at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+        at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+        at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+        at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+        at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+        at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+        at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+        at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+        at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+        at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+        at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+        at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+        at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+        at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+        at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+        at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+        at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+        at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+        at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+        at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+        at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+      cause: undefined,
+      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      requestBodyValues: [Object],
+      statusCode: 429,
+      responseHeaders: [Object],
+      responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+      isRetryable: true,
+      data: undefined,
+      [Symbol(vercel.ai.error)]: true,
+      [Symbol(vercel.ai.error.AI_APICallError)]: true
+    },
+    APICallError [AI_APICallError]: Too Many Requests
+        at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+        at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+        at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+        at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+        at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+        at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+        at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+        at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+        at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+        at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+        at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+        at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+        at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+        at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+        at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+        at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+        at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+        at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+        at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+        at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+        at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+        at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+        at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+        at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+        at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+        at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+        at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+      cause: undefined,
+      url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+      requestBodyValues: [Object],
+      statusCode: 429,
+      responseHeaders: [Object],
+      responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+      isRetryable: true,
+      data: undefined,
+      [Symbol(vercel.ai.error)]: true,
+      [Symbol(vercel.ai.error.AI_APICallError)]: true
+    }
+  ],
+  lastError: APICallError [AI_APICallError]: Too Many Requests
+      at eval (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:613:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async postToApi (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/node_modules/@ai-sdk/provider-utils/dist/index.js:498:28)
+      at async OpenRouterChatLanguageModel.doGenerate (webpack-internal:///(rsc)/./node_modules/@openrouter/ai-sdk-provider/dist/index.js:343:50)
+      at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4358:30)
+      at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+      at async _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:357:12)
+      at async fn (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:4314:32)
+      at async eval (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:556:22)
+      at async OpenRouterClient.chat (webpack-internal:///(rsc)/./lib/llm/core/providers/base.js:34:24)
+      at async LLMClient._callClientMethod (webpack-internal:///(rsc)/./lib/llm/core/index.js:100:24)
+      at async LLMClient.getResponse (webpack-internal:///(rsc)/./lib/llm/core/index.js:188:24)
+      at async generateQuestionsForChunkWithGA (webpack-internal:///(rsc)/./lib/services/questions/index.js:216:30)
+      at async POST (webpack-internal:///(rsc)/./app/api/projects/[projectId]/chunks/[chunkId]/questions/route.js:37:24)
+      at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:57228
+      at async eT.execute (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:46851)
+      at async eT.handle (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\compiled\next-server\app-route.runtime.dev.js:6:58760)
+      at async doRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1366:42)
+      at async cacheEntry.responseCache.get.routeKind (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1576:40)
+      at async DevServer.renderToResponseWithComponentsImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1496:28)
+      at async DevServer.renderPageComponent (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1924:24)
+      at async DevServer.renderToResponseImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:1962:32)
+      at async DevServer.pipeImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:922:25)
+      at async NextNodeServer.handleCatchallRenderRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\next-server.js:272:17)
+      at async DevServer.handleRequestImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\base-server.js:818:17)
+      at async C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+      at async Span.traceAsyncFn (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\trace\trace.js:154:20)
+      at async DevServer.handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+      at async invokeRender (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:178:21)
+      at async handleRequest (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:355:24)
+      at async requestHandlerImpl (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\router-server.js:379:13)
+      at async Server.requestListener (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\lib\start-server.js:141:13) {
+    cause: undefined,
+    url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+    requestBodyValues: {
+      model: 'glm-5',
+      models: undefined,
+      logit_bias: undefined,
+      logprobs: undefined,
+      top_logprobs: undefined,
+      user: undefined,
+      parallel_tool_calls: undefined,
+      max_tokens: 131072,
+      temperature: 0.7,
+      top_p: 0.9,
+      frequency_penalty: undefined,
+      presence_penalty: undefined,
+      seed: undefined,
+      stop: undefined,
+      response_format: undefined,
+      top_k: undefined,
+      messages: [Array],
+      include_reasoning: undefined,
+      reasoning: undefined,
+      tools: undefined,
+      tool_choice: undefined
+    },
+    statusCode: 429,
+    responseHeaders: {
+      connection: 'keep-alive',
+      'content-type': 'application/json; charset=UTF-8',
+      date: 'Thu, 19 Feb 2026 16:55:05 GMT',
+      'set-cookie': 'acw_tc=3ccdc16c17715201050217743e8d9b1cc31e4d1dbda6774346df0647fd7397;path=/;HttpOnly;Max-Age=1800',
+      'strict-transport-security': 'max-age=31536000; includeSubDomains',
+      'transfer-encoding': 'chunked',
+      vary: 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
+      'x-log-id': '20260220005505e821779151fc4d22'
+    },
+    responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
+    isRetryable: true,
+    data: undefined,
+    [Symbol(vercel.ai.error)]: true,
+    [Symbol(vercel.ai.error.AI_APICallError)]: true
+  },
+  [Symbol(vercel.ai.error)]: true,
+  [Symbol(vercel.ai.error.AI_RetryError)]: true
+}
