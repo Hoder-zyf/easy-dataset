@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createInitModelConfig, getModelConfigByProjectId, saveModelConfig } from '@/lib/db/model-config';
 import { DEFAULT_MODEL_SETTINGS, MODEL_PROVIDERS } from '@/constant/model';
 import { getProject } from '@/lib/db/projects';
+import { sortProvidersByPriority } from '@/lib/util/providerLogo';
 
 // 获取模型配置列表
 export async function GET(request, { params }) {
@@ -14,15 +15,16 @@ export async function GET(request, { params }) {
     let modelConfigList = await getModelConfigByProjectId(projectId);
     if (!modelConfigList || modelConfigList.length === 0) {
       let insertModelConfigList = [];
-      MODEL_PROVIDERS.forEach(item => {
+      const sortedProviders = sortProvidersByPriority(MODEL_PROVIDERS, item => item.id);
+      sortedProviders.forEach(item => {
         let data = {
           projectId: projectId,
           providerId: item.id,
           providerName: item.name,
           endpoint: item.defaultEndpoint,
           apiKey: '',
-          modelId: item.defaultModels.length > 0 ? item.defaultModels[0] : '',
-          modelName: item.defaultModels.length > 0 ? item.defaultModels[0] : '',
+          modelId: '',
+          modelName: '',
           type: 'text',
           temperature: DEFAULT_MODEL_SETTINGS.temperature,
           maxTokens: DEFAULT_MODEL_SETTINGS.maxTokens,
@@ -34,6 +36,7 @@ export async function GET(request, { params }) {
       });
       modelConfigList = await createInitModelConfig(insertModelConfigList);
     }
+    modelConfigList = sortProvidersByPriority(modelConfigList, item => item.providerId);
     let project = await getProject(projectId);
     return NextResponse.json({ data: modelConfigList, defaultModelConfigId: project.defaultModelConfigId });
   } catch (error) {

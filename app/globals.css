@@ -13,6 +13,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 避免根滚动条显隐导致页面横向抖动 */
+html {
+  overflow-y: auto;
+}
+
 a {
   color: inherit;
   text-decoration: none;

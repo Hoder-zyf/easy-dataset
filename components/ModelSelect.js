@@ -21,42 +21,41 @@ export default function ModelSelect({
   const { t } = useTranslation();
   const models = useAtomValue(modelConfigListAtom);
   const [selectedModelInfo, setSelectedModelInfo] = useAtom(selectedModelInfoAtom);
-  // 确保始终使用字符串值初始化 selectedModel，避免从非受控变为受控
   const [selectedModel, setSelectedModel] = useState(() => {
     if (selectedModelInfo && selectedModelInfo.id) {
       return selectedModelInfo.id;
-    } else if (models && models.length > 0 && models[0]?.id) {
-      return models[0].id;
     }
     return '';
   });
   const [error, setError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
   const handleModelChange = event => {
     if (!event || !event.target) return;
     const newModelId = event.target.value;
 
-    // 清除错误状态
     if (error) {
       setError(false);
       if (onError) onError(false);
     }
 
-    // 找到选中的模型对象
-    const selectedModelObj = models.find(model => model.id === newModelId);
-    if (selectedModelObj) {
-      setSelectedModel(newModelId);
-      // 将完整的模型信息存储到 localStorage
-      setSelectedModelInfo(selectedModelObj);
-      updateDefaultModel(newModelId);
+    if (!newModelId) {
+      setSelectedModel('');
+      setSelectedModelInfo(null);
+      updateDefaultModel(null);
     } else {
-      setSelectedModelInfo({
-        id: newModelId
-      });
+      const selectedModelObj = models.find(model => model.id === newModelId);
+      if (selectedModelObj) {
+        setSelectedModel(newModelId);
+        setSelectedModelInfo(selectedModelObj);
+        updateDefaultModel(newModelId);
+      } else {
+        setSelectedModel(newModelId);
+        setSelectedModelInfo({ id: newModelId });
+      }
     }
 
-    // 选择模型后，延迟收回到图标状态
     setTimeout(() => {
       setIsHovered(false);
       setIsOpen(false);
@@ -70,7 +69,6 @@ export default function ModelSelect({
     }
   };
 
-  // 检查是否选择了模型
   const validateModel = () => {
     if (required && (!selectedModel || selectedModel === '')) {
       setError(true);
@@ -88,15 +86,22 @@ export default function ModelSelect({
     }
   }, [selectedModelInfo]);
 
-  // 初始检查
   useEffect(() => {
     if (required) {
       validateModel();
     }
   }, [required]);
 
-  // 获取当前选中模型的显示内容
   const renderSelectedValue = value => {
+    if (!value) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <SmartToyIcon fontSize="small" />
+          {t('models.unselectedModel', t('playground.selectModelFirst'))}
+        </Box>
+      );
+    }
+
     const selectedModelObj = models.find(model => model.id === value);
     if (!selectedModelObj) return null;
 
@@ -124,13 +129,11 @@ export default function ModelSelect({
     );
   };
 
-  // 获取当前选中模型的图标
   const currentModelIcon = useMemo(() => {
     const selectedModelObj = models.find(model => model.id === selectedModel);
     return selectedModelObj ? getModelIcon(selectedModelObj.modelName, selectedModelObj.modelId) : null;
   }, [selectedModel, models]);
 
-  // 判断是否应该显示完整的 Select
   const shouldShowFullSelect = isHovered || isOpen;
 
   return (
@@ -138,7 +141,6 @@ export default function ModelSelect({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
-        // 确保菜单关闭后才能收回
         if (!isOpen) {
           setIsOpen(false);
         }
@@ -149,13 +151,10 @@ export default function ModelSelect({
         alignItems: 'center'
       }}
     >
-      {/* 默认显示的图标按钮 */}
       {!shouldShowFullSelect && (
         <Tooltip
           title={
-            selectedModel
-              ? models.find(m => m.id === selectedModel)?.modelName
-              : t('playground.selectModelFirst', '请先选择模型')
+            selectedModel ? models.find(m => m.id === selectedModel)?.modelName : t('playground.selectModelFirst', '请先选择模型')
           }
           placement="bottom"
         >
@@ -209,7 +208,6 @@ export default function ModelSelect({
         </Tooltip>
       )}
 
-      {/* 悬浮时显示的完整 Select */}
       <FormControl
         size={size}
         sx={{
@@ -270,11 +268,10 @@ export default function ModelSelect({
             }
           }}
         >
-          <MenuItem value="" disabled>
-            {error ? t('models.pleaseSelectModel') : t('playground.selectModelFirst')}
+          <MenuItem value="">
+            {error ? t('models.pleaseSelectModel') : t('models.unselectedModel', t('playground.selectModelFirst'))}
           </MenuItem>
           {(() => {
-            // 按 provider 分组
             const filteredModels = models.filter(m => {
               if (m.providerId?.toLowerCase() === 'ollama') {
                 return m.modelName && m.endpoint;
@@ -283,7 +280,6 @@ export default function ModelSelect({
               }
             });
 
-            // 获取所有 provider
             const providers = [...new Set(filteredModels.map(m => m.providerName || 'Other'))];
 
             return providers.map(provider => {

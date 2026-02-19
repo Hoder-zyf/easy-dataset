@@ -79,20 +79,22 @@ const ConversationTable = ({
   const isIndeterminate = selectedIds.length > 0 && !isAllSelected;
 
   return (
-    <TableContainer component={Paper} elevation={0}>
-      <Table>
+    <TableContainer component={Paper} elevation={0} sx={{ overflowX: 'auto' }}>
+      <Table sx={{ tableLayout: 'fixed', minWidth: 1100 }}>
         <TableHead>
           <TableRow sx={{ bgcolor: 'action.hover' }}>
-            <TableCell padding="checkbox">
+            <TableCell padding="checkbox" sx={{ width: 56 }}>
               <Checkbox indeterminate={isIndeterminate} checked={isAllSelected} onChange={handleSelectAll} />
             </TableCell>
-            <TableCell>{t('datasets.firstQuestion')}</TableCell>
-            <TableCell>{t('datasets.conversationScenario')}</TableCell>
-            <TableCell>{t('datasets.conversationRounds')}</TableCell>
-            <TableCell>{t('datasets.modelUsed')}</TableCell>
-            <TableCell>{t('datasets.rating')}</TableCell>
-            <TableCell>{t('datasets.createTime')}</TableCell>
-            <TableCell align="center">{t('common.actions')}</TableCell>
+            <TableCell sx={{ width: '30%', minWidth: 280 }}>{t('datasets.firstQuestion')}</TableCell>
+            <TableCell sx={{ width: '38%', minWidth: 360 }}>{t('datasets.conversationScenario')}</TableCell>
+            <TableCell sx={{ width: 110 }}>{t('datasets.conversationRounds')}</TableCell>
+            <TableCell sx={{ width: 130 }}>{t('datasets.modelUsed')}</TableCell>
+            <TableCell sx={{ width: 110 }}>{t('datasets.rating')}</TableCell>
+            <TableCell sx={{ width: 130 }}>{t('datasets.createTime')}</TableCell>
+            <TableCell align="center" sx={{ width: 110 }}>
+              {t('common.actions')}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -113,16 +115,30 @@ const ConversationTable = ({
           ) : (
             conversations.map(conversation => (
               <TableRow key={conversation.id} hover>
-                <TableCell padding="checkbox">
+                <TableCell padding="checkbox" sx={{ verticalAlign: 'top' }}>
                   <Checkbox
                     checked={selectedIds.includes(conversation.id)}
                     onChange={() => handleSelectOne(conversation.id)}
                   />
                 </TableCell>
-                <TableCell>
-                  <Typography variant="body2" sx={{ maxWidth: 300 }}>
-                    {conversation.question}
-                  </Typography>
+                <TableCell sx={{ verticalAlign: 'top' }}>
+                  <Tooltip title={conversation.question || ''} placement="top-start">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        whiteSpace: 'normal',
+                        overflowWrap: 'anywhere',
+                        wordBreak: 'break-word',
+                        lineHeight: 1.5
+                      }}
+                    >
+                      {conversation.question}
+                    </Typography>
+                  </Tooltip>
                   {conversation.confirmed && (
                     <Chip
                       label={t('datasets.confirmed')}
@@ -133,29 +149,63 @@ const ConversationTable = ({
                     />
                   )}
                 </TableCell>
-                <TableCell>
-                  <Chip
-                    label={conversation.scenario || t('datasets.notSet')}
-                    size="small"
-                    variant="outlined"
-                    color={conversation.scenario ? 'primary' : 'default'}
-                  />
+                <TableCell sx={{ verticalAlign: 'top' }}>
+                  <Tooltip title={conversation.scenario || t('datasets.notSet')} placement="top-start">
+                    <Paper
+                      variant="outlined"
+                      sx={{
+                        px: 1,
+                        py: 0.75,
+                        maxWidth: '100%',
+                        borderColor: conversation.scenario ? 'primary.main' : 'divider',
+                        backgroundColor: conversation.scenario ? 'action.selected' : 'background.default'
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          whiteSpace: 'normal',
+                          overflowWrap: 'anywhere',
+                          wordBreak: 'break-word',
+                          lineHeight: 1.45
+                        }}
+                      >
+                        {conversation.scenario || t('datasets.notSet')}
+                      </Typography>
+                    </Paper>
+                  </Tooltip>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ verticalAlign: 'top' }}>
                   <Typography variant="body2">
                     {conversation.turnCount}/{conversation.maxTurns}
                   </Typography>
                 </TableCell>
-                <TableCell>
-                  <Chip label={conversation.model} size="small" variant="outlined" color="info" />
+                <TableCell sx={{ verticalAlign: 'top' }}>
+                  <Chip
+                    label={conversation.model}
+                    size="small"
+                    variant="outlined"
+                    color="info"
+                    sx={{
+                      maxWidth: '100%',
+                      '& .MuiChip-label': {
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }
+                    }}
+                  />
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ verticalAlign: 'top' }}>
                   <RatingChip score={conversation.score || 0} />
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ verticalAlign: 'top' }}>
                   <Typography variant="caption">{new Date(conversation.createAt).toLocaleDateString()}</Typography>
                 </TableCell>
-                <TableCell align="center">
+                <TableCell align="center" sx={{ verticalAlign: 'top' }}>
                   <Tooltip title={t('datasets.viewDetails')}>
                     <IconButton size="small" color="primary" onClick={() => onView(conversation.id)}>
                       <ViewIcon fontSize="small" />

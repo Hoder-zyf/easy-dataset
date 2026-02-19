@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Typography,
   Box,
@@ -31,7 +31,6 @@ import ErrorIcon from '@mui/icons-material/Error';
 import { DEFAULT_MODEL_SETTINGS } from '@/constant/model';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { ProviderIcon } from '@lobehub/icons';
 import { toast } from 'sonner';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -39,6 +38,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 import { useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
 import { modelConfigListAtom, selectedModelInfoAtom } from '@/lib/store';
+import { getProviderLogo, sortProvidersByPriority } from '@/lib/util/providerLogo';
 
 export default function ModelSettings({ projectId }) {
   const { t } = useTranslation();
@@ -55,6 +55,10 @@ export default function ModelSettings({ projectId }) {
   const [models, setModels] = useState([]);
   const [modelConfigList, setModelConfigList] = useAtom(modelConfigListAtom);
   const [selectedModelInfo, setSelectedModelInfo] = useAtom(selectedModelInfoAtom);
+  const orderedModelConfigList = useMemo(
+    () => sortProvidersByPriority(modelConfigList, item => item.providerId),
+    [modelConfigList]
+  );
   const [modelConfigForm, setModelConfigForm] = useState({
     id: '',
     providerId: '',
@@ -80,13 +84,16 @@ export default function ModelSettings({ projectId }) {
   const getProvidersList = () => {
     axios.get('/api/llm/providers').then(response => {
       console.log('获取的模型列表:', response.data);
-      setProviderList(response.data);
-      const providerOptions = response.data.map(provider => ({
+      const sortedProviders = sortProvidersByPriority(response.data, item => item.id);
+      setProviderList(sortedProviders);
+      const providerOptions = sortedProviders.map(provider => ({
         id: provider.id,
         label: provider.name
       }));
-      setSelectedProvider(response.data[0]);
-      getProviderModels(response.data[0].id);
+      if (sortedProviders.length > 0) {
+        setSelectedProvider(sortedProviders[0]);
+        getProviderModels(sortedProviders[0].id);
+      }
       setProviderOptions(providerOptions);
     });
   };
@@ -106,7 +113,7 @@ export default function ModelSettings({ projectId }) {
     axios
       .get(`/api/projects/${projectId}/model-config`)
       .then(response => {
-        setModelConfigList(response.data.data);
+        setModelConfigList(sortProvidersByPriority(response.data.data, item => item.providerId));
         setLoading(false);
       })
       .catch(error => {
@@ -353,7 +360,7 @@ export default function ModelSettings({ projectId }) {
         </Box>
 
         <Stack spacing={2}>
-          {modelConfigList.map(model => (
+          {orderedModelConfigList.map(model => (
             <Paper
               key={model.id}
               elevation={1}
@@ -369,7 +376,15 @@ export default function ModelSettings({ projectId }) {
             >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <ProviderIcon key={model.providerId} provider={model.providerId} size={32} type={'color'} />
+                  <Box
+                    component="img"
+                    src={getProviderLogo(model.providerId, model.providerName)}
+                    alt={model.providerName}
+                    sx={{ width: 32, height: 32, objectFit: 'contain' }}
+                    onError={e => {
+                      e.target.src = '/imgs/models/default.svg';
+                    }}
+                  />
                   <Box>
                     <Typography variant="subtitle1" fontWeight="bold">
                       {model.modelName ? model.modelName : t('models.unselectedModel')}
@@ -484,7 +499,15 @@ export default function ModelSettings({ projectId }) {
                     return (
                       <div {...props}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <ProviderIcon key={option.id} provider={option.id} size={32} type={'color'} />
+                          <Box
+                            component="img"
+                            src={getProviderLogo(option.id, option.label)}
+                            alt={option.label}
+                            sx={{ width: 24, height: 24, objectFit: 'contain' }}
+                            onError={e => {
+                              e.target.src = '/imgs/models/default.svg';
+                            }}
+                          />
                           {option.label}
                         </div>
                       </div>

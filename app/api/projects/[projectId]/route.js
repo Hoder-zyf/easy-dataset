@@ -22,8 +22,15 @@ export async function PUT(request, { params }) {
     const { projectId } = params;
     const projectData = await request.json();
 
-    // 验证必要的字段
-    if (!projectData.name && !projectData.defaultModelConfigId) {
+    const hasNameField = Object.prototype.hasOwnProperty.call(projectData, 'name');
+    const hasDefaultModelField = Object.prototype.hasOwnProperty.call(projectData, 'defaultModelConfigId');
+
+    // 至少允许更新名称或默认模型（defaultModelConfigId 可显式为 null）
+    if (!hasNameField && !hasDefaultModelField) {
+      return Response.json({ error: '项目名称不能为空' }, { status: 400 });
+    }
+
+    if (hasNameField && !projectData.name && !hasDefaultModelField) {
       return Response.json({ error: '项目名称不能为空' }, { status: 400 });
     }
 
