@@ -76,6 +76,11 @@ export async function POST(request, { params }) {
     if (!modelConfig.status) {
       modelConfig.status = 1;
     }
+    const parsedMaxTokens = Number(modelConfig.maxTokens ?? DEFAULT_MODEL_SETTINGS.maxTokens);
+    if (!Number.isInteger(parsedMaxTokens) || parsedMaxTokens < 1) {
+      return NextResponse.json({ error: 'maxTokens must be a positive integer' }, { status: 400 });
+    }
+    modelConfig.maxTokens = parsedMaxTokens;
     const res = await saveModelConfig(modelConfig);
 
     return NextResponse.json(res);

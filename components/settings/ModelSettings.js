@@ -45,6 +45,7 @@ export default function ModelSettings({ projectId }) {
   const router = useRouter();
   // 展示端点的最大长度
   const MAX_ENDPOINT_DISPLAY = 80;
+  const MAX_GENERATION_TOKENS = 131072;
   // 模型对话框状态
   const [openModelDialog, setOpenModelDialog] = useState(false);
   const [editingModel, setEditingModel] = useState(null);
@@ -69,11 +70,23 @@ export default function ModelSettings({ projectId }) {
     modelName: '',
     type: 'text',
     temperature: 0.0,
-    maxTokens: 0,
+    maxTokens: DEFAULT_MODEL_SETTINGS.maxTokens,
     topP: 0,
     topK: 0,
     status: 1
   });
+
+  const normalizePositiveInteger = value => {
+    const parsedValue = Number(value);
+    if (!Number.isInteger(parsedValue) || parsedValue < 1) {
+      return null;
+    }
+    return parsedValue;
+  };
+
+  const getSafeMaxTokensValue = value => {
+    return normalizePositiveInteger(value) ?? DEFAULT_MODEL_SETTINGS.maxTokens;
+  };
 
   useEffect(() => {
     getProvidersList();
@@ -260,6 +273,48 @@ export default function ModelSettings({ projectId }) {
     }));
   };
 
+  const handleMaxTokensSliderChange = (event, newValue) => {
+    const value = Array.isArray(newValue) ? newValue[0] : newValue;
+    const normalizedValue = normalizePositiveInteger(value);
+    if (normalizedValue === null) {
+      return;
+    }
+    setModelConfigForm(prev => ({
+      ...prev,
+      maxTokens: normalizedValue
+    }));
+  };
+
+  const handleMaxTokensInputChange = e => {
+    const { value } = e.target;
+    if (value === '') {
+      setModelConfigForm(prev => ({
+        ...prev,
+        maxTokens: ''
+      }));
+      return;
+    }
+    const normalizedValue = normalizePositiveInteger(value);
+    if (normalizedValue === null) {
+      return;
+    }
+    setModelConfigForm(prev => ({
+      ...prev,
+      maxTokens: normalizedValue
+    }));
+  };
+
+  const handleMaxTokensInputBlur = () => {
+    const normalizedValue = normalizePositiveInteger(modelConfigForm.maxTokens);
+    if (normalizedValue !== null) {
+      return;
+    }
+    setModelConfigForm(prev => ({
+      ...prev,
+      maxTokens: DEFAULT_MODEL_SETTINGS.maxTokens
+    }));
+  };
+
   // 保存模型
   const handleSaveModel = () => {
     // 确保有模型 ID
@@ -268,9 +323,16 @@ export default function ModelSettings({ projectId }) {
       return;
     }
 
+    const normalizedMaxTokens = normalizePositiveInteger(modelConfigForm.maxTokens);
+    if (normalizedMaxTokens === null) {
+      toast.error(t('models.maxTokensPositiveError', { defaultValue: 'Max Tokens must be a positive integer' }));
+      return;
+    }
+
     // 如果模型名称为空，则默认为模型 ID
     const dataToSave = {
       ...modelConfigForm,
+      maxTokens: normalizedMaxTokens,
       modelName: modelConfigForm.modelName || modelConfigForm.modelId
     };
 
@@ -638,20 +700,31 @@ export default function ModelSettings({ projectId }) {
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Slider
-                  min={1024}
-                  max={16384}
+                  min={1}
+                  max={MAX_GENERATION_TOKENS}
                   name="maxTokens"
-                  value={modelConfigForm.maxTokens}
-                  onChange={handleModelFormChange}
+                  value={Math.min(getSafeMaxTokensValue(modelConfigForm.maxTokens), MAX_GENERATION_TOKENS)}
+                  onChange={handleMaxTokensSliderChange}
                   step={1}
                   valueLabelDisplay="auto"
                   aria-label="maxTokens"
                   sx={{ flex: 1 }}
                 />
-                <Typography variant="body2" sx={{ minWidth: '40px' }}>
-                  {modelConfigForm.maxTokens}
-                </Typography>
+                <TextField
+                  size="small"
+                  type="number"
+                  value={modelConfigForm.maxTokens}
+                  onChange={handleMaxTokensInputChange}
+                  onBlur={handleMaxTokensInputBlur}
+                  inputProps={{ min: 1, step: 1 }}
+                  sx={{ width: 170 }}
+                />
               </Box>
+              <Typography variant="caption" color="text.secondary">
+                {t('models.maxTokensInputTip', {
+                  defaultValue: `Slider range: 1-${MAX_GENERATION_TOKENS}. You can also input any positive integer.`
+                })}
+              </Typography>
             </Grid>
             <Grid item xs={12}>
               <Typography id="top-p-slider" gutterBottom>
