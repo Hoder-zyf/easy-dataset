@@ -27,6 +27,9 @@ export default function ActionButtons({
   onActionAreaEnter
 }) {
   const { t, i18n } = useTranslation();
+  const isZhLanguage = String(i18n.language || '')
+    .toLowerCase()
+    .startsWith('zh');
 
   return (
     <Box sx={styles.actionAreaStyles} onMouseEnter={onActionAreaEnter}>
@@ -75,7 +78,7 @@ export default function ActionButtons({
       <Tooltip title={t('documentation')}>
         <IconButton
           component="a"
-          href={i18n.language === 'zh-CN' ? 'https://docs.easy-dataset.com/' : 'https://docs.easy-dataset.com/ed/en'}
+          href={isZhLanguage ? 'https://docs.easy-dataset.com/' : 'https://docs.easy-dataset.com/ed/en'}
           target="_blank"
           rel="noopener noreferrer"
           size="medium"

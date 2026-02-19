@@ -23,7 +23,9 @@ import {
   Paper,
   Tooltip,
   IconButton,
-  Chip
+  Chip,
+  Divider,
+  CircularProgress
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -35,6 +37,7 @@ import { toast } from 'sonner';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ScienceIcon from '@mui/icons-material/Science';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import { useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
 import { modelConfigListAtom, selectedModelInfoAtom } from '@/lib/store';
@@ -75,6 +78,32 @@ export default function ModelSettings({ projectId }) {
     topK: 0,
     status: 1
   });
+  const [healthStatusMap, setHealthStatusMap] = useState({});
+  const [batchCheckingHealth, setBatchCheckingHealth] = useState(false);
+
+  const isModelConfigured = model => {
+    if (!model) return false;
+    const hasEndpoint = Boolean(String(model.endpoint || '').trim());
+    const hasModel = Boolean(String(model.modelId || model.modelName || '').trim());
+    const providerId = String(model.providerId || '').toLowerCase();
+
+    if (providerId === 'ollama') {
+      return hasEndpoint && hasModel;
+    }
+
+    const hasApiKey = Boolean(String(model.apiKey || '').trim());
+    return hasEndpoint && hasApiKey && hasModel;
+  };
+
+  const configuredModelList = useMemo(
+    () => orderedModelConfigList.filter(isModelConfigured),
+    [orderedModelConfigList]
+  );
+
+  const unconfiguredModelList = useMemo(
+    () => orderedModelConfigList.filter(model => !isModelConfigured(model)),
+    [orderedModelConfigList]
+  );
 
   const normalizePositiveInteger = value => {
     const parsedValue = Number(value);
@@ -96,7 +125,7 @@ export default function ModelSettings({ projectId }) {
   // 获取提供商列表
   const getProvidersList = () => {
     axios.get('/api/llm/providers').then(response => {
-      console.log('获取的模型列表:', response.data);
+      console.log('获取的模型列表', response.data);
       const sortedProviders = sortProvidersByPriority(response.data, item => item.id);
       setProviderList(sortedProviders);
       const providerOptions = sortedProviders.map(provider => ({
@@ -116,7 +145,7 @@ export default function ModelSettings({ projectId }) {
     if (!model?.endpoint) return '';
     const base = model.endpoint.replace(/^https?:\/\//, '');
     if (base.length > MAX_ENDPOINT_DISPLAY) {
-      return base.slice(0, MAX_ENDPOINT_DISPLAY) + '…';
+      return base.slice(0, MAX_ENDPOINT_DISPLAY) + '...';
     }
     return base;
   };
@@ -136,7 +165,7 @@ export default function ModelSettings({ projectId }) {
   };
 
   const onChangeProvider = (event, newValue) => {
-    console.log('选择提供商:', newValue, typeof newValue);
+    console.log('选择提供商', newValue, typeof newValue);
     if (typeof newValue === 'string') {
       // 用户手动输入了自定义提供商
       setModelConfigForm(prev => ({
@@ -174,7 +203,7 @@ export default function ModelSettings({ projectId }) {
       });
   };
 
-  //同步模型列表
+  // 同步模型列表
   const refreshProviderModels = async () => {
     let data = await getNewModels();
     if (!data) return;
@@ -193,7 +222,7 @@ export default function ModelSettings({ projectId }) {
     }
   };
 
-  //获取最新模型列表
+  // 获取最新模型列表
   async function getNewModels() {
     try {
       if (!modelConfigForm || !modelConfigForm.endpoint) {
@@ -220,11 +249,187 @@ export default function ModelSettings({ projectId }) {
     }
   }
 
+  const getHealthCheckErrorMessage = error => {
+    if (error?.response?.data?.error) return String(error.response.data.error);
+    if (error?.response?.data?.message) return String(error.response.data.message);
+    if (error?.message) return String(error.message);
+    return t('models.endpointCheckFailed', { defaultValue: 'Endpoint check failed' });
+  };
+
+  const checkModelEndpointHealth = async (model, { silent = false } = {}) => {
+    if (!model?.id) return false;
+
+    const endpoint = String(model.endpoint || '').trim();
+    if (!endpoint) {
+      setHealthStatusMap(prev => ({
+        ...prev,
+        [model.id]: {
+          status: 'error',
+          message: t('models.endpointMissing', { defaultValue: 'Endpoint is empty' })
+        }
+      }));
+      if (!silent) {
+        toast.error(t('models.endpointMissing', { defaultValue: 'Endpoint is empty' }));
+      }
+      return false;
+    }
+
+    setHealthStatusMap(prev => ({
+      ...prev,
+      [model.id]: {
+        status: 'checking',
+        message: t('models.checking', { defaultValue: 'Checking...' })
+      }
+    }));
+
+    try {
+      const response = await axios.post('/api/llm/fetch-models', {
+        endpoint,
+        providerId: model.providerId,
+        apiKey: model.apiKey
+      });
+
+      const resultList = Array.isArray(response.data) ? response.data : [];
+      const currentModelId = String(model.modelId || model.modelName || '').trim();
+      const hasMatchedModel =
+        !currentModelId ||
+        resultList.some(item => {
+          return item?.modelId === currentModelId || item?.modelName === currentModelId;
+        });
+
+      if (!hasMatchedModel) {
+        setHealthStatusMap(prev => ({
+          ...prev,
+          [model.id]: {
+            status: 'warning',
+            message: t('models.endpointReachableModelMissing', {
+              defaultValue: 'Endpoint reachable, but current model is not in the returned model list'
+            }),
+            checkedAt: Date.now()
+          }
+        }));
+        if (!silent) {
+          toast.warning(
+            t('models.endpointReachableModelMissing', {
+              defaultValue: 'Endpoint reachable, but current model is not in the returned model list'
+            })
+          );
+        }
+        return true;
+      }
+
+      setHealthStatusMap(prev => ({
+        ...prev,
+        [model.id]: {
+          status: 'success',
+          message: t('models.endpointHealthy', { defaultValue: 'Endpoint is healthy' }),
+          checkedAt: Date.now()
+        }
+      }));
+      if (!silent) {
+        toast.success(t('models.endpointHealthy', { defaultValue: 'Endpoint is healthy' }));
+      }
+      return true;
+    } catch (error) {
+      const message = getHealthCheckErrorMessage(error);
+      setHealthStatusMap(prev => ({
+        ...prev,
+        [model.id]: {
+          status: 'error',
+          message,
+          checkedAt: Date.now()
+        }
+      }));
+      if (!silent) {
+        toast.error(message);
+      }
+      return false;
+    }
+  };
+
+  const checkAllConfiguredModelHealth = async () => {
+    if (configuredModelList.length === 0) {
+      toast.info(t('models.noConfiguredModels', { defaultValue: 'No configured models to check' }));
+      return;
+    }
+
+    setBatchCheckingHealth(true);
+    let okCount = 0;
+    let failCount = 0;
+
+    for (const model of configuredModelList) {
+      const isHealthy = await checkModelEndpointHealth(model, { silent: true });
+      if (isHealthy) {
+        okCount += 1;
+      } else {
+        failCount += 1;
+      }
+    }
+
+    setBatchCheckingHealth(false);
+    toast.success(
+      t('models.healthCheckSummary', {
+        defaultValue: `Health check completed: ${okCount} healthy, ${failCount} failed`,
+        okCount,
+        failCount
+      })
+    );
+  };
+
+  const getHealthStatusInfo = model => {
+    const status = healthStatusMap[model.id]?.status || 'idle';
+    const message = healthStatusMap[model.id]?.message;
+
+    if (status === 'checking') {
+      return {
+        color: 'default',
+        icon: <CircularProgress size={14} />,
+        label: t('models.checking', { defaultValue: 'Checking...' }),
+        message
+      };
+    }
+
+    if (status === 'success') {
+      return {
+        color: 'success',
+        icon: <CheckCircleIcon fontSize="small" />,
+        label: t('models.healthy', { defaultValue: 'Healthy' }),
+        message
+      };
+    }
+
+    if (status === 'warning') {
+      return {
+        color: 'warning',
+        icon: <ErrorIcon fontSize="small" />,
+        label: t('models.reachable', { defaultValue: 'Reachable' }),
+        message
+      };
+    }
+
+    if (status === 'error') {
+      return {
+        color: 'error',
+        icon: <ErrorIcon fontSize="small" />,
+        label: t('models.unhealthy', { defaultValue: 'Unhealthy' }),
+        message
+      };
+    }
+
+    return {
+      color: 'default',
+      icon: <HealthAndSafetyIcon fontSize="small" />,
+      label: t('models.notChecked', { defaultValue: 'Not checked' }),
+      message: t('models.notChecked', { defaultValue: 'Not checked' })
+    };
+  };
+
   // 打开模型对话框
   const handleOpenModelDialog = (model = null) => {
     if (model) {
+      setEditingModel(model);
       console.log('handleOpenModelDialog', model);
-      // 兼容逻辑：如果 modelId 为空，则取 modelName 作为 modelId
+      // 兼容逻辑：如果 modelId 为空，则用 modelName 作为 modelId
       const initialForm = { ...model };
       if (!initialForm.modelId && initialForm.modelName) {
         initialForm.modelId = initialForm.modelName;
@@ -239,6 +444,7 @@ export default function ModelSettings({ projectId }) {
       });
       getProviderModels(model.providerId);
     } else {
+      setEditingModel(null);
       // 添加新模型时，完全重置表单
       setModelConfigForm({
         providerId: selectedProvider?.id || '',
@@ -260,6 +466,7 @@ export default function ModelSettings({ projectId }) {
 
   // 关闭模型对话框
   const handleCloseModelDialog = () => {
+    setEditingModel(null);
     setOpenModelDialog(false);
   };
 
@@ -318,7 +525,11 @@ export default function ModelSettings({ projectId }) {
   // 保存模型
   const handleSaveModel = () => {
     // 确保有模型 ID
-    if (!modelConfigForm.modelId) {
+    const normalizedModelId = String(modelConfigForm.modelId || '').trim();
+    const normalizedModelName = String(modelConfigForm.modelName || '').trim();
+    const isEditingExistingModel = Boolean(modelConfigForm.id || editingModel?.id);
+
+    if (!isEditingExistingModel && !normalizedModelId) {
       toast.error(t('models.modelIdPlaceholder'));
       return;
     }
@@ -332,8 +543,9 @@ export default function ModelSettings({ projectId }) {
     // 如果模型名称为空，则默认为模型 ID
     const dataToSave = {
       ...modelConfigForm,
+      modelId: normalizedModelId,
       maxTokens: normalizedMaxTokens,
-      modelName: modelConfigForm.modelName || modelConfigForm.modelId
+      modelName: normalizedModelName || normalizedModelId
     };
 
     axios
@@ -367,7 +579,8 @@ export default function ModelSettings({ projectId }) {
 
   // 获取模型状态图标和颜色
   const getModelStatusInfo = model => {
-    if (model.providerId.toLowerCase() === 'ollama') {
+    const providerId = String(model?.providerId || '').toLowerCase();
+    if (providerId === 'ollama') {
       return {
         icon: <CheckCircleIcon fontSize="small" />,
         color: 'success',
@@ -388,6 +601,129 @@ export default function ModelSettings({ projectId }) {
     }
   };
 
+  const renderModelCard = model => {
+    const modelStatus = getModelStatusInfo(model);
+    const healthStatus = getHealthStatusInfo(model);
+    const providerId = String(model?.providerId || '').toLowerCase();
+    const endpointLabel = `${formatEndpoint(model)}${
+      providerId !== 'ollama' && !model.apiKey ? ' (' + t('models.unconfiguredAPIKey') + ')' : ''
+    }`;
+
+    return (
+      <Paper
+        key={model.id}
+        elevation={1}
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          transition: 'all 0.2s',
+          '&:hover': {
+            boxShadow: 3,
+            transform: 'translateY(-2px)'
+          }
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
+              component="img"
+              src={getProviderLogo(model.providerId, model.providerName)}
+              alt={model.providerName}
+              sx={{ width: 32, height: 32, objectFit: 'contain' }}
+              onError={e => {
+                e.target.src = '/imgs/models/default.svg';
+              }}
+            />
+            <Box>
+              <Typography variant="subtitle1" fontWeight="bold">
+                {model.modelName ? model.modelName : t('models.unselectedModel')}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="primary"
+                sx={{
+                  fontWeight: 'medium',
+                  bgcolor: 'primary.50',
+                  px: 1,
+                  py: 0.2,
+                  borderRadius: 1,
+                  display: 'inline-block'
+                }}
+              >
+                {model.providerName}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <Tooltip title={modelStatus.text}>
+              <Chip icon={modelStatus.icon} label={endpointLabel} size="small" color={modelStatus.color} variant="outlined" />
+            </Tooltip>
+
+            <Tooltip title={healthStatus.message || healthStatus.label}>
+              <Chip
+                icon={healthStatus.icon}
+                label={healthStatus.label}
+                size="small"
+                color={healthStatus.color}
+                variant="outlined"
+              />
+            </Tooltip>
+
+            <Tooltip title={t('models.checkEndpointHealth', { defaultValue: 'Check endpoint health' })}>
+              <span>
+                <IconButton
+                  size="small"
+                  color="success"
+                  onClick={() => checkModelEndpointHealth(model)}
+                  disabled={healthStatusMap[model.id]?.status === 'checking'}
+                >
+                  <HealthAndSafetyIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            <Tooltip title={t('models.typeTips')}>
+              <Chip
+                sx={{ marginLeft: '5px' }}
+                label={t(`models.${model.type || 'text'}`)}
+                size="small"
+                color={model.type === 'vision' ? 'secondary' : 'info'}
+                variant="outlined"
+              />
+            </Tooltip>
+            <Tooltip title={t('playground.title')}>
+              <IconButton
+                size="small"
+                onClick={() => router.push(`/projects/${projectId}/playground?modelId=${model.id}`)}
+                color="secondary"
+              >
+                <ScienceIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title={t('common.edit')}>
+              <IconButton size="small" onClick={() => handleOpenModelDialog(model)} color="primary">
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title={t('common.delete')}>
+              <IconButton
+                size="small"
+                onClick={() => handleDeleteModel(model.id)}
+                disabled={modelConfigList.length <= 1}
+                color="error"
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+      </Paper>
+    );
+  };
+
   if (loading) {
     return <Typography>{t('textSplit.loading')}</Typography>;
   }
@@ -396,8 +732,23 @@ export default function ModelSettings({ projectId }) {
     <Card>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h6" fontWeight="bold"></Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Typography variant="h6" fontWeight="bold">
+            {t('settings.modelConfig')}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <Button
+              variant="outlined"
+              color="success"
+              startIcon={batchCheckingHealth ? <CircularProgress size={14} /> : <HealthAndSafetyIcon />}
+              onClick={checkAllConfiguredModelHealth}
+              size="small"
+              disabled={batchCheckingHealth || configuredModelList.length === 0}
+              sx={{ textTransform: 'none' }}
+            >
+              {batchCheckingHealth
+                ? t('models.checking', { defaultValue: 'Checking...' })
+                : t('models.checkAllEndpointHealth', { defaultValue: 'Check all endpoints' })}
+            </Button>
             <Button
               variant="outlined"
               color="secondary"
@@ -422,105 +773,41 @@ export default function ModelSettings({ projectId }) {
         </Box>
 
         <Stack spacing={2}>
-          {orderedModelConfigList.map(model => (
-            <Paper
-              key={model.id}
-              elevation={1}
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                transition: 'all 0.2s',
-                '&:hover': {
-                  boxShadow: 3,
-                  transform: 'translateY(-2px)'
-                }
-              }}
-            >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box
-                    component="img"
-                    src={getProviderLogo(model.providerId, model.providerName)}
-                    alt={model.providerName}
-                    sx={{ width: 32, height: 32, objectFit: 'contain' }}
-                    onError={e => {
-                      e.target.src = '/imgs/models/default.svg';
-                    }}
-                  />
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {model.modelName ? model.modelName : t('models.unselectedModel')}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="primary" // 改为主色调
-                      sx={{
-                        fontWeight: 'medium', // 加粗
-                        bgcolor: 'primary.50', // 添加背景色
-                        px: 1, // 水平内边距
-                        py: 0.2, // 垂直内边距
-                        borderRadius: 1, // 圆角
-                        display: 'inline-block' // 行内块元素
-                      }}
-                    >
-                      {model.providerName}
-                    </Typography>
-                  </Box>
-                </Box>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                {t('models.configuredModels', { defaultValue: 'Configured Models' })}
+              </Typography>
+              <Chip size="small" label={configuredModelList.length} />
+            </Box>
+            <Stack spacing={2}>
+              {configuredModelList.map(renderModelCard)}
+              {configuredModelList.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  {t('models.noConfiguredModels', { defaultValue: 'No configured models' })}
+                </Typography>
+              )}
+            </Stack>
+          </Box>
 
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Tooltip title={getModelStatusInfo(model).text}>
-                    <Chip
-                      icon={getModelStatusInfo(model).icon}
-                      label={`${formatEndpoint(model)}${
-                        model.providerId.toLowerCase() !== 'ollama' && !model.apiKey
-                          ? ' (' + t('models.unconfiguredAPIKey') + ')'
-                          : ''
-                      }`}
-                      size="small"
-                      color={getModelStatusInfo(model).color}
-                      variant="outlined"
-                    />
-                  </Tooltip>
-                  <Tooltip title={t('models.typeTips')}>
-                    <Chip
-                      sx={{ marginLeft: '5px' }}
-                      label={t(`models.${model.type || 'text'}`)}
-                      size="small"
-                      color={model.type === 'vision' ? 'secondary' : 'info'}
-                      variant="outlined"
-                    />
-                  </Tooltip>
-                  <Tooltip title={t('playground.title')}>
-                    <IconButton
-                      size="small"
-                      onClick={() => router.push(`/projects/${projectId}/playground?modelId=${model.id}`)}
-                      color="secondary"
-                    >
-                      <ScienceIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
+          <Divider />
 
-                  <Tooltip title={t('common.edit')}>
-                    <IconButton size="small" onClick={() => handleOpenModelDialog(model)} color="primary">
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip title={t('common.delete')}>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteModel(model.id)}
-                      disabled={modelConfigList.length <= 1}
-                      color="error"
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              </Box>
-            </Paper>
-          ))}
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                {t('models.unconfiguredModels', { defaultValue: 'Unconfigured Models' })}
+              </Typography>
+              <Chip size="small" label={unconfiguredModelList.length} />
+            </Box>
+            <Stack spacing={2}>
+              {unconfiguredModelList.map(renderModelCard)}
+              {unconfiguredModelList.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  {t('models.noUnconfiguredModels', { defaultValue: 'No unconfigured models' })}
+                </Typography>
+              )}
+            </Stack>
+          </Box>
         </Stack>
       </CardContent>
 
@@ -529,7 +816,7 @@ export default function ModelSettings({ projectId }) {
         <DialogTitle>{editingModel ? t('models.edit') : t('models.add')}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            {/*ai提供商*/}
+            {/* provider */}
             <Grid item xs={12}>
               <FormControl fullWidth>
                 <Autocomplete
@@ -578,7 +865,7 @@ export default function ModelSettings({ projectId }) {
                 />
               </FormControl>
             </Grid>
-            {/*接口地址*/}
+            {/* 接口地址 */}
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -589,7 +876,7 @@ export default function ModelSettings({ projectId }) {
                 placeholder="例如: https://api.openai.com/v1"
               />
             </Grid>
-            {/*api密钥*/}
+            {/* API Key */}
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -601,7 +888,7 @@ export default function ModelSettings({ projectId }) {
                 placeholder="例如: sk-..."
               />
             </Grid>
-            {/*模型 ID*/}
+            {/* 模型 ID */}
             <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
               <FormControl style={{ width: '70%' }}>
                 <Autocomplete
@@ -622,7 +909,7 @@ export default function ModelSettings({ projectId }) {
                     setModelConfigForm(prev => ({
                       ...prev,
                       modelId: newId,
-                      // 如果当前名称为空或者和旧 ID 一致，则同步更新名称
+                      // 如果当前名称为空或与旧 ID 一致，则同步更新名称
                       modelName: !prev.modelName || prev.modelName === prev.modelId ? newName : prev.modelName
                     }));
                   }}
@@ -645,7 +932,7 @@ export default function ModelSettings({ projectId }) {
                 {t('models.refresh')}
               </Button>
             </Grid>
-            {/*模型名称*/}
+            {/* 模型名称 */}
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -764,3 +1051,5 @@ export default function ModelSettings({ projectId }) {
     </Card>
   );
 }
+
+

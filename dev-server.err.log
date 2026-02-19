@@ -1,3 +1,17 @@
+ ⨯ Failed to generate static paths for /api/projects/[projectId]:
+TypeError: __webpack_require__.C is not a function
+    at C:\Users\user\Documents\_Projects\easy-dataset\.next\server\app\api\projects\[projectId]\route.js:151:21
+    at Object.<anonymous> (C:\Users\user\Documents\_Projects\easy-dataset\.next\server\app\api\projects\[projectId]\route.js:156:3)
+    at Module._compile (node:internal/modules/cjs/loader:1521:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+    at Module.load (node:internal/modules/cjs/loader:1266:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+    at mod.require (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:182:18)
+    at requirePage (C:\Users\user\Documents\_Projects\easy-dataset\node_modules\next\dist\server\require.js:109:84) {
+  type: 'TypeError'
+}
 openRouter API 调用出错: RetryError [AI_RetryError]: Failed after 3 attempts. Last error: Too Many Requests
     at _retryWithExponentialBackoff (webpack-internal:///(rsc)/./node_modules/ai/dist/index.js:369:13)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
@@ -224,12 +238,12 @@ openRouter API 调用出错: RetryError [AI_RetryError]: Failed after 3 attempts
     responseHeaders: {
       connection: 'keep-alive',
       'content-type': 'application/json; charset=UTF-8',
-      date: 'Thu, 19 Feb 2026 16:55:05 GMT',
-      'set-cookie': 'acw_tc=3ccdc16c17715201050217743e8d9b1cc31e4d1dbda6774346df0647fd7397;path=/;HttpOnly;Max-Age=1800',
+      date: 'Thu, 19 Feb 2026 17:16:13 GMT',
+      'set-cookie': 'acw_tc=2760827a17715213732118438e5ec351cca864f0b66f30d491038926451b6c;path=/;HttpOnly;Max-Age=1800',
       'strict-transport-security': 'max-age=31536000; includeSubDomains',
       'transfer-encoding': 'chunked',
       vary: 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
-      'x-log-id': '20260220005505e821779151fc4d22'
+      'x-log-id': '20260220011613e53980327f834f95'
     },
     responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
     isRetryable: true,
@@ -466,12 +480,12 @@ GA增强问题生成时出错: RetryError [AI_RetryError]: Failed after 3 attemp
     responseHeaders: {
       connection: 'keep-alive',
       'content-type': 'application/json; charset=UTF-8',
-      date: 'Thu, 19 Feb 2026 16:55:05 GMT',
-      'set-cookie': 'acw_tc=3ccdc16c17715201050217743e8d9b1cc31e4d1dbda6774346df0647fd7397;path=/;HttpOnly;Max-Age=1800',
+      date: 'Thu, 19 Feb 2026 17:16:13 GMT',
+      'set-cookie': 'acw_tc=2760827a17715213732118438e5ec351cca864f0b66f30d491038926451b6c;path=/;HttpOnly;Max-Age=1800',
       'strict-transport-security': 'max-age=31536000; includeSubDomains',
       'transfer-encoding': 'chunked',
       vary: 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
-      'x-log-id': '20260220005505e821779151fc4d22'
+      'x-log-id': '20260220011613e53980327f834f95'
     },
     responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
     isRetryable: true,
@@ -708,12 +722,12 @@ Error generating questions: RetryError [AI_RetryError]: Failed after 3 attempts.
     responseHeaders: {
       connection: 'keep-alive',
       'content-type': 'application/json; charset=UTF-8',
-      date: 'Thu, 19 Feb 2026 16:55:05 GMT',
-      'set-cookie': 'acw_tc=3ccdc16c17715201050217743e8d9b1cc31e4d1dbda6774346df0647fd7397;path=/;HttpOnly;Max-Age=1800',
+      date: 'Thu, 19 Feb 2026 17:16:13 GMT',
+      'set-cookie': 'acw_tc=2760827a17715213732118438e5ec351cca864f0b66f30d491038926451b6c;path=/;HttpOnly;Max-Age=1800',
       'strict-transport-security': 'max-age=31536000; includeSubDomains',
       'transfer-encoding': 'chunked',
       vary: 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers, Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
-      'x-log-id': '20260220005505e821779151fc4d22'
+      'x-log-id': '20260220011613e53980327f834f95'
     },
     responseBody: '{"error":{"code":"1113","message":"余额不足或无可用资源包,请充值。"}}',
     isRetryable: true,
@@ -724,3 +738,26 @@ Error generating questions: RetryError [AI_RetryError]: Failed after 3 attempts.
   [Symbol(vercel.ai.error)]: true,
   [Symbol(vercel.ai.error.AI_RetryError)]: true
 }
+ ⨯ ./components/LanguageSwitcher.js
+Error: Failed to read source code from C:\Users\user\Documents\_Projects\easy-dataset\components\LanguageSwitcher.js
+
+Caused by:
+    系统找不到指定的文件。 (os error 2)
+
+Import trace for requested module:
+./components/LanguageSwitcher.js
+./components/Navbar/ActionButtons.js
+./components/Navbar/index.js
+./app/projects/[projectId]/layout.js
+ ⨯ ./components/LanguageSwitcher.js
+Error: Failed to read source code from C:\Users\user\Documents\_Projects\easy-dataset\components\LanguageSwitcher.js
+
+Caused by:
+    系统找不到指定的文件。 (os error 2)
+
+Import trace for requested module:
+./components/LanguageSwitcher.js
+./components/Navbar/ActionButtons.js
+./components/Navbar/index.js
+./app/projects/[projectId]/layout.js
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.

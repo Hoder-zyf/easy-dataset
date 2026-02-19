@@ -9,9 +9,6 @@ function normalizeModelEndpoint(endpoint = '') {
   if (!normalizedEndpoint) {
     return '';
   }
-  if (normalizedEndpoint.includes('/api/coding/paas/v4')) {
-    normalizedEndpoint = normalizedEndpoint.replace('/api/coding/paas/v4', '/api/paas/v4');
-  }
   if (normalizedEndpoint.includes('/chat/completions')) {
     normalizedEndpoint = normalizedEndpoint.replace('/chat/completions', '');
   }

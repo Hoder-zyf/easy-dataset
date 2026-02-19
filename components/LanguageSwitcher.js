@@ -6,18 +6,20 @@ import { useState } from 'react';
 import TranslateIcon from '@mui/icons-material/Translate';
 
 export default function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const languages = [
-    { code: 'en', label: 'English', flag: '🇬🇧' },
-    { code: 'zh-CN', label: '简体中文', flag: '🇨🇳' },
-    { code: 'tr', label: 'Türkçe', flag: '🇹🇷' }
+    { code: 'en', label: t('language.english', 'English'), short: 'EN' },
+    { code: 'zh-CN', label: t('language.chineseSimplified', '简体中文'), short: '中文' },
+    { code: 'tr', label: t('language.turkish', 'Türkçe'), short: 'TR' }
   ];
 
-  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+  const normalizedCurrentLanguage =
+    i18n.language && String(i18n.language).toLowerCase().startsWith('zh') ? 'zh-CN' : i18n.language;
+  const currentLanguage = languages.find(lang => lang.code === normalizedCurrentLanguage) || languages[0];
 
   const handleClick = event => {
     setAnchorEl(event.currentTarget);
@@ -34,7 +36,7 @@ export default function LanguageSwitcher() {
 
   return (
     <>
-      <Tooltip title="Change Language / 切换语言 / Dil Değiştir">
+      <Tooltip title={t('language.switcherTitle', 'Change Language / 切换语言 / Dil Değiştir')}>
         <IconButton
           onClick={handleClick}
           size="small"
@@ -49,7 +51,7 @@ export default function LanguageSwitcher() {
           }}
         >
           <Typography variant="body2" fontWeight="medium" sx={{ mr: 0.5 }}>
-            {currentLanguage.flag}
+            {currentLanguage.short}
           </Typography>
           <TranslateIcon fontSize="small" />
         </IconButton>
@@ -71,10 +73,10 @@ export default function LanguageSwitcher() {
           <MenuItem
             key={lang.code}
             onClick={() => handleLanguageChange(lang.code)}
-            selected={i18n.language === lang.code}
+            selected={normalizedCurrentLanguage === lang.code}
           >
-            <Typography variant="body2" sx={{ mr: 1 }}>
-              {lang.flag}
+            <Typography variant="body2" sx={{ mr: 1, minWidth: 28 }}>
+              {lang.short}
             </Typography>
             {lang.label}
           </MenuItem>
