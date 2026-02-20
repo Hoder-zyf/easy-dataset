@@ -1,8 +1,34 @@
 import { NextResponse } from 'next/server';
 import LLMClient from '@/lib/llm/core/index';
+import { getModelConfigById } from '@/lib/db/model-config';
+
+async function resolveLatestModelConfig(projectId, incomingModel = {}) {
+  const modelId = incomingModel?.id;
+  if (!modelId) {
+    return incomingModel;
+  }
+
+  try {
+    const latestModelConfig = await getModelConfigById(modelId);
+    if (!latestModelConfig) {
+      return incomingModel;
+    }
+    if (String(latestModelConfig.projectId) !== String(projectId)) {
+      return incomingModel;
+    }
+
+    return {
+      ...incomingModel,
+      ...latestModelConfig
+    };
+  } catch (error) {
+    console.error('Failed to resolve latest model config:', String(error));
+    return incomingModel;
+  }
+}
 
 /**
- * 流式输出的聊天接口
+ * Streaming chat endpoint.
  */
 export async function POST(request, { params }) {
   const { projectId } = params;
@@ -10,31 +36,32 @@ export async function POST(request, { params }) {
   try {
     const body = await request.json();
     const { model, messages } = body;
+    const resolvedModel = await resolveLatestModelConfig(projectId, model);
 
-    if (!model || !messages) {
+    if (!resolvedModel || !messages) {
       return NextResponse.json({ error: 'Missing necessary parameters' }, { status: 400 });
     }
 
-    // 创建 LLM 客户端
-    const llmClient = new LLMClient(model);
+    // Use custom LLM client.
+    const llmClient = new LLMClient(resolvedModel);
 
-    // 格式化消息历史
+    // Normalize message payload for text + vision models.
     const formattedMessages = messages.map(msg => {
-      // 处理纯文本消息
+      // Plain text message.
       if (typeof msg.content === 'string') {
         return {
           role: msg.role,
           content: msg.content
         };
       }
-      // 处理包含图片的复合消息（用于视觉模型）
-      else if (Array.isArray(msg.content)) {
+      // Multimodal message (e.g. image parts).
+      if (Array.isArray(msg.content)) {
         return {
           role: msg.role,
           content: msg.content
         };
       }
-      // 默认情况
+      // Fallback.
       return {
         role: msg.role,
         content: msg.content
@@ -42,15 +69,15 @@ export async function POST(request, { params }) {
     });
 
     try {
-      // 调用纯API流式输出
+      // Stream response from provider.
       const response = await llmClient.chatStreamAPI(formattedMessages.filter(f => f.role !== 'error'));
-      // 返回流式响应
+      // Return native streaming response.
       return response;
     } catch (error) {
       console.error('Failed to call LLM API:', error);
       return NextResponse.json(
         {
-          error: `Failed to call ${model.modelId} model: ${error.message}`
+          error: `Failed to call ${resolvedModel.modelId || resolvedModel.modelName || 'unknown'} model: ${error.message}`
         },
         { status: 500 }
       );

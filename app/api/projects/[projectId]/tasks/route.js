@@ -6,6 +6,35 @@ import { getTaskConfig } from '@/lib/db/projects';
 import { processTask } from '@/lib/services/tasks';
 import { db } from '@/lib/db/index';
 
+function normalizeModelEndpoint(endpoint = '') {
+  let normalizedEndpoint = String(endpoint).trim();
+  if (!normalizedEndpoint) {
+    return '';
+  }
+  if (normalizedEndpoint.includes('/chat/completions')) {
+    normalizedEndpoint = normalizedEndpoint.replace('/chat/completions', '');
+  }
+  return normalizedEndpoint;
+}
+
+function normalizeTaskModelInfo(modelInfo) {
+  if (!modelInfo) {
+    return {};
+  }
+  let parsedModelInfo = modelInfo;
+  if (typeof modelInfo === 'string') {
+    try {
+      parsedModelInfo = JSON.parse(modelInfo);
+    } catch (error) {
+      return {};
+    }
+  }
+  if (parsedModelInfo && typeof parsedModelInfo === 'object' && parsedModelInfo.endpoint) {
+    parsedModelInfo.endpoint = normalizeModelEndpoint(parsedModelInfo.endpoint);
+  }
+  return parsedModelInfo;
+}
+
 // 获取任务配置
 export async function GET(request, { params }) {
   try {
@@ -102,7 +131,7 @@ export async function POST(request, { params }) {
         projectId,
         taskType,
         status: 0, // 初始状态: 处理中
-        modelInfo: typeof modelInfo === 'string' ? modelInfo : JSON.stringify(modelInfo),
+        modelInfo: JSON.stringify(normalizeTaskModelInfo(modelInfo)),
         language: language || 'zh-CN',
         detail: detail || '',
         totalCount,

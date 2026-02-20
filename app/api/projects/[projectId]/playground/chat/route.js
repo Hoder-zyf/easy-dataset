@@ -1,20 +1,48 @@
 import { NextResponse } from 'next/server';
 import LLMClient from '@/lib/llm/core/index';
+import { getModelConfigById } from '@/lib/db/model-config';
+
+async function resolveLatestModelConfig(projectId, incomingModel = {}) {
+  const modelId = incomingModel?.id;
+  if (!modelId) {
+    return incomingModel;
+  }
+
+  try {
+    const latestModelConfig = await getModelConfigById(modelId);
+    if (!latestModelConfig) {
+      return incomingModel;
+    }
+    if (String(latestModelConfig.projectId) !== String(projectId)) {
+      return incomingModel;
+    }
+
+    // Keep transient client-only fields, but force endpoint/auth/model fields to latest DB values.
+    return {
+      ...incomingModel,
+      ...latestModelConfig
+    };
+  } catch (error) {
+    console.error('Failed to resolve latest model config:', String(error));
+    return incomingModel;
+  }
+}
 
 export async function POST(request, { params }) {
   try {
     const { projectId } = params;
 
-    // 验证项目ID
+    // Validate project ID.
     if (!projectId) {
       return NextResponse.json({ error: 'The project ID cannot be empty' }, { status: 400 });
     }
 
-    // 获取请求体
+    // Read request payload.
     const { model, messages } = await request.json();
+    const resolvedModel = await resolveLatestModelConfig(projectId, model);
 
-    // 验证请求参数
-    if (!model) {
+    // Validate request parameters.
+    if (!resolvedModel) {
       return NextResponse.json({ error: 'The model parameters cannot be empty' }, { status: 400 });
     }
 
@@ -22,33 +50,33 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: 'The message list cannot be empty' }, { status: 400 });
     }
 
-    // 使用自定义的LLM客户端
-    const llmClient = new LLMClient(model);
+    // Use custom LLM client.
+    const llmClient = new LLMClient(resolvedModel);
 
-    // 格式化消息历史
+    // Normalize message payload for text + vision models.
     const formattedMessages = messages.map(msg => {
-      // 处理纯文本消息
+      // Plain text message.
       if (typeof msg.content === 'string') {
         return {
           role: msg.role,
           content: msg.content
         };
       }
-      // 处理包含图片的复合消息（用于视觉模型）
-      else if (Array.isArray(msg.content)) {
+      // Multimodal message (e.g. image parts).
+      if (Array.isArray(msg.content)) {
         return {
           role: msg.role,
           content: msg.content
         };
       }
-      // 默认情况
+      // Fallback.
       return {
         role: msg.role,
         content: msg.content
       };
     });
 
-    // 调用LLM API
+    // Call LLM API.
     let response = '';
     try {
       const { answer, cot } = await llmClient.getResponseWithCOT(formattedMessages.filter(f => f.role !== 'error'));
@@ -57,7 +85,7 @@ export async function POST(request, { params }) {
       console.error('Failed to call LLM API:', String(error));
       return NextResponse.json(
         {
-          error: `Failed to call ${model.modelId} model: ${error.message}`
+          error: `Failed to call ${resolvedModel.modelId || resolvedModel.modelName || 'unknown'} model: ${error.message}`
         },
         { status: 500 }
       );
