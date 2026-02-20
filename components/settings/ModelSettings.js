@@ -95,10 +95,7 @@ export default function ModelSettings({ projectId }) {
     return hasEndpoint && hasApiKey && hasModel;
   };
 
-  const configuredModelList = useMemo(
-    () => orderedModelConfigList.filter(isModelConfigured),
-    [orderedModelConfigList]
-  );
+  const configuredModelList = useMemo(() => orderedModelConfigList.filter(isModelConfigured), [orderedModelConfigList]);
 
   const unconfiguredModelList = useMemo(
     () => orderedModelConfigList.filter(model => !isModelConfigured(model)),
@@ -657,7 +654,13 @@ export default function ModelSettings({ projectId }) {
 
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
             <Tooltip title={modelStatus.text}>
-              <Chip icon={modelStatus.icon} label={endpointLabel} size="small" color={modelStatus.color} variant="outlined" />
+              <Chip
+                icon={modelStatus.icon}
+                label={endpointLabel}
+                size="small"
+                color={modelStatus.color}
+                variant="outlined"
+              />
             </Tooltip>
 
             <Tooltip title={healthStatus.message || healthStatus.label}>
@@ -1051,5 +1054,3 @@ export default function ModelSettings({ projectId }) {
     </Card>
   );
 }
-
-

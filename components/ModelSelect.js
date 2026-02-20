@@ -154,7 +154,9 @@ export default function ModelSelect({
       {!shouldShowFullSelect && (
         <Tooltip
           title={
-            selectedModel ? models.find(m => m.id === selectedModel)?.modelName : t('playground.selectModelFirst', '请先选择模型')
+            selectedModel
+              ? models.find(m => m.id === selectedModel)?.modelName
+              : t('playground.selectModelFirst', '请先选择模型')
           }
           placement="bottom"
         >
