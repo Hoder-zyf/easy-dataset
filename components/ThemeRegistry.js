@@ -279,6 +279,26 @@ const getTheme = mode => {
           }
         }
       },
+      MuiModal: {
+        defaultProps: {
+          disableScrollLock: true
+        }
+      },
+      MuiDialog: {
+        defaultProps: {
+          disableScrollLock: true
+        }
+      },
+      MuiPopover: {
+        defaultProps: {
+          disableScrollLock: true
+        }
+      },
+      MuiMenu: {
+        defaultProps: {
+          disableScrollLock: true
+        }
+      },
       MuiDialogTitle: {
         styleOverrides: {
           root: {

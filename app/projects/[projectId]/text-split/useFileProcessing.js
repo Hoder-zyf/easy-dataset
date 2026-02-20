@@ -55,7 +55,7 @@ export default function useFileProcessing(projectId) {
 
         const response = await axios.post(`/api/projects/${projectId}/tasks`, {
           taskType: 'file-processing',
-          modelInfo: localStorage.getItem('selectedModelInfo'),
+          modelInfo: model,
           language: currentLanguage,
           detail: '文件处理任务',
           note: {
@@ -77,7 +77,7 @@ export default function useFileProcessing(projectId) {
         toast.error(t('textSplit.pdfProcessingFailed') + error.message || '');
       }
     },
-    [projectId, t, resetProgress]
+    [projectId, t, resetProgress, model]
   );
 
   return {

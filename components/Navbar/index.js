@@ -19,7 +19,7 @@ import DesktopMenus from './DesktopMenus';
 import ContextBar from './ContextBar';
 
 export default function Navbar({ projects = [], currentProject }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const pathname = usePathname();
   const theme = useMuiTheme();
   const { resolvedTheme, setTheme } = useTheme();
@@ -56,6 +56,21 @@ export default function Navbar({ projects = [], currentProject }) {
       document.removeEventListener('pointerdown', handleOutsideClick, true);
     };
   }, [contextBarHovered]);
+
+  useEffect(() => {
+    if (!menuState.menuType) return;
+
+    const handleOutsideMenuClick = event => {
+      if (menuState.anchorEl?.contains(event.target)) return;
+      if (event.target?.closest?.('.MuiMenu-root')) return;
+      setMenuState({ anchorEl: null, menuType: null });
+    };
+
+    document.addEventListener('pointerdown', handleOutsideMenuClick, true);
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsideMenuClick, true);
+    };
+  }, [menuState.anchorEl, menuState.menuType]);
 
   const handleMenuOpen = (event, menuType) => {
     setMenuState({ anchorEl: event.currentTarget, menuType });
@@ -137,6 +152,7 @@ export default function Navbar({ projects = [], currentProject }) {
             toggleTheme={toggleTheme}
             isProjectDetail={isProjectDetail}
             currentProject={currentProject}
+            onActionAreaEnter={!isMobile ? handleMenuClose : undefined}
           />
         </Toolbar>
       </AppBar>

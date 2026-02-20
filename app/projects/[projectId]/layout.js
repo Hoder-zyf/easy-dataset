@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import { useSetAtom } from 'jotai';
+import { modelConfigListAtom, selectedModelInfoAtom } from '@/lib/store';
 
 export default function ProjectLayout({ children, params }) {
   const router = useRouter();
@@ -14,42 +16,58 @@ export default function ProjectLayout({ children, params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [t] = useTranslation();
-  // 定义获取数据的函数
+  const setModelConfigList = useSetAtom(modelConfigListAtom);
+  const setSelectedModelInfo = useSetAtom(selectedModelInfoAtom);
+
   const fetchData = async () => {
     try {
       setLoading(true);
 
-      // 获取用户创建的项目详情
-      const projectsResponse = await fetch(`/api/projects`);
+      const [projectsResponse, projectResponse, modelConfigResponse] = await Promise.all([
+        fetch('/api/projects'),
+        fetch(`/api/projects/${projectId}`),
+        fetch(`/api/projects/${projectId}/model-config`)
+      ]);
+
       if (!projectsResponse.ok) {
         throw new Error(t('projects.fetchFailed'));
       }
       const projectsData = await projectsResponse.json();
       setProjects(projectsData);
 
-      // 获取当前项目详情
-      const projectResponse = await fetch(`/api/projects/${projectId}`);
       if (!projectResponse.ok) {
-        // 如果项目不存在，跳转到首页
         if (projectResponse.status === 404) {
           router.push('/');
           return;
         }
-        throw new Error('获取项目详情失败');
+        throw new Error('Failed to load project details');
       }
       const projectData = await projectResponse.json();
       setCurrentProject(projectData);
+
+      if (modelConfigResponse.ok) {
+        const modelConfigData = await modelConfigResponse.json();
+        const modelList = Array.isArray(modelConfigData?.data) ? modelConfigData.data : [];
+        setModelConfigList(modelList);
+        if (modelConfigData?.defaultModelConfigId) {
+          const defaultModel = modelList.find(item => item.id === modelConfigData.defaultModelConfigId);
+          setSelectedModelInfo(defaultModel || null);
+        } else {
+          setSelectedModelInfo(null);
+        }
+      } else {
+        setModelConfigList([]);
+        setSelectedModelInfo(null);
+      }
     } catch (error) {
-      console.error('加载项目数据出错:', error);
+      console.error('Failed to load project data:', error);
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // 初始加载数据
   useEffect(() => {
-    // 如果 projectId 是 undefined 或 "undefined"，直接重定向到首页
     if (!projectId || projectId === 'undefined') {
       router.push('/');
       return;
@@ -70,7 +88,7 @@ export default function ProjectLayout({ children, params }) {
         }}
       >
         <CircularProgress />
-        <Typography sx={{ mt: 2 }}>加载项目数据...</Typography>
+        <Typography sx={{ mt: 2 }}>Loading project data...</Typography>
       </Box>
     );
   }

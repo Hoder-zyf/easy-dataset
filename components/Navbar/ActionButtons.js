@@ -18,11 +18,21 @@ import * as styles from './styles';
  * ActionButtons 组件
  * 右侧操作区按钮：语言切换、主题切换、文档、GitHub、更新检查
  */
-export default function ActionButtons({ theme, resolvedTheme, toggleTheme, isProjectDetail, currentProject }) {
+export default function ActionButtons({
+  theme,
+  resolvedTheme,
+  toggleTheme,
+  isProjectDetail,
+  currentProject,
+  onActionAreaEnter
+}) {
   const { t, i18n } = useTranslation();
+  const isZhLanguage = String(i18n.language || '')
+    .toLowerCase()
+    .startsWith('zh');
 
   return (
-    <Box sx={styles.actionAreaStyles}>
+    <Box sx={styles.actionAreaStyles} onMouseEnter={onActionAreaEnter}>
       {isProjectDetail && <ModelSelect projectId={currentProject} />}
       {isProjectDetail && <TaskIcon theme={theme} projectId={currentProject} />}
 
@@ -68,7 +78,7 @@ export default function ActionButtons({ theme, resolvedTheme, toggleTheme, isPro
       <Tooltip title={t('documentation')}>
         <IconButton
           component="a"
-          href={i18n.language === 'zh-CN' ? 'https://docs.easy-dataset.com/' : 'https://docs.easy-dataset.com/ed/en'}
+          href={isZhLanguage ? 'https://docs.easy-dataset.com/' : 'https://docs.easy-dataset.com/ed/en'}
           target="_blank"
           rel="noopener noreferrer"
           size="medium"
