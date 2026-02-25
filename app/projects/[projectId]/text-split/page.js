@@ -119,7 +119,9 @@ export default function TextSplitPage({ params }) {
       await fetchUploadedFiles();
       fetchChunks();
 
-      toast.success(t('textSplit.deleteSuccess', { fileName: fileToDelete.fileName }) || `删除 ${fileToDelete.fileName} 成功`);
+      toast.success(
+        t('textSplit.deleteSuccess', { fileName: fileToDelete.fileName }) || `删除 ${fileToDelete.fileName} 成功`
+      );
     } catch (error) {
       console.error('删除文件出错:', error);
       toast.error(error.message || '删除文件失败');
@@ -436,4 +438,3 @@ export default function TextSplitPage({ params }) {
     </Container>
   );
 }
-

@@ -1,7 +1,16 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AppBar, Toolbar, Box, IconButton, useTheme as useMuiTheme, Tooltip, useMediaQuery, LinearProgress } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  IconButton,
+  useTheme as useMuiTheme,
+  Tooltip,
+  useMediaQuery,
+  LinearProgress
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
