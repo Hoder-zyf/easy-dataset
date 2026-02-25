@@ -35,7 +35,11 @@ export default function TaskFilters({ statusFilter, setStatusFilter, typeFilter,
     <Box sx={{ display: 'flex', gap: 2 }}>
       <FormControl size="small" sx={{ minWidth: 120 }}>
         <InputLabel>{t('tasks.filters.status')}</InputLabel>
-        <Select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} input={<OutlinedInput label={t('tasks.filters.status')} />}>
+        <Select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          input={<OutlinedInput label={t('tasks.filters.status')} />}
+        >
           <MenuItem value="all">{t('datasets.filterAll')}</MenuItem>
           <MenuItem value="0">{t('tasks.status.processing')}</MenuItem>
           <MenuItem value="1">{t('tasks.status.completed')}</MenuItem>
@@ -46,7 +50,11 @@ export default function TaskFilters({ statusFilter, setStatusFilter, typeFilter,
 
       <FormControl size="small" sx={{ minWidth: 160 }}>
         <InputLabel>{t('tasks.filters.type')}</InputLabel>
-        <Select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} input={<OutlinedInput label={t('tasks.filters.type')} />}>
+        <Select
+          value={typeFilter}
+          onChange={e => setTypeFilter(e.target.value)}
+          input={<OutlinedInput label={t('tasks.filters.type')} />}
+        >
           <MenuItem value="all">{t('datasets.filterAll')}</MenuItem>
           {taskTypeOptions.map(type => (
             <MenuItem key={type} value={type}>

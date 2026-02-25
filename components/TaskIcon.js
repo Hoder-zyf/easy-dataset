@@ -40,7 +40,9 @@ export default function TaskIcon({ projectId, theme }) {
         setTaskFileProcessing(hasActiveFileTask);
 
         if (hasActiveFileTask) {
-          const activeTask = pendingTasks.find(task => task.projectId === projectId && task.taskType === 'file-processing');
+          const activeTask = pendingTasks.find(
+            task => task.projectId === projectId && task.taskType === 'file-processing'
+          );
           try {
             const detailInfo = JSON.parse(activeTask?.detail || '{}');
             setTask(detailInfo);
@@ -91,7 +93,7 @@ export default function TaskIcon({ projectId, theme }) {
 
   const createBatchTask = async (taskType, detail) => {
     if (!projectId || !selectedModel?.id) {
-      toast.error(t('textSplit.selectModelFirst', { defaultValue: '璇峰厛閫夋嫨妯″瀷' }));
+      toast.error(t('textSplit.selectModelFirst'));
       return;
     }
 
@@ -104,14 +106,14 @@ export default function TaskIcon({ projectId, theme }) {
       });
 
       if (response.data?.code === 0) {
-        toast.success(t('tasks.createSuccess', { defaultValue: '浠诲姟鍒涘缓鎴愬姛' }));
+        toast.success(t('tasks.createSuccess'));
         await fetchPendingTasks();
       } else {
-        toast.error(`${t('tasks.createFailed', { defaultValue: '浠诲姟鍒涘缓澶辫触' })}: ${response.data?.message || ''}`);
+        toast.error(`${t('tasks.createFailed')}: ${response.data?.message || ''}`);
       }
     } catch (error) {
       console.error('Create batch task failed:', error);
-      toast.error(`${t('tasks.createFailed', { defaultValue: '浠诲姟鍒涘缓澶辫触' })}: ${error.message}`);
+      toast.error(`${t('tasks.createFailed')}: ${error.message}`);
     }
   };
 
@@ -219,4 +221,3 @@ export default function TaskIcon({ projectId, theme }) {
     </>
   );
 }
-

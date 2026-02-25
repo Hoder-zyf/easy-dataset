@@ -152,7 +152,8 @@ export default function TasksPage({ params }) {
       {processingTasks.length > 0 && (
         <Paper sx={{ p: 2, mb: 2, borderRadius: 2 }}>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            {t('tasks.pending', { count: processingTasks.length })} - {completedProgressCount}/{totalProgressCount} ({overallProgress}%)
+            {t('tasks.pending', { count: processingTasks.length })} - {completedProgressCount}/{totalProgressCount} (
+            {overallProgress}%)
           </Typography>
           <LinearProgress variant="determinate" value={overallProgress} sx={{ height: 8, borderRadius: 4 }} />
         </Paper>

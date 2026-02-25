@@ -41,12 +41,14 @@ const useDatasetExport = projectId => {
         if (window.showSaveFilePicker) {
           const handle = await window.showSaveFilePicker({
             suggestedName: fileName,
-            types: [{
-              description: 'Dataset File',
-              accept: {
-                'application/json': [`.${fileFormat}`]
+            types: [
+              {
+                description: 'Dataset File',
+                accept: {
+                  'application/json': [`.${fileFormat}`]
+                }
               }
-            }]
+            ]
           });
           fileStream = await handle.createWritable();
         } else {
@@ -250,7 +252,8 @@ const useDatasetExport = projectId => {
     } else if (formatType === 'multilingualthinking') {
       return ['reasoning_language', 'developer', 'user', 'analysis', 'final', 'messages'];
     } else if (formatType === 'custom') {
-      const { questionField, answerField, cotField, includeLabels, includeChunk, questionOnly } = exportOptions.customFields;
+      const { questionField, answerField, cotField, includeLabels, includeChunk, questionOnly } =
+        exportOptions.customFields;
       const headers = [questionField];
       if (!questionOnly) {
         headers.push(answerField);
@@ -289,10 +292,7 @@ const useDatasetExport = projectId => {
       return dataBatch.map(({ question, answer, cot }) => {
         const messages = [];
         if (exportOptions.systemPrompt) {
-          messages.push(
-              { role: 'system',
-                content: exportOptions.systemPrompt
-              });
+          messages.push({ role: 'system', content: exportOptions.systemPrompt });
         }
         messages.push({
           role: 'user',
@@ -314,7 +314,8 @@ const useDatasetExport = projectId => {
         messages: [
           {
             content: exportOptions.systemPrompt || '',
-            role: 'system', thinking: null
+            role: 'system',
+            thinking: null
           },
           {
             content: question,
@@ -329,7 +330,8 @@ const useDatasetExport = projectId => {
         ]
       }));
     } else if (formatType === 'custom') {
-      const { questionField, answerField, cotField, includeLabels, includeChunk, questionOnly } = exportOptions.customFields;
+      const { questionField, answerField, cotField, includeLabels, includeChunk, questionOnly } =
+        exportOptions.customFields;
       return dataBatch.map(({ question, answer, cot, questionLabel: labels, chunkContent }) => {
         const item = { [questionField]: question };
         if (!questionOnly) {
@@ -353,20 +355,26 @@ const useDatasetExport = projectId => {
   // 将批次格式化为CSV行
   const formatBatchToCSV = (formattedBatch, formatType, exportOptions) => {
     const headers = getCSVHeaders(formatType, exportOptions);
-    return formattedBatch.map(item => {
-      return headers.map(header => {
-        let field = item[header]?.toString() || '';
-        // 对于复杂对象，转换为JSON字符串
-        if (typeof item[header] === 'object') {
-          field = JSON.stringify(item[header]);
-        }
-        // CSV转义
-        if (field.includes(',') || field.includes('\n') || field.includes('"')) {
-          field = `"${field.replace(/"/g, '""')}"`;
-        }
-        return field;
-      }).join(',');
-    }).join('\n') + '\n';
+    return (
+      formattedBatch
+        .map(item => {
+          return headers
+            .map(header => {
+              let field = item[header]?.toString() || '';
+              // 对于复杂对象，转换为JSON字符串
+              if (typeof item[header] === 'object') {
+                field = JSON.stringify(item[header]);
+              }
+              // CSV转义
+              if (field.includes(',') || field.includes('\n') || field.includes('"')) {
+                field = `"${field.replace(/"/g, '""')}"`;
+              }
+              return field;
+            })
+            .join(',');
+        })
+        .join('\n') + '\n'
+    );
   };
 
   // 处理和下载数据的通用函数（保留用于小数据量）
@@ -385,7 +393,8 @@ const useDatasetExport = projectId => {
       const csvRows = [
         headers.join(','),
         ...formattedData.map(item =>
-            headers.map(header => {
+          headers
+            .map(header => {
               let field = item[header]?.toString() || '';
               if (typeof item[header] === 'object') {
                 field = JSON.stringify(item[header]);
@@ -394,7 +403,8 @@ const useDatasetExport = projectId => {
                 field = `"${field.replace(/"/g, '""')}"`;
               }
               return field;
-            }).join(',')
+            })
+            .join(',')
         )
       ];
       content = csvRows.join('\n');

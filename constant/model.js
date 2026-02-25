@@ -56,7 +56,7 @@ export const MODEL_PROVIDERS = [
     id: 'grok',
     name: 'Grok',
     defaultEndpoint: 'https://api.x.ai/v1',
-    defaultModels: ['Grok Beta']
+    defaultModels: ['Grok']
   },
   {
     id: 'OpenRouter',
